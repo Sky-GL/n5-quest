@@ -293,6 +293,7 @@ rt{
    かなだけでは読めても意味が取れない。小さく添えて意味を渡す。 */
 .gl{display:block; font-size:10.5px; color:#7F87AB; letter-spacing:.02em; line-height:1.5}
 .cmd .gl{margin-top:1px}
+.cmd .note{display:block; margin-top:1px}
 .win-t .gl{display:inline; font-size:10px; color:#6E76A0; margin-left:6px}
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
@@ -853,13 +854,13 @@ function vField(){
       ${['vocab','kanji','grammar'].map(sec=>{
         const s=stats(sec);
         return `<button class="cmd" data-dun="${sec}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>${SEC[sec]}${gl(SEC_EN[sec])}
-          <br><span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}</span></span></button>`;
+          <span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}</span></span></button>`;
       }).join('')}
       <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（3つの ばしょを まわる）${gl("Today's journey - all three areas")}</span></button>
       ${TTS.ready?`<button class="cmd" data-listen="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ちょうかいの どうくつ${gl('Listening Cave - answer by ear')}
-        <br><span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}</span></span></button>`:''}
+        <span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}</span></span></button>`:''}
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
-        <br><span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
+        <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
     </div>
   </div>
