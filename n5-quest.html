@@ -298,6 +298,38 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* ---- ステージ ---- */
+.stage-card{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:center}
+.stage-card .no{
+  display:grid; place-items:center; width:38px; height:38px; flex:none;
+  border:var(--px) solid var(--gold); border-radius:5px; color:var(--gold); font-size:17px; line-height:1;
+}
+.stage-card .nm{font-size:15.5px; line-height:1.5}
+.pbar{display:flex; gap:2px; height:8px; margin:8px 0 4px}
+.pbar i{flex:1; background:var(--win-2); border-radius:1px}
+.pbar i.on{background:var(--exp)}
+.pbar i.full{background:var(--gold)}
+.chap{
+  display:grid; grid-template-columns:30px 1fr auto; gap:10px; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #1E1E3C; font-size:14.5px;
+}
+.chap:last-child{border-bottom:none}
+.chap .cn{color:var(--dim); font-variant-numeric:tabular-nums; text-align:right}
+.chap.done .cn{color:var(--gold)}
+.chap.now{background:var(--win-2); border-radius:3px}
+.chap .st2{font-size:11.5px; color:var(--dim); text-align:right; white-space:nowrap}
+/* ---- みせ ---- */
+.good{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:10px 4px; border-bottom:1px solid #1E1E3C}
+.good:last-child{border-bottom:none}
+.good .gn{font-size:15px}
+.good .gd{font-size:11.5px; color:var(--dim); line-height:1.7}
+.good .gp{font-size:13px; color:var(--gold); white-space:nowrap; font-variant-numeric:tabular-nums}
+.good button{border:var(--px) solid #3A3A6E; border-radius:4px; padding:5px 12px; font-size:13.5px; color:var(--gold)}
+.good button:disabled{color:#4A5070; border-color:#26264A; cursor:default}
+.good button:hover:not(:disabled){background:var(--win-2)}
+.marks{display:flex; gap:6px; flex-wrap:wrap; margin-top:7px}
+.mk{border:var(--px) solid #3A3A6E; border-radius:4px; padding:2px 9px; font-size:12px; color:#4A5070; font-variant-numeric:tabular-nums}
+.mk.on{border-color:var(--gold); color:var(--gold)}
 /* ---- 聴解 ---- */
 .earbox{display:flex; gap:12px; align-items:center; margin:10px 0 4px}
 .ear{
@@ -1355,6 +1387,20 @@ const MONSTERS=[
 const HEROES=[
 {"id":"hero_m","name":"おとこ","label":"おとこの ゆうしゃ","pal":{"h":"#5A3A1E","H":"#8B5A2B","s":"#F2C9A0","S":"#D9A87C","e":"#2A3A5E","w":"#FFFFFF","m":"#9A6A4A","a":"#1F3E6E","b":"#2F5A9E","c":"#5E8FD8","g":"#F8D048","G":"#B8860B","k":"#3A2A1E","K":"#5A4030","n":"#E8ECF8","N":"#A8B0C8","P":"#5E1028","p":"#8E2040"},"px":[".......hhhhhhhh.........","......hHHHHHHHHh........",".....hHHHHHHHHHHh.......",".....hHHHHHHHHHHh...nN..",".....hHHggggggHHh...nN..",".....hHssssssssHh...nN..",".....hHswesswesHh...nN..",".....hHswesswesHh...nN..",".....hHssSssSssHh...nN..",".....hHsssmmsssHh...nN..","......hssssssssh....nN..",".........SssS.......nN..","..PPpaaaaaaaaaaaa...nN..","..PPpabbbcggcbbba...nN..","..PPpabbbbggbbbbaassnN..","..PPpabbbbbbbbbbaasGGGG.","..PPpaGggggggggGa...KK..","..PPpabbbbbbbbbba...KK..","...Ppabbba..abbba.......","....Pabbba..abbba.......",".....abbba..abbba.......",".....kKKKk..kKKKk.......","....kkKKKk..kKKKkk......","....kkkkkk..kkkkkk......"],"px2":[".......hhhhhhhh.....nN..","......hHHHHHHHHh....nN..",".....hHHHHHHHHHHh...nN..",".....hHHHHHHHHHHh...nN..",".....hHHggggggHHh...nN..",".....hHssssssssHh...nN..",".....hHswesswesHh...nN..",".....hHswesswesHh..GGGG.",".....hHssSssSssHh.ssKK..",".....hHsssmmsssHh.ssKK..","......hssssssssh..s.....",".........SssS.....s.....","..PPpaaaaaaaaaaaa.s.....","..PPpabbbcggcbbbaas.....","..PPpabbbbggbbbbaa......","..PPpabbbbbbbbbbaa......","..PPpaGggggggggGa.......","..PPpabbbbbbbbbba.......","...Ppabbba..abbba.......","....Pabbba..abbba.......",".....abbba..abbba.......",".....kKKKk..kKKKk.......","....kkKKKk..kKKKkk......","....kkkkkk..kkkkkk......"]},
 {"id":"hero_f","name":"おんな","label":"おんなの ゆうしゃ","pal":{"h":"#B5762A","H":"#E8B45A","s":"#F2C9A0","S":"#D9A87C","e":"#4A2A5E","w":"#FFFFFF","m":"#C06A7A","a":"#6E1A42","b":"#A8306A","c":"#D86A9A","g":"#F8D048","G":"#B8860B","k":"#3A2A1E","K":"#5A4030","n":"#E8ECF8","N":"#A8B0C8"},"px":[".......hhhhhhhh.........","......hHHHHHHHHh........",".....hHHHHHHHHHHh.......",".....hHHHHHHHHHHh...nN..","....hHHHggggggHHHh..nN..","....hHHssssssssHHh..nN..","....hHHswesswesHHh..nN..","....hHHswesswesHHh..nN..","....hHHssSssSssHHh..nN..","....hHHsssmmsssHHh..nN..","....hHHhsssssshHHh..nN..","....hHH..SssS..HHh..nN..","...hHaaaaaaaaaaaaHh.nN..","...hHabbbcggcbbbaHh.nN..","...hHabbbbggbbbbaassnN..","...hHabbbbbbbbbbaasGGGG.","...hHaGggggggggGa...KK..","....habbbbbbbbbba...KK..","....abbbbbbbbbbbbba.....","...abbbbbbbbbbbbbbba....","...aaaaaaaaaaaaaaaaa....",".......sss....sss.......","......kKKk...kKKk.......",".....kkkkk..kkkkk......."],"px2":[".......hhhhhhhh.....nN..","......hHHHHHHHHh....nN..",".....hHHHHHHHHHHh...nN..",".....hHHHHHHHHHHh...nN..","....hHHHggggggHHHh..nN..","....hHHssssssssHHh..nN..","....hHHswesswesHHh..nN..","....hHHswesswesHHh.GGGG.","....hHHssSssSssHHhssKK..","....hHHsssmmsssHHhssKK..","....hHHhsssssshHHh.s....","....hHH..SssS..HHh.s....","...hHaaaaaaaaaaaaHhs....","...hHabbbcggcbbbaHhs....","...hHabbbbggbbbbaas.....","...hHabbbbbbbbbbaa......","...hHaGggggggggGa.......","....habbbbbbbbbba.......","....abbbbbbbbbbbbba.....","...abbbbbbbbbbbbbbba....","...aaaaaaaaaaaaaaaaa....",".......sss....sss.......","......kKKk...kKKk.......",".....kkkkk..kkkkk......."]}
+];
+const CHAPTERS=[
+{"id":"vocab-a","sec":"vocab","name":"ひとと からだ","en":"People & Body","boss":"kotonoha","ids":["v:私","v:あなた","v:彼","v:彼女","v:方","v:皆さん","v:家族","v:両親","v:兄","v:姉","v:弟","v:妹","v:兄弟","v:息子","v:娘","v:夫","v:妻","v:主人","v:奥さん","v:おじいさん","v:おばあさん","v:おじさん","v:おばさん","v:子供","v:赤ちゃん","v:大人","v:友達","v:先輩","v:名前","v:体","v:頭","v:顔","v:髪","v:首","v:肩","v:背","v:腕","v:指","v:爪","v:胸","v:お腹","v:背中","v:腰","v:膝","v:歯","v:舌","v:のど","v:鼻","v:血","v:声","v:力","v:気持ち","v:元気","v:病気","v:風邪","v:熱","v:薬","v:けが","v:医者","v:病院","v:歯医者","v:看護師","v:警察","v:お客さん","v:店員","v:社員","v:会社員","v:先生","v:学生","v:生徒","v:留学生","v:外国人","v:男の人","v:女の人","v:男の子","v:女の子","v:人々","v:自分","v:一人","v:二人","v:大勢","v:みんな","v:誰","v:どなた","v:顔色","v:涙","v:笑顔","v:年","v:誕生日","v:結婚","v:仕事","v:趣味","v:夢","v:性格","v:丈夫","v:親切","v:有名","v:大切","v:上手","v:下手","v:暇","v:大丈夫"]},
+{"id":"vocab-b","sec":"vocab","name":"まいにちの うごき","en":"Everyday Actions","boss":"goiworm","ids":["v:行く","v:来る","v:帰る","v:歩く","v:走る","v:起きる","v:寝る","v:食べる","v:飲む","v:見る","v:聞く","v:話す","v:言う","v:読む","v:書く","v:買う","v:売る","v:使う","v:作る","v:する","v:なる","v:ある","v:いる","v:会う","v:待つ","v:立つ","v:座る","v:入る","v:出る","v:出かける","v:開ける","v:閉める","v:開く","v:閉まる","v:つける","v:消す","v:置く","v:取る","v:持つ","v:渡す","v:送る","v:借りる","v:返す","v:貸す","v:洗う","v:掃除する","v:洗濯する","v:料理する","v:勉強する","v:習う","v:教える","v:覚える","v:忘れる","v:分かる","v:知る","v:考える","v:思う","v:住む","v:働く","v:休む","v:遊ぶ","v:泳ぐ","v:歌う","v:踊る","v:撮る","v:登る","v:降りる","v:乗る","v:急ぐ","v:止まる","v:泊まる","v:曲がる","v:渡る","v:困る","v:手伝う","v:招待する","v:説明する","v:質問する","v:紹介する","v:練習する","v:用意する","v:始まる","v:始める","v:終わる","v:降る","v:吹く","v:晴れる","v:曇る","v:死ぬ","v:生まれる","v:脱ぐ","v:着る","v:履く","v:かぶる","v:浴びる","v:磨く","v:切る","v:並ぶ","v:呼ぶ","v:探す","v:見つける"]},
+{"id":"grammar-a","sec":"grammar","name":"ぶんぽう：てにをはと きほん","en":"Grammar: Particles & Basics","boss":"bunporobo","ids":["g:〜は〜です","g:〜じゃありません","g:〜も","g:〜の","g:〜と","g:〜や","g:〜が","g:〜を","g:〜に（とき）","g:〜に（ばしょ）","g:〜へ","g:〜で（ばしょ）","g:〜で（どうぐ）","g:〜から〜まで","g:〜より","g:〜のほうが〜より","g:〜のなかでいちばん","g:〜か（しつもん）","g:〜ね","g:〜よ","g:〜だけ","g:〜しか〜ません","g:〜ぐらい","g:〜ごろ","g:〜など","g:〜ずつ","g:〜でも","g:〜という","g:〜が、（けれども）","g:〜から（りゆう）","g:〜ので","g:〜が あります","g:〜が います","g:〜が すきです","g:〜が じょうずです","g:〜が ほしいです","g:〜が わかります","g:どんな〜","g:ぎもんし＋か","g:ぎもんし＋も＋ない","g:まだ〜ていません","g:もう〜ました"]},
+{"id":"vocab-c","sec":"vocab","name":"ようすを あらわす ことば","en":"Describing Things","boss":"ruigigoke","ids":["v:大きい","v:小さい","v:高い","v:安い","v:低い","v:長い","v:短い","v:新しい","v:古い","v:若い","v:多い","v:少ない","v:早い","v:速い","v:遅い","v:近い","v:遠い","v:広い","v:狭い","v:暑い","v:寒い","v:熱い","v:冷たい","v:暖かい","v:涼しい","v:おいしい","v:まずい","v:甘い","v:辛い","v:塩辛い","v:苦い","v:酸っぱい","v:面白い","v:つまらない","v:楽しい","v:嬉しい","v:悲しい","v:寂しい","v:怖い","v:痛い","v:忙しい","v:難しい","v:易しい","v:優しい","v:軽い","v:重い","v:強い","v:弱い","v:明るい","v:暗い","v:白い","v:黒い","v:赤い","v:青い","v:黄色い","v:茶色い","v:丸い","v:細い","v:太い","v:汚い","v:危ない","v:眠い","v:うるさい","v:欲しい","v:いい","v:悪い","v:きれい","v:静か","v:賑やか","v:便利","v:不便","v:簡単","v:大変","v:好き","v:嫌い","v:色々","v:同じ","v:特別","v:必要","v:無理","v:真面目","v:残念","v:心配","v:安全","v:自由","v:立派","v:新鮮","v:十分","v:結構","v:変","v:大好き","v:苦手","v:すごい","v:楽","v:うまい","v:柔らかい","v:固い","v:深い","v:浅い","v:珍しい"]},
+{"id":"kanji-a","sec":"kanji","name":"かんじ：かずと とき","en":"Kanji: Numbers & Time","boss":"fudeobake","ids":["k:一","k:二","k:三","k:四","k:五","k:六","k:七","k:八","k:九","k:十","k:百","k:千","k:万","k:円","k:時","k:年","k:月","k:日","k:上","k:下","k:右","k:左","k:中","k:北","k:南","k:東","k:西","k:人","k:今","k:休","k:会","k:何","k:先","k:入","k:出","k:分","k:前","k:午","k:半","k:友","k:口","k:古","k:名","k:国","k:土","k:外","k:多"]},
+{"id":"vocab-d","sec":"vocab","name":"たべものと いえの もの","en":"Food & Home","boss":"katakanabachi","ids":["v:ご飯","v:朝ご飯","v:昼ご飯","v:晩ご飯","v:食事","v:パン","v:肉","v:魚","v:野菜","v:果物","v:卵","v:牛乳","v:水","v:お茶","v:コーヒー","v:紅茶","v:ジュース","v:お酒","v:ビール","v:塩","v:砂糖","v:醤油","v:味","v:料理","v:お弁当","v:お菓子","v:ケーキ","v:家","v:部屋","v:台所","v:お風呂","v:トイレ","v:玄関","v:庭","v:窓","v:ドア","v:鍵","v:階段","v:エレベーター","v:壁","v:机","v:椅子","v:ベッド","v:テーブル","v:棚","v:冷蔵庫","v:電話","v:時計","v:テレビ","v:ラジオ","v:パソコン","v:カメラ","v:電気","v:エアコン","v:傘","v:鞄","v:財布","v:眼鏡","v:靴","v:服","v:洋服","v:シャツ","v:ズボン","v:帽子","v:上着","v:ハンカチ","v:タオル","v:歯ブラシ","v:石鹸","v:紙","v:本","v:雑誌","v:新聞","v:辞書","v:ノート","v:鉛筆","v:ボールペン","v:消しゴム","v:手紙","v:切手","v:封筒","v:葉書","v:写真","v:絵","v:地図","v:荷物","v:箱","v:袋","v:ごみ","v:物","v:事","v:花","v:木","v:犬","v:猫","v:鳥","v:動物","v:自転車","v:車","v:お金"]},
+{"id":"vocab-e","sec":"vocab","name":"ひにちと かず","en":"Dates & Numbers","boss":"kotonoha","ids":["v:今","v:今日","v:昨日","v:明日","v:一昨日","v:明後日","v:毎日","v:毎朝","v:毎晩","v:毎週","v:毎月","v:毎年","v:朝","v:昼","v:夕方","v:晩","v:夜","v:午前","v:午後","v:今朝","v:今晩","v:今夜","v:今週","v:先週","v:来週","v:今月","v:先月","v:来月","v:今年","v:去年","v:来年","v:時間","v:時","v:分","v:秒","v:半","v:日曜日","v:月曜日","v:火曜日","v:水曜日","v:木曜日","v:金曜日","v:土曜日","v:週末","v:一日","v:二日","v:三日","v:四日","v:五日","v:六日","v:七日","v:九日","v:二十日","v:一月","v:二月","v:五月","v:六月","v:八月","v:十月","v:十一月","v:十二月","v:春","v:夏","v:秋","v:冬","v:季節","v:天気","v:雨","v:雪","v:風","v:雲","v:空","v:太陽","v:月","v:星","v:一","v:二","v:三","v:四","v:五","v:六","v:七","v:八","v:九","v:十","v:百","v:千","v:万","v:半分","v:番号","v:歳","v:人","v:枚","v:本数","v:回","v:階","v:度","v:最初","v:最後","v:次","v:前","v:後"]},
+{"id":"grammar-b","sec":"grammar","name":"ぶんぽう：どうしの かたち","en":"Grammar: Verb Forms","boss":"jokenryu","ids":["g:〜ます","g:〜ません","g:〜ました","g:〜ませんでした","g:〜ませんか","g:〜ましょう","g:〜ましょうか","g:〜たいです","g:〜に いきます","g:〜てください","g:〜ないでください","g:〜ています（しんこう）","g:〜ています（じょうたい）","g:〜てから","g:〜てもいいです","g:〜てはいけません","g:〜なければなりません","g:〜なくてもいいです","g:〜たことがあります","g:〜たり〜たりします","g:〜ながら","g:〜まえに","g:〜あとで","g:〜とき","g:〜ことができます","g:〜のがすきです","g:〜と おもいます","g:〜と いいました","g:〜でしょう","g:〜んです","g:〜つもりです","g:〜ほうがいいです","g:〜くなります","g:〜になります","g:〜くします","g:〜にします","g:〜くて","g:〜で（けいようし）","g:〜すぎます","g:〜を ください","g:〜は いかがですか","g:〜てから（じゅんばん）","g:〜も（かず）","g:〜しましょうか","g:〜が、〜（ぜんおき）","g:どうして〜か"]},
+{"id":"vocab-f","sec":"vocab","name":"まちと のりもの","en":"Town & Travel","boss":"goiworm","ids":["v:所","v:場所","v:町","v:村","v:市","v:国","v:世界","v:道","v:角","v:交差点","v:橋","v:公園","v:駅","v:空港","v:港","v:銀行","v:郵便局","v:図書館","v:美術館","v:映画館","v:店","v:デパート","v:スーパー","v:コンビニ","v:八百屋","v:本屋","v:喫茶店","v:食堂","v:レストラン","v:ホテル","v:建物","v:ビル","v:アパート","v:会社","v:学校","v:教室","v:事務所","v:工場","v:寮","v:電車","v:地下鉄","v:バス","v:タクシー","v:飛行機","v:船","v:切符","v:改札","v:ホーム","v:席","v:信号","v:横断歩道","v:駐車場","v:上","v:下","v:中","v:外","v:右","v:左","v:隣","v:横","v:近く","v:後ろ","v:向こう","v:間","v:真ん中","v:北","v:南","v:東","v:西","v:ほう","v:こちら","v:そちら","v:あちら","v:どちら","v:ここ","v:そこ","v:あそこ","v:どこ","v:山","v:川","v:海","v:池","v:森","v:島","v:空気","v:旅行","v:散歩","v:買い物","v:交番","v:入口","v:出口","v:受付","v:窓口","v:お寺","v:プール","v:住所","v:ふるさと","v:動物園","v:高速道路"]},
+{"id":"kanji-b","sec":"kanji","name":"かんじ：しぜんと くらし","en":"Kanji: Nature & Life","boss":"kanjigolem","ids":["k:大","k:天","k:女","k:子","k:学","k:安","k:小","k:少","k:山","k:川","k:店","k:後","k:手","k:新","k:書","k:木","k:本","k:来","k:校","k:母","k:毎","k:気","k:水","k:火","k:父","k:生","k:男","k:白","k:目","k:社","k:空","k:立","k:耳","k:聞","k:花","k:行","k:見","k:言","k:話","k:語","k:読","k:買","k:足","k:車","k:週","k:道","k:金","k:長","k:間","k:雨","k:電","k:食","k:飲","k:駅","k:高","k:魚"]},
+{"id":"vocab-g","sec":"vocab","name":"がっこうと しごと","en":"School & Work","boss":"ruigigoke","ids":["v:勉強","v:宿題","v:授業","v:試験","v:テスト","v:問題","v:答え","v:質問","v:意味","v:言葉","v:文字","v:字","v:漢字","v:平仮名","v:片仮名","v:発音","v:会話","v:文法","v:作文","v:言語","v:日本語","v:英語","v:中国語","v:数学","v:科学","v:歴史","v:音楽","v:スポーツ","v:映画","v:ニュース","v:番組","v:歌","v:絵本","v:小説","v:物語","v:紙袋","v:会議","v:約束","v:予定","v:準備","v:用事","v:連絡","v:電話番号","v:メール","v:住所録","v:財産","v:値段","v:お釣り","v:レジ","v:切符売り場","v:旅館","v:部長","v:社長","v:名刺","v:書類","v:コピー","v:残業","v:休み","v:夏休み","v:春休み","v:冬休み","v:祭り","v:パーティー","v:プレゼント","v:お土産","v:チケット","v:席順","v:写真集","v:練習","v:試合","v:選手","v:野球","v:サッカー","v:テニス","v:水泳","v:自動車","v:工事","v:説明書","v:地震","v:火事","v:事故","v:経験","v:理由","v:方法","v:意見","v:返事","v:相談","v:注意","v:規則","v:自由時間","v:受験","v:合格","v:卒業","v:入学","v:留学","v:生活","v:習慣","v:文化","v:社会","v:自然"]},
+{"id":"vocab-h","sec":"vocab","name":"つなぎことばと あいさつ","en":"Connectors & Greetings","boss":"goukaku","ids":["v:とても","v:少し","v:ちょっと","v:たくさん","v:もっと","v:よく","v:時々","v:いつも","v:たいてい","v:あまり","v:全然","v:まだ","v:もう","v:すぐ","v:だんだん","v:ゆっくり","v:はやく","v:まっすぐ","v:ちょうど","v:だいたい","v:ほとんど","v:きっと","v:たぶん","v:必ず","v:ぜひ","v:また","v:まず","v:やっと","v:もうすぐ","v:これから","v:さっき","v:あとで","v:先に","v:一緒に","v:自分で","v:一人で","v:みんなで","v:本当に","v:はっきり","v:ちゃんと","v:いろいろ","v:どうぞ","v:どうも","v:もちろん","v:やはり","v:こう","v:そう","v:どう","v:なぜ","v:どうして","v:いくつ","v:いくら","v:どのぐらい","v:何回","v:何時","v:何曜日","v:これ","v:それ","v:あれ","v:どれ","v:この","v:その","v:あの","v:どの","v:こんな","v:そんな","v:あんな","v:どんな","v:そして","v:それから","v:でも","v:しかし","v:だから","v:それで","v:じゃあ","v:では","v:または","v:けれども","v:おはようございます","v:こんにちは","v:こんばんは","v:さようなら","v:ありがとうございます","v:すみません","v:ごめんなさい","v:いただきます","v:ごちそうさま","v:いってきます","v:ただいま","v:おかえりなさい","v:はじめまして","v:よろしく","v:おめでとう","v:はい","v:いいえ","v:ええ","v:あのう","v:もしもし","v:お願いします","v:失礼します","v:お元気ですか"]}
 ];</script>
 <script>
 (function(){
@@ -1412,7 +1458,8 @@ const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
   examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, sound:true, speech:true, hero:'hero_m',
-  name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0, updatedAt:0
+  name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
+  chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', updatedAt:0
 };
 // ぼうけんのしょは3つ。1つを1人ぶんの進捗と設定にあてる
 const SLOTS=[1,2,3];
@@ -1451,19 +1498,48 @@ function persist(){
     db.doc('progress/slot'+SLOT).set(JSON.parse(JSON.stringify(S))).catch(()=>{});
   },1200); }
 }
-function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const dayKeyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function todayKey(){ return dayKeyOf(new Date()); }
+function shiftKey(n){ const d=new Date(); d.setDate(d.getDate()+n); return dayKeyOf(d); }
 const dayGap=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/DAY);
+// 連続日数の しるし。ここに届くと ごほうびが出る
+const MARKS=[3,7,14,30,60,100];
 function rollDay(){
   const t=todayKey();
-  if(S.lastDay!==t){ S.lastDay=t; S.doneToday=0; }
-  if(S.lastStudyDay && S.lastStudyDay!==t && dayGap(S.lastStudyDay,t)>1) S.streak=0;
-  if(!S.lastStudyDay) S.streak=0;
+  let changed=false;
+  if(S.lastDay!==t){ S.lastDay=t; S.doneToday=0; changed=true; }
+  if(S.lastStudyDay && S.lastStudyDay!==t){
+    const gap=dayGap(S.lastStudyDay,t);
+    if(gap>1){
+      const miss=gap-1;
+      if(S.charm>=miss){
+        // 休んだ日を ふだ で埋める。lastStudyDay を昨日に進めるので、この分岐は一度しか通らない
+        S.charm-=miss; S.lastStudyDay=shiftKey(-1);
+      }else{
+        S.charm=0; S.streak=0;
+      }
+      changed=true;
+    }
+  }
+  if(!S.lastStudyDay && S.streak){ S.streak=0; changed=true; }
+  // 今日の目標は朝いちで決めて動かさない。解くたびに目標が縮むと進みが読めない。
+  // 「今日ぶんは計算済み」を日付で覚える。0件の日に毎回計算し直さないため
+  if(S.goalDay!==t){ S.goalDay=t; S.dayGoal=quota().total; changed=true; }
+  // ふだを消費した／連続が切れたのに保存しないと、次に開いたとき数字が食い違う。
+  // ただし persist() は使わない。開いただけで updatedAt が進むと、
+  // 別の端末で進めた新しい書をクラウドから拾えなくなる。ここは手元に書くだけにする。
+  // まだ名前のない書には勝手に書き込まない。
+  if(changed && S.name) writeSlot(SLOT,S);
 }
+// 連続が のびて しるし に届いたら、その数字を返す（ごほうびの表示に使う）
 function markStudied(){
   const t=todayKey();
-  if(S.lastStudyDay===t) return;
+  if(S.lastStudyDay===t) return 0;
   S.streak=(S.lastStudyDay && dayGap(S.lastStudyDay,t)===1)?S.streak+1:1;
   S.lastStudyDay=t;
+  const hit=MARKS.find(n=>n===S.streak && !S.marks[n]);
+  if(hit){ S.marks[hit]=1; S.gold+=hit*10; return hit; }
+  return 0;
 }
 
 /* ===== SRS ===== */
@@ -1484,6 +1560,57 @@ function stats(sec){
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
   return {n:pool.length,done,due,fresh,dist,rate:sum/(pool.length*MAX_LV)};
 }
+/* ===== 章（ステージ） =====
+   996項目を一本道で見せると、1週間やっても「ぜんたい 3％」にしかならない。
+   12の章に切って、8日前後で1つ終わる区切りを作る。 */
+const CHAP_OPEN=0.8;   // 章ボスに挑めるようになる到達率
+CHAPTERS.forEach(c=>{ c.set=new Set(c.ids); });
+const chapCleared = c => !!(S.chap[c.id]&&S.chap[c.id].cleared);
+function chapStats(c){
+  let done=0,seen=0;
+  c.ids.forEach(id=>{ const r=rec(id); if(r.lv>=4)done++; if(r.seen)seen++; });
+  return {n:c.ids.length,done,seen,rate:c.ids.length?done/c.ids.length:0};
+}
+// いま取り組んでいる章＝まだクリアしていない最初の章
+function currentChapter(){ return CHAPTERS.find(c=>!chapCleared(c))||CHAPTERS[CHAPTERS.length-1]; }
+const chapNo = c => CHAPTERS.indexOf(c)+1;
+const chapClearedCount = () => CHAPTERS.filter(chapCleared).length;
+
+/* ===== どうぐや =====
+   ゴールドは倒すたびに増えるのに使い道が無いと、ただの数字になってしまう。
+   「連続を守る」「少し強くなる」「見た目が変わる」の3方向だけ用意する。 */
+const SHOP=[
+  {id:'charm',   price:50,  max:9,  name:'まもりの ふだ',     en:'Streak Charm',
+   desc:'1にち やすんでも「れんぞく」が きえない。やすんだ ぶんだけ つかう。'},
+  {id:'hpStone', price:120, max:12, name:'いのちの いし',     en:'Life Stone',
+   desc:'さいだいＨＰが 5 ふえる。'},
+  {id:'mpStone', price:90,  max:8,  name:'こころの いし',     en:'Spirit Stone',
+   desc:'さいだいＭＰが 1 ふえる。スキャンが おおく つかえる。'},
+  {id:'robe_g',  price:400, max:1,  name:'きんの ころも',     en:'Golden Robe',
+   desc:'ゆうしゃの ふくが きんいろに なる。'},
+  {id:'robe_v',  price:400, max:1,  name:'むらさきの ころも', en:'Violet Robe',
+   desc:'ゆうしゃの ふくが むらさきに なる。'}
+];
+const owned = id => id==='charm' ? S.charm : (S.bought[id]||0);
+function buy(id){
+  const g=SHOP.find(x=>x.id===id);
+  if(!g || S.gold<g.price || owned(id)>=g.max) return;
+  S.gold-=g.price;
+  if(id==='charm'){ S.charm++; }
+  else{
+    S.bought[id]=(S.bought[id]||0)+1;
+    if(id==='hpStone'){ S.maxHp+=5; S.hp=Math.min(S.maxHp,S.hp+5); }
+    if(id==='mpStone'){ S.maxMp+=1; S.mp=Math.min(S.maxMp,S.mp+1); }
+    if(id.indexOf('robe_')===0) S.robe=id;
+  }
+  persist(); SFX.up(); render();
+}
+// ころもは勇者のパレットを上から塗り替えるだけ。ドット絵は描き直さない
+const ROBES={
+  robe_g:{a:'#7A5A10', b:'#C89A20', c:'#F0D060'},
+  robe_v:{a:'#3A1A5E', b:'#6A3A9E', c:'#A878D8'}
+};
+
 function daysLeft(){ return S.examDate?Math.ceil((new Date(S.examDate+'T09:00:00')-Date.now())/DAY):null; }
 function quota(){
   const st=stats(), d=daysLeft();
@@ -1620,10 +1747,16 @@ const SPRITES={};
 MONSTERS.forEach(m=>SPRITES[m.id]=m);
 HEROES.forEach(h=>SPRITES[h.id]=h);
 const heroOf = id => SPRITES[id] || HEROES[0];
+const HERO_IDS=new Set(HEROES.map(h=>h.id));
+function withRobe(h){
+  const r=ROBES[S.robe];
+  return r?{id:h.id,px:h.px,px2:h.px2,pal:Object.assign({},h.pal,r)}:h;
+}
 function monHtml(m,scale,cls){ return `<canvas data-mon="${esc(m.id)}" data-scale="${scale}" class="${cls||''}"></canvas>`; }
 function paintMons(root){
   (root||document).querySelectorAll('canvas[data-mon]').forEach(cv=>{
-    const m=SPRITES[cv.dataset.mon];
+    let m=SPRITES[cv.dataset.mon];
+    if(m && HERO_IDS.has(m.id)) m=withRobe(m);
     if(m) drawMon(cv,m,+cv.dataset.scale||8);
   });
 }
@@ -1631,7 +1764,7 @@ function paintMons(root){
 function heroSwing(){
   const sp=$('#heroSp'); if(!sp) return;
   sp.classList.remove('atk'); void sp.offsetWidth; sp.classList.add('atk');
-  const cv=sp.querySelector('canvas'); const h=heroOf(S.hero);
+  const cv=sp.querySelector('canvas'); const h=withRobe(heroOf(S.hero));
   if(!cv||!h.px2) return;
   const sc=+cv.dataset.scale||4;
   drawPx(cv,h.px2,h.pal,sc);
@@ -1645,7 +1778,10 @@ function buildQueue(sec,limit){
   const fresh=pool.filter(i=>isNew(i.id));
   const q=quota();
   const nNew=sec?Math.ceil(q.fresh/3)+2:q.fresh;
-  const out=due.slice(0,limit).concat(shuffle(fresh.slice()).slice(0,Math.max(0,Math.min(nNew,limit-due.length))));
+  // 新しい項目は、いまの章のものから先に出す。こうしないと章がいつまでも埋まらない
+  const cur=currentChapter();
+  const freshOrdered=shuffle(fresh.filter(i=>cur.set.has(i.id))).concat(shuffle(fresh.filter(i=>!cur.set.has(i.id))));
+  const out=due.slice(0,limit).concat(freshOrdered.slice(0,Math.max(0,Math.min(nNew,limit-due.length))));
   if(out.length<limit){
     const have=new Set(out.map(i=>i.id));
     const weak=pool.filter(i=>!have.has(i.id)&&rec(i.id).lv<MAX_LV).sort((a,b)=>rec(a.id).lv-rec(b.id).lv);
@@ -1776,7 +1912,7 @@ function render(){
   $('#hud').classList.toggle('hide',t);
   document.querySelector('.nav').classList.toggle('hide',t);
   if(!t) paintHud();
-  ({title:vTitle,newgame:vNewGame,field:vField,book:vBook,status:vStatus,conf:vConf}[route]||vField)();
+  ({title:vTitle,newgame:vNewGame,field:vField,stages:vStages,shop:vShop,book:vBook,status:vStatus,conf:vConf}[route]||vField)();
   paintMons();
 }
 // そのスロットの習得数を、Sを切り替えずに数える
@@ -1827,6 +1963,15 @@ function pips(cur,max,color,seg){
   for(let i=0;i<n;i++) h+=`<i class="${i<on?'on':''}" style="--c:${color}"></i>`;
   return `<span class="bar">${h}</span>`;
 }
+// 章の進み具合。20目盛りで、満了だけ金にする
+function pbar(rate){
+  const n=20, full=rate>=1;
+  // 満了でないのに全部点くと「終わった」と誤解する。逆に、少しでも進んでいたら1つは点ける
+  const on = rate<=0 ? 0 : full ? n : Math.max(1,Math.min(n-1,Math.round(rate*n)));
+  let h='';
+  for(let i=0;i<n;i++) h+=`<i class="${i<on?(full?'full':'on'):''}"></i>`;
+  return `<span class="pbar">${h}</span>`;
+}
 function paintHud(){
   const d=daysLeft();
   $('#hud').innerHTML=`<div class="st">
@@ -1868,11 +2013,30 @@ function vNewGame(){
 /* ===== 冒険（メニュー） ===== */
 function vField(){
   const qt=quota(), st=stats();
-  const done=Math.min(S.doneToday,qt.total||S.doneToday);
-  const cleared=qt.total>0 && S.doneToday>=qt.total;
+  const goal=S.dayGoal||qt.total;
+  const done=Math.min(S.doneToday,goal||S.doneToday);
+  const cleared=goal>0 && S.doneToday>=goal;
+  const ch=currentChapter(), cs=chapStats(ch), open=cs.rate>=CHAP_OPEN, won=chapCleared(ch);
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">${S.name?esc(S.name)+'の もくひょう':'きょうの もくひょう'}${gl("Today's goal")}</span>
     <div class="msg" id="fmsg"></div>
+  </div>
+  <div class="win"><span class="win-t">いまの ステージ${gl('Current stage')}</span>
+    <div class="stage-card">
+      <span class="no">${chapNo(ch)}</span>
+      <span><span class="nm">${esc(ch.name)}</span>${gl(ch.en)}</span>
+    </div>
+    ${pbar(cs.rate)}
+    <div class="note">おぼえた ${cs.done} / ${cs.n}　${
+      won?'この ステージは クリアずみ'
+        :open?'ステージの ぬしに いどめます'
+             :`ぬしが 出て くるまで あと ${Math.max(1,Math.ceil(cs.n*CHAP_OPEN)-cs.done)}こ`}</div>
+    <div class="cmds" style="margin-top:7px">
+      <button class="cmd" data-chap="${esc(ch.id)}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>この ステージを れんしゅう${gl('Practice this stage')}</span></button>
+      <button class="cmd" data-chapboss="${esc(ch.id)}" ${(!open||S.hp<=0)?'disabled':''}><span class="cur">▶</span><span>ステージの ぬしに いどむ${gl('Challenge the stage boss')}
+        <span class="note">20もん・たおせば クリア</span></span></button>
+      <button class="cmd" data-go2="stages"><span class="cur">▶</span><span>ステージ いちらん（${chapClearedCount()} / ${CHAPTERS.length} クリア）${gl('All stages')}</span></button>
+    </div>
   </div>
   <div class="win"><span class="win-t">コマンド${gl('Command')}</span>
     <div class="cmds">
@@ -1888,6 +2052,8 @@ function vField(){
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
         <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
+      <button class="cmd" data-go2="shop"><span class="cur">▶</span><span>どうぐやに いく${gl('Shop')}
+        <span class="note">もっている ゴールド ${S.gold}${S.charm?` ・ まもりのふだ ${S.charm}`:''}</span></span></button>
     </div>
   </div>
   <div class="win tight"><div class="note">
@@ -1897,8 +2063,8 @@ function vField(){
   const m=S.hp<=0
     ? 'ぜんめつ して しまった…\nやどやで やすめば、すぐに たびを つづけられる。'
     : cleared
-      ? `きょうの ノルマ ${qt.total}もんを たっせい した！\nまだ すすんでも かまわない。`
-      : `きょうは あと ${Math.max(0,qt.total-done)}もん。\nふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`;
+      ? `きょうの ぶん ${done} / ${goal}\nきょうの ノルマは たっせい した！\nまだ すすんでも かまわない。`
+      : `きょうの ぶん ${done} / ${goal}\nふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`;
   type($('#fmsg'),esc(m),null,true);
 }
 
@@ -1911,17 +2077,47 @@ function monPool(sec,boss){
   const p=MONSTERS.filter(m=>m.area===area||m.area==='any');
   return p.length?p:MONSTERS.filter(m=>m.area==='any');
 }
+// 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
+// どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
+function beginBattle(items,opts){
+  opts=opts||{};
+  const mon=opts.mon||pick(monPool(opts.sec,opts.boss));
+  const max=opts.monMax||mon.hp;
+  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
+     sec:opts.sec||null,boss:!!opts.boss,mode:opts.mode||null,chap:opts.chap||null,
+     mon,monMax:max,monHp:max,killed:0,levelUps:[]};
+  route='battle';
+  document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
+  drawBattle(opts.intro||`${mon.name}が あらわれた！`);
+}
 function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
   const items=buildQueue(sec||null,limit);
   if(!items.length){ alert('いま、いどめる もんだいが ありません。'); return; }
-  const pool=monPool(sec,boss);
-  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],sec,boss:!!boss,mode:mode||null,
-     mon:pick(pool),monHp:0,killed:0,levelUps:[]};
-  B.monHp=B.mon.hp;
-  route='battle';
-  document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
-  drawBattle(`${B.mon.name}が あらわれた！`);
+  beginBattle(items,{sec,boss,mode});
+}
+// ステージの中だけを回す練習
+function startChapPractice(id){
+  const ch=CHAPTERS.find(c=>c.id===id); if(!ch) return;
+  const pool=ch.ids.map(x=>BY_ID[x]).filter(Boolean);
+  const due=pool.filter(i=>isDue(i.id)).sort((a,b)=>rec(a.id).due-rec(b.id).due);
+  const fresh=shuffle(pool.filter(i=>isNew(i.id)));
+  const weak=pool.filter(i=>!isDue(i.id)&&!isNew(i.id)&&rec(i.id).lv<MAX_LV)
+                 .sort((a,b)=>rec(a.id).lv-rec(b.id).lv);
+  const items=shuffle(due.concat(fresh,weak).slice(0,12));
+  if(!items.length){ alert('この ステージは もう かんぺきです。'); return; }
+  beginBattle(items,{sec:ch.sec});
+}
+// ステージの ぬし。20問ぶんの体力を持たせ、倒しきれたらクリア
+function startChapBoss(id){
+  const ch=CHAPTERS.find(c=>c.id===id); if(!ch) return;
+  if(chapStats(ch).rate<CHAP_OPEN) return;
+  const pool=ch.ids.map(x=>BY_ID[x]).filter(Boolean);
+  if(pool.length<4) return;
+  const items=shuffle(pool.slice()).slice(0,20);
+  const mon=SPRITES[ch.boss]||MONSTERS[0];
+  beginBattle(items,{sec:ch.sec,boss:true,chap:ch.id,mon,monMax:18,
+    intro:`ステージ ${chapNo(ch)}の ぬし\n${mon.name}が 立ちふさがった！`});
 }
 // 舞台の中に出す自分のHP/MP。上のステータスが隠れても戦況が読めるようにする
 function stageHp(){
@@ -1930,7 +2126,8 @@ function stageHp(){
          `<span style="margin-left:auto">Ｌｖ <b>${S.lv}</b></span>`;
 }
 function monHpBar(){
-  let h=''; for(let i=0;i<B.mon.hp;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
+  const max=B.monMax||B.mon.hp;
+  let h=''; for(let i=0;i<max;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
   return h;
 }
 function drawBattle(intro){
@@ -1999,7 +2196,16 @@ function answer(n){
     popDmg(String(dmg),true); SFX.miss();
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
   }
-  B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true; markStudied();
+  B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true;
+  const markHit=markStudied();
+  if(markHit) B.markHit=markHit;
+  // 今日のノルマに届いたら、その日1回だけ ごほうび。連続が長いほど多い
+  const goal=S.dayGoal||0, td=todayKey();
+  if(goal>0 && S.doneToday>=goal && S.bonusDay!==td){
+    S.bonusDay=td;
+    B.bonus=30+S.streak*2;
+    S.gold+=B.bonus;
+  }
   // 聴解は本試験で別区分なので、成績も分けて数える
   if(B.mode==='listen'){ S.listenN++; if(ok) S.listenOk++; }
   // レベルアップ判定
@@ -2073,14 +2279,15 @@ function nextStep(){
   if(S.hp<=0){ persist(); return vWipe(); }
   if(B.monHp<=0){
     B.killed++;
-    const g=B.mon.hp*7+(B.boss?60:0);
+    const g=(B.monMax||B.mon.hp)*7+(B.boss?60:0);
     B.gold+=g; S.gold+=g;
     S.defeated[B.mon.id]=(S.defeated[B.mon.id]||0)+1;
     persist();
-    if(B.i+1>=B.items.length) return vAfter();
+    // ステージの ぬしは1体だけ。倒した時点で決着
+    if(B.chap||B.i+1>=B.items.length) return vAfter();
     // 次の敵が現れる
     const pool=monPool(B.sec,B.boss);
-    B.mon=pick(pool); B.monHp=B.mon.hp;
+    B.mon=pick(pool); B.monMax=B.mon.hp; B.monHp=B.mon.hp;
     B.i++; return drawBattle(`${g}ゴールドを てに いれた！\n${B.mon.name}が あらわれた！`);
   }
   B.i++;
@@ -2104,7 +2311,23 @@ function vWipe(){
 function vAfter(){
   route='after';
   const total=B.ok+B.ng, acc=total?Math.round(B.ok/total*100):0;
-  if(B.boss&&acc>S.best) S.best=acc;
+  if(B.boss&&!B.chap&&acc>S.best) S.best=acc;
+  // ステージの ぬしを倒せたか。初クリアのときだけ ごほうびを出す
+  let chapMsg='';
+  if(B.chap){
+    const ch=CHAPTERS.find(c=>c.id===B.chap);
+    const won=B.monHp<=0, first=won&&!chapCleared(ch);
+    if(won){
+      const prev=S.chap[ch.id]||{};
+      S.chap[ch.id]={cleared:1,best:Math.max(prev.best||0,acc)};
+      if(first){ S.gold+=150; }
+      chapMsg=first
+        ? `\nステージ ${chapNo(ch)}「${ch.name}」を クリアした！\n150ゴールドを うけとった！`
+        : `\nステージ ${chapNo(ch)}を もう いちど クリアした！`;
+    }else{
+      chapMsg=`\n${ch.name}の ぬしは たおせなかった…\nもういちど いどめます。`;
+    }
+  }
   persist();
   const lvMsg=B.levelUps.length?`\nレベルが ${B.levelUps[B.levelUps.length-1]}に あがった！\nさいだいＨＰが ${B.levelUps.length*4} ふえた！`:'';
   $('#view').innerHTML=`
@@ -2123,9 +2346,68 @@ function vAfter(){
     ${B.wrong.length?`<button class="cmd" data-retry=""><span class="cur">▶</span><span>とりこぼしだけ もういちど${gl('Retry the missed ones')}</span></button>`:''}
     <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back to adventure')}</span></button>
   </div></div>`;
+  const extra=
+    (B.bonus?`\nきょうの ノルマ たっせい！ ${B.bonus}ゴールドの ごほうび！`:'')+
+    (B.markHit?`\n${B.markHit}にち れんぞくの しるしを てに いれた！ ${B.markHit*10}ゴールド！`:'')+
+    chapMsg;
+  paintHud();   // ステージのごほうびなどは戦闘の外で入るので、ここで数字を出し直す
   const head=B.killed?`${B.killed}たいを たおした！`:'たたかいを おえた。';
-  type($('#amsg'),`${head}\nけいけんち ${B.exp}を てに いれた！\n${B.gold}ゴールドを てに いれた！${esc(lvMsg)}`);
+  type($('#amsg'),`${head}\nけいけんち ${B.exp}を てに いれた！\n${B.gold}ゴールドを てに いれた！${esc(lvMsg)}${esc(extra)}`);
   if(B.levelUps.length) SFX.up(); else SFX.win();
+}
+
+/* ===== ステージ一覧 ===== */
+function vStages(){
+  const cur=currentChapter();
+  $('#view').innerHTML=`
+  <div class="win"><span class="win-t">ステージ いちらん${gl('All stages')}</span>
+    <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア</div>
+    <div style="margin-top:8px">${CHAPTERS.map((c,i)=>{
+      const cs=chapStats(c), done=chapCleared(c), now=c.id===cur.id;
+      return `<div class="chap ${done?'done':''} ${now?'now':''}">
+        <span class="cn">${done?'✔':i+1}</span>
+        <span><span>${esc(c.name)}</span>${gl(c.en)}${pbar(cs.rate)}</span>
+        <span class="st2">${cs.done} / ${cs.n}<br>${(cs.rate*100).toFixed(0)}％</span>
+      </div>`;
+    }).join('')}</div>
+  </div>
+  <div class="win tight"><div class="note">
+    ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
+    ${gl('New items are drawn from your current stage first.')}
+  </div></div>
+  <div class="win tight"><div class="cmds">
+    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back')}</span></button>
+  </div></div>`;
+}
+
+/* ===== どうぐや ===== */
+function vShop(){
+  $('#view').innerHTML=`
+  <div class="win"><span class="win-t">どうぐや${gl('Shop')}</span>
+    <div class="note">もっている ゴールド <span class="st-n">${S.gold}</span></div>
+    <div style="margin-top:8px">${SHOP.map(g=>{
+      const have=owned(g.id), full=have>=g.max, poor=S.gold<g.price;
+      const isRobe=g.id.indexOf('robe_')===0, worn=isRobe&&S.robe===g.id;
+      let label='かう', act=`data-buy="${esc(g.id)}"`, dis=(full||poor);
+      if(isRobe&&have){ label=worn?'きて いる':'きる'; act=`data-wear="${esc(g.id)}"`; dis=worn; }
+      else if(full) label='じゅうぶん';
+      else if(poor) label='たりない';
+      return `<div class="good">
+        <span><span class="gn">${esc(g.name)}</span>${gl(g.en)}
+          <span class="gd">${esc(g.desc)}${have?`　（もっている ${have}${g.max>1?' / '+g.max:''}）`:''}</span></span>
+        <span style="display:grid; gap:4px; justify-items:end">
+          <span class="gp">${g.price} Ｇ</span>
+          <button ${act} ${dis?'disabled':''}>${label}</button>
+        </span>
+      </div>`;
+    }).join('')}
+    ${S.robe?`<div class="good"><span><span class="gn">もとの ふくに もどす</span>${gl('Back to the default outfit')}</span>
+      <span><button data-wear="">もどす</button></span></div>`:''}
+    </div>
+  </div>
+  <div class="win tight"><div class="cmds">
+    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back')}</span></button>
+  </div></div>`;
 }
 
 /* ===== 図鑑 ===== */
@@ -2186,9 +2468,14 @@ function vStatus(){
       <span class="st-l">ＭＰ</span><span class="st-row"><span class="st-n">${S.mp} / ${S.maxMp}</span></span>
       <span class="st-l">けいけんち</span><span class="st-row"><span class="st-n">${S.exp}</span><span class="st-l">つぎまで ${expToNext(S.lv)-S.exp}</span></span>
       <span class="st-l">ゴールド</span><span class="st-row"><span class="st-n">${S.gold}</span></span>
-      <span class="st-l">れんぞく</span><span class="st-row"><span class="st-n">${S.streak} にち</span></span>
+      <span class="st-l">れんぞく</span><span class="st-row"><span class="st-n">${S.streak} にち</span>${S.charm?`<span class="st-l">まもりのふだ ${S.charm}</span>`:''}</span>
+      <span class="st-l">ステージ</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${CHAPTERS.length}</span><span class="st-l">クリア</span></span>
       <span class="st-l">たおした かず</span><span class="st-row"><span class="st-n">${Object.values(S.defeated).reduce((a,b)=>a+b,0)}</span></span>
     </div>
+  </div>
+  <div class="win"><span class="win-t">れんぞくの しるし${gl('Streak badges')}</span>
+    <div class="note">まいにち つづけると しるしが つきます。${MARKS.filter(n=>S.marks[n]).length} / ${MARKS.length}</div>
+    <div class="marks">${MARKS.map(n=>`<span class="mk ${S.marks[n]?'on':''}">${n}にち</span>`).join('')}</div>
   </div>
   <div class="win"><span class="win-t">ぶんやべつの おぼえた ぐあい${gl('Progress by area')}</span>
     <div class="meters">${['vocab','kanji','grammar'].map(sec=>{
@@ -2266,7 +2553,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -2298,6 +2585,10 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-dun')){ SFX.sel(); return startBattle(d.dun||null); }
   if(t.hasAttribute('data-boss')){ SFX.sel(); return startBattle(null,30,true); }
   if(t.hasAttribute('data-listen')){ SFX.sel(); return startBattle(null,10,false,'listen'); }
+  if(d.chap){ SFX.sel(); return startChapPractice(d.chap); }
+  if(d.chapboss){ SFX.sel(); return startChapBoss(d.chapboss); }
+  if(d.buy){ return buy(d.buy); }
+  if(t.hasAttribute('data-wear')){ S.robe=d.wear||''; persist(); SFX.sel(); return render(); }
   // 2回目からは ゆっくり 読み上げる。聞き取れなかった人に速さを合わせる
   if(t.hasAttribute('data-replay')){ return replaySay(true); }
   if(d.sayt){ return speak(d.sayt,t.hasAttribute('data-slow')); }
@@ -2308,11 +2599,10 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-next')) return nextStep();
   if(t.hasAttribute('data-run')){ SFX.sel(); return B&&B.i>0?vAfter():go('field'); }
   if(t.hasAttribute('data-retry')){
-    const ids=B.wrong.slice();
-    B={items:ids.map(i=>BY_ID[i]),i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
-       sec:B.sec,boss:false,mode:B.mode,mon:pick(MONSTERS.filter(m=>m.area==='any')),monHp:0,killed:0,levelUps:[]};
-    B.monHp=B.mon.hp; route='battle';
-    return drawBattle(`${B.mon.name}が たちふさがった！`);
+    const items=B.wrong.map(i=>BY_ID[i]).filter(Boolean);
+    if(!items.length) return go('field');
+    return beginBattle(items,{sec:B.sec,mode:B.mode,
+      mon:pick(MONSTERS.filter(m=>m.area==='any')),intro:'にげた ものたちが たちふさがった！'});
   }
   if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
   if(d.ask) return askAI(d.ask);

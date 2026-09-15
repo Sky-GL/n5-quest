@@ -298,6 +298,38 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* ---- ステージ ---- */
+.stage-card{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:center}
+.stage-card .no{
+  display:grid; place-items:center; width:38px; height:38px; flex:none;
+  border:var(--px) solid var(--gold); border-radius:5px; color:var(--gold); font-size:17px; line-height:1;
+}
+.stage-card .nm{font-size:15.5px; line-height:1.5}
+.pbar{display:flex; gap:2px; height:8px; margin:8px 0 4px}
+.pbar i{flex:1; background:var(--win-2); border-radius:1px}
+.pbar i.on{background:var(--exp)}
+.pbar i.full{background:var(--gold)}
+.chap{
+  display:grid; grid-template-columns:30px 1fr auto; gap:10px; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #1E1E3C; font-size:14.5px;
+}
+.chap:last-child{border-bottom:none}
+.chap .cn{color:var(--dim); font-variant-numeric:tabular-nums; text-align:right}
+.chap.done .cn{color:var(--gold)}
+.chap.now{background:var(--win-2); border-radius:3px}
+.chap .st2{font-size:11.5px; color:var(--dim); text-align:right; white-space:nowrap}
+/* ---- みせ ---- */
+.good{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:10px 4px; border-bottom:1px solid #1E1E3C}
+.good:last-child{border-bottom:none}
+.good .gn{font-size:15px}
+.good .gd{font-size:11.5px; color:var(--dim); line-height:1.7}
+.good .gp{font-size:13px; color:var(--gold); white-space:nowrap; font-variant-numeric:tabular-nums}
+.good button{border:var(--px) solid #3A3A6E; border-radius:4px; padding:5px 12px; font-size:13.5px; color:var(--gold)}
+.good button:disabled{color:#4A5070; border-color:#26264A; cursor:default}
+.good button:hover:not(:disabled){background:var(--win-2)}
+.marks{display:flex; gap:6px; flex-wrap:wrap; margin-top:7px}
+.mk{border:var(--px) solid #3A3A6E; border-radius:4px; padding:2px 9px; font-size:12px; color:#4A5070; font-variant-numeric:tabular-nums}
+.mk.on{border-color:var(--gold); color:var(--gold)}
 /* ---- 聴解 ---- */
 .earbox{display:flex; gap:12px; align-items:center; margin:10px 0 4px}
 .ear{
@@ -386,7 +418,8 @@ const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
   examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, sound:true, speech:true, hero:'hero_m',
-  name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0, updatedAt:0
+  name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
+  chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', updatedAt:0
 };
 // ぼうけんのしょは3つ。1つを1人ぶんの進捗と設定にあてる
 const SLOTS=[1,2,3];
@@ -425,19 +458,48 @@ function persist(){
     db.doc('progress/slot'+SLOT).set(JSON.parse(JSON.stringify(S))).catch(()=>{});
   },1200); }
 }
-function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const dayKeyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function todayKey(){ return dayKeyOf(new Date()); }
+function shiftKey(n){ const d=new Date(); d.setDate(d.getDate()+n); return dayKeyOf(d); }
 const dayGap=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/DAY);
+// 連続日数の しるし。ここに届くと ごほうびが出る
+const MARKS=[3,7,14,30,60,100];
 function rollDay(){
   const t=todayKey();
-  if(S.lastDay!==t){ S.lastDay=t; S.doneToday=0; }
-  if(S.lastStudyDay && S.lastStudyDay!==t && dayGap(S.lastStudyDay,t)>1) S.streak=0;
-  if(!S.lastStudyDay) S.streak=0;
+  let changed=false;
+  if(S.lastDay!==t){ S.lastDay=t; S.doneToday=0; changed=true; }
+  if(S.lastStudyDay && S.lastStudyDay!==t){
+    const gap=dayGap(S.lastStudyDay,t);
+    if(gap>1){
+      const miss=gap-1;
+      if(S.charm>=miss){
+        // 休んだ日を ふだ で埋める。lastStudyDay を昨日に進めるので、この分岐は一度しか通らない
+        S.charm-=miss; S.lastStudyDay=shiftKey(-1);
+      }else{
+        S.charm=0; S.streak=0;
+      }
+      changed=true;
+    }
+  }
+  if(!S.lastStudyDay && S.streak){ S.streak=0; changed=true; }
+  // 今日の目標は朝いちで決めて動かさない。解くたびに目標が縮むと進みが読めない。
+  // 「今日ぶんは計算済み」を日付で覚える。0件の日に毎回計算し直さないため
+  if(S.goalDay!==t){ S.goalDay=t; S.dayGoal=quota().total; changed=true; }
+  // ふだを消費した／連続が切れたのに保存しないと、次に開いたとき数字が食い違う。
+  // ただし persist() は使わない。開いただけで updatedAt が進むと、
+  // 別の端末で進めた新しい書をクラウドから拾えなくなる。ここは手元に書くだけにする。
+  // まだ名前のない書には勝手に書き込まない。
+  if(changed && S.name) writeSlot(SLOT,S);
 }
+// 連続が のびて しるし に届いたら、その数字を返す（ごほうびの表示に使う）
 function markStudied(){
   const t=todayKey();
-  if(S.lastStudyDay===t) return;
+  if(S.lastStudyDay===t) return 0;
   S.streak=(S.lastStudyDay && dayGap(S.lastStudyDay,t)===1)?S.streak+1:1;
   S.lastStudyDay=t;
+  const hit=MARKS.find(n=>n===S.streak && !S.marks[n]);
+  if(hit){ S.marks[hit]=1; S.gold+=hit*10; return hit; }
+  return 0;
 }
 
 /* ===== SRS ===== */
@@ -458,6 +520,57 @@ function stats(sec){
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
   return {n:pool.length,done,due,fresh,dist,rate:sum/(pool.length*MAX_LV)};
 }
+/* ===== 章（ステージ） =====
+   996項目を一本道で見せると、1週間やっても「ぜんたい 3％」にしかならない。
+   12の章に切って、8日前後で1つ終わる区切りを作る。 */
+const CHAP_OPEN=0.8;   // 章ボスに挑めるようになる到達率
+CHAPTERS.forEach(c=>{ c.set=new Set(c.ids); });
+const chapCleared = c => !!(S.chap[c.id]&&S.chap[c.id].cleared);
+function chapStats(c){
+  let done=0,seen=0;
+  c.ids.forEach(id=>{ const r=rec(id); if(r.lv>=4)done++; if(r.seen)seen++; });
+  return {n:c.ids.length,done,seen,rate:c.ids.length?done/c.ids.length:0};
+}
+// いま取り組んでいる章＝まだクリアしていない最初の章
+function currentChapter(){ return CHAPTERS.find(c=>!chapCleared(c))||CHAPTERS[CHAPTERS.length-1]; }
+const chapNo = c => CHAPTERS.indexOf(c)+1;
+const chapClearedCount = () => CHAPTERS.filter(chapCleared).length;
+
+/* ===== どうぐや =====
+   ゴールドは倒すたびに増えるのに使い道が無いと、ただの数字になってしまう。
+   「連続を守る」「少し強くなる」「見た目が変わる」の3方向だけ用意する。 */
+const SHOP=[
+  {id:'charm',   price:50,  max:9,  name:'まもりの ふだ',     en:'Streak Charm',
+   desc:'1にち やすんでも「れんぞく」が きえない。やすんだ ぶんだけ つかう。'},
+  {id:'hpStone', price:120, max:12, name:'いのちの いし',     en:'Life Stone',
+   desc:'さいだいＨＰが 5 ふえる。'},
+  {id:'mpStone', price:90,  max:8,  name:'こころの いし',     en:'Spirit Stone',
+   desc:'さいだいＭＰが 1 ふえる。スキャンが おおく つかえる。'},
+  {id:'robe_g',  price:400, max:1,  name:'きんの ころも',     en:'Golden Robe',
+   desc:'ゆうしゃの ふくが きんいろに なる。'},
+  {id:'robe_v',  price:400, max:1,  name:'むらさきの ころも', en:'Violet Robe',
+   desc:'ゆうしゃの ふくが むらさきに なる。'}
+];
+const owned = id => id==='charm' ? S.charm : (S.bought[id]||0);
+function buy(id){
+  const g=SHOP.find(x=>x.id===id);
+  if(!g || S.gold<g.price || owned(id)>=g.max) return;
+  S.gold-=g.price;
+  if(id==='charm'){ S.charm++; }
+  else{
+    S.bought[id]=(S.bought[id]||0)+1;
+    if(id==='hpStone'){ S.maxHp+=5; S.hp=Math.min(S.maxHp,S.hp+5); }
+    if(id==='mpStone'){ S.maxMp+=1; S.mp=Math.min(S.maxMp,S.mp+1); }
+    if(id.indexOf('robe_')===0) S.robe=id;
+  }
+  persist(); SFX.up(); render();
+}
+// ころもは勇者のパレットを上から塗り替えるだけ。ドット絵は描き直さない
+const ROBES={
+  robe_g:{a:'#7A5A10', b:'#C89A20', c:'#F0D060'},
+  robe_v:{a:'#3A1A5E', b:'#6A3A9E', c:'#A878D8'}
+};
+
 function daysLeft(){ return S.examDate?Math.ceil((new Date(S.examDate+'T09:00:00')-Date.now())/DAY):null; }
 function quota(){
   const st=stats(), d=daysLeft();
@@ -594,10 +707,16 @@ const SPRITES={};
 MONSTERS.forEach(m=>SPRITES[m.id]=m);
 HEROES.forEach(h=>SPRITES[h.id]=h);
 const heroOf = id => SPRITES[id] || HEROES[0];
+const HERO_IDS=new Set(HEROES.map(h=>h.id));
+function withRobe(h){
+  const r=ROBES[S.robe];
+  return r?{id:h.id,px:h.px,px2:h.px2,pal:Object.assign({},h.pal,r)}:h;
+}
 function monHtml(m,scale,cls){ return `<canvas data-mon="${esc(m.id)}" data-scale="${scale}" class="${cls||''}"></canvas>`; }
 function paintMons(root){
   (root||document).querySelectorAll('canvas[data-mon]').forEach(cv=>{
-    const m=SPRITES[cv.dataset.mon];
+    let m=SPRITES[cv.dataset.mon];
+    if(m && HERO_IDS.has(m.id)) m=withRobe(m);
     if(m) drawMon(cv,m,+cv.dataset.scale||8);
   });
 }
@@ -605,7 +724,7 @@ function paintMons(root){
 function heroSwing(){
   const sp=$('#heroSp'); if(!sp) return;
   sp.classList.remove('atk'); void sp.offsetWidth; sp.classList.add('atk');
-  const cv=sp.querySelector('canvas'); const h=heroOf(S.hero);
+  const cv=sp.querySelector('canvas'); const h=withRobe(heroOf(S.hero));
   if(!cv||!h.px2) return;
   const sc=+cv.dataset.scale||4;
   drawPx(cv,h.px2,h.pal,sc);
@@ -619,7 +738,10 @@ function buildQueue(sec,limit){
   const fresh=pool.filter(i=>isNew(i.id));
   const q=quota();
   const nNew=sec?Math.ceil(q.fresh/3)+2:q.fresh;
-  const out=due.slice(0,limit).concat(shuffle(fresh.slice()).slice(0,Math.max(0,Math.min(nNew,limit-due.length))));
+  // 新しい項目は、いまの章のものから先に出す。こうしないと章がいつまでも埋まらない
+  const cur=currentChapter();
+  const freshOrdered=shuffle(fresh.filter(i=>cur.set.has(i.id))).concat(shuffle(fresh.filter(i=>!cur.set.has(i.id))));
+  const out=due.slice(0,limit).concat(freshOrdered.slice(0,Math.max(0,Math.min(nNew,limit-due.length))));
   if(out.length<limit){
     const have=new Set(out.map(i=>i.id));
     const weak=pool.filter(i=>!have.has(i.id)&&rec(i.id).lv<MAX_LV).sort((a,b)=>rec(a.id).lv-rec(b.id).lv);
@@ -750,7 +872,7 @@ function render(){
   $('#hud').classList.toggle('hide',t);
   document.querySelector('.nav').classList.toggle('hide',t);
   if(!t) paintHud();
-  ({title:vTitle,newgame:vNewGame,field:vField,book:vBook,status:vStatus,conf:vConf}[route]||vField)();
+  ({title:vTitle,newgame:vNewGame,field:vField,stages:vStages,shop:vShop,book:vBook,status:vStatus,conf:vConf}[route]||vField)();
   paintMons();
 }
 // そのスロットの習得数を、Sを切り替えずに数える
@@ -801,6 +923,15 @@ function pips(cur,max,color,seg){
   for(let i=0;i<n;i++) h+=`<i class="${i<on?'on':''}" style="--c:${color}"></i>`;
   return `<span class="bar">${h}</span>`;
 }
+// 章の進み具合。20目盛りで、満了だけ金にする
+function pbar(rate){
+  const n=20, full=rate>=1;
+  // 満了でないのに全部点くと「終わった」と誤解する。逆に、少しでも進んでいたら1つは点ける
+  const on = rate<=0 ? 0 : full ? n : Math.max(1,Math.min(n-1,Math.round(rate*n)));
+  let h='';
+  for(let i=0;i<n;i++) h+=`<i class="${i<on?(full?'full':'on'):''}"></i>`;
+  return `<span class="pbar">${h}</span>`;
+}
 function paintHud(){
   const d=daysLeft();
   $('#hud').innerHTML=`<div class="st">
@@ -842,11 +973,30 @@ function vNewGame(){
 /* ===== 冒険（メニュー） ===== */
 function vField(){
   const qt=quota(), st=stats();
-  const done=Math.min(S.doneToday,qt.total||S.doneToday);
-  const cleared=qt.total>0 && S.doneToday>=qt.total;
+  const goal=S.dayGoal||qt.total;
+  const done=Math.min(S.doneToday,goal||S.doneToday);
+  const cleared=goal>0 && S.doneToday>=goal;
+  const ch=currentChapter(), cs=chapStats(ch), open=cs.rate>=CHAP_OPEN, won=chapCleared(ch);
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">${S.name?esc(S.name)+'の もくひょう':'きょうの もくひょう'}${gl("Today's goal")}</span>
     <div class="msg" id="fmsg"></div>
+  </div>
+  <div class="win"><span class="win-t">いまの ステージ${gl('Current stage')}</span>
+    <div class="stage-card">
+      <span class="no">${chapNo(ch)}</span>
+      <span><span class="nm">${esc(ch.name)}</span>${gl(ch.en)}</span>
+    </div>
+    ${pbar(cs.rate)}
+    <div class="note">おぼえた ${cs.done} / ${cs.n}　${
+      won?'この ステージは クリアずみ'
+        :open?'ステージの ぬしに いどめます'
+             :`ぬしが 出て くるまで あと ${Math.max(1,Math.ceil(cs.n*CHAP_OPEN)-cs.done)}こ`}</div>
+    <div class="cmds" style="margin-top:7px">
+      <button class="cmd" data-chap="${esc(ch.id)}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>この ステージを れんしゅう${gl('Practice this stage')}</span></button>
+      <button class="cmd" data-chapboss="${esc(ch.id)}" ${(!open||S.hp<=0)?'disabled':''}><span class="cur">▶</span><span>ステージの ぬしに いどむ${gl('Challenge the stage boss')}
+        <span class="note">20もん・たおせば クリア</span></span></button>
+      <button class="cmd" data-go2="stages"><span class="cur">▶</span><span>ステージ いちらん（${chapClearedCount()} / ${CHAPTERS.length} クリア）${gl('All stages')}</span></button>
+    </div>
   </div>
   <div class="win"><span class="win-t">コマンド${gl('Command')}</span>
     <div class="cmds">
@@ -862,6 +1012,8 @@ function vField(){
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
         <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
+      <button class="cmd" data-go2="shop"><span class="cur">▶</span><span>どうぐやに いく${gl('Shop')}
+        <span class="note">もっている ゴールド ${S.gold}${S.charm?` ・ まもりのふだ ${S.charm}`:''}</span></span></button>
     </div>
   </div>
   <div class="win tight"><div class="note">
@@ -871,8 +1023,8 @@ function vField(){
   const m=S.hp<=0
     ? 'ぜんめつ して しまった…\nやどやで やすめば、すぐに たびを つづけられる。'
     : cleared
-      ? `きょうの ノルマ ${qt.total}もんを たっせい した！\nまだ すすんでも かまわない。`
-      : `きょうは あと ${Math.max(0,qt.total-done)}もん。\nふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`;
+      ? `きょうの ぶん ${done} / ${goal}\nきょうの ノルマは たっせい した！\nまだ すすんでも かまわない。`
+      : `きょうの ぶん ${done} / ${goal}\nふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`;
   type($('#fmsg'),esc(m),null,true);
 }
 
@@ -885,17 +1037,47 @@ function monPool(sec,boss){
   const p=MONSTERS.filter(m=>m.area===area||m.area==='any');
   return p.length?p:MONSTERS.filter(m=>m.area==='any');
 }
+// 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
+// どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
+function beginBattle(items,opts){
+  opts=opts||{};
+  const mon=opts.mon||pick(monPool(opts.sec,opts.boss));
+  const max=opts.monMax||mon.hp;
+  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
+     sec:opts.sec||null,boss:!!opts.boss,mode:opts.mode||null,chap:opts.chap||null,
+     mon,monMax:max,monHp:max,killed:0,levelUps:[]};
+  route='battle';
+  document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
+  drawBattle(opts.intro||`${mon.name}が あらわれた！`);
+}
 function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
   const items=buildQueue(sec||null,limit);
   if(!items.length){ alert('いま、いどめる もんだいが ありません。'); return; }
-  const pool=monPool(sec,boss);
-  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],sec,boss:!!boss,mode:mode||null,
-     mon:pick(pool),monHp:0,killed:0,levelUps:[]};
-  B.monHp=B.mon.hp;
-  route='battle';
-  document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
-  drawBattle(`${B.mon.name}が あらわれた！`);
+  beginBattle(items,{sec,boss,mode});
+}
+// ステージの中だけを回す練習
+function startChapPractice(id){
+  const ch=CHAPTERS.find(c=>c.id===id); if(!ch) return;
+  const pool=ch.ids.map(x=>BY_ID[x]).filter(Boolean);
+  const due=pool.filter(i=>isDue(i.id)).sort((a,b)=>rec(a.id).due-rec(b.id).due);
+  const fresh=shuffle(pool.filter(i=>isNew(i.id)));
+  const weak=pool.filter(i=>!isDue(i.id)&&!isNew(i.id)&&rec(i.id).lv<MAX_LV)
+                 .sort((a,b)=>rec(a.id).lv-rec(b.id).lv);
+  const items=shuffle(due.concat(fresh,weak).slice(0,12));
+  if(!items.length){ alert('この ステージは もう かんぺきです。'); return; }
+  beginBattle(items,{sec:ch.sec});
+}
+// ステージの ぬし。20問ぶんの体力を持たせ、倒しきれたらクリア
+function startChapBoss(id){
+  const ch=CHAPTERS.find(c=>c.id===id); if(!ch) return;
+  if(chapStats(ch).rate<CHAP_OPEN) return;
+  const pool=ch.ids.map(x=>BY_ID[x]).filter(Boolean);
+  if(pool.length<4) return;
+  const items=shuffle(pool.slice()).slice(0,20);
+  const mon=SPRITES[ch.boss]||MONSTERS[0];
+  beginBattle(items,{sec:ch.sec,boss:true,chap:ch.id,mon,monMax:18,
+    intro:`ステージ ${chapNo(ch)}の ぬし\n${mon.name}が 立ちふさがった！`});
 }
 // 舞台の中に出す自分のHP/MP。上のステータスが隠れても戦況が読めるようにする
 function stageHp(){
@@ -904,7 +1086,8 @@ function stageHp(){
          `<span style="margin-left:auto">Ｌｖ <b>${S.lv}</b></span>`;
 }
 function monHpBar(){
-  let h=''; for(let i=0;i<B.mon.hp;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
+  const max=B.monMax||B.mon.hp;
+  let h=''; for(let i=0;i<max;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
   return h;
 }
 function drawBattle(intro){
@@ -973,7 +1156,16 @@ function answer(n){
     popDmg(String(dmg),true); SFX.miss();
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
   }
-  B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true; markStudied();
+  B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true;
+  const markHit=markStudied();
+  if(markHit) B.markHit=markHit;
+  // 今日のノルマに届いたら、その日1回だけ ごほうび。連続が長いほど多い
+  const goal=S.dayGoal||0, td=todayKey();
+  if(goal>0 && S.doneToday>=goal && S.bonusDay!==td){
+    S.bonusDay=td;
+    B.bonus=30+S.streak*2;
+    S.gold+=B.bonus;
+  }
   // 聴解は本試験で別区分なので、成績も分けて数える
   if(B.mode==='listen'){ S.listenN++; if(ok) S.listenOk++; }
   // レベルアップ判定
@@ -1047,14 +1239,15 @@ function nextStep(){
   if(S.hp<=0){ persist(); return vWipe(); }
   if(B.monHp<=0){
     B.killed++;
-    const g=B.mon.hp*7+(B.boss?60:0);
+    const g=(B.monMax||B.mon.hp)*7+(B.boss?60:0);
     B.gold+=g; S.gold+=g;
     S.defeated[B.mon.id]=(S.defeated[B.mon.id]||0)+1;
     persist();
-    if(B.i+1>=B.items.length) return vAfter();
+    // ステージの ぬしは1体だけ。倒した時点で決着
+    if(B.chap||B.i+1>=B.items.length) return vAfter();
     // 次の敵が現れる
     const pool=monPool(B.sec,B.boss);
-    B.mon=pick(pool); B.monHp=B.mon.hp;
+    B.mon=pick(pool); B.monMax=B.mon.hp; B.monHp=B.mon.hp;
     B.i++; return drawBattle(`${g}ゴールドを てに いれた！\n${B.mon.name}が あらわれた！`);
   }
   B.i++;
@@ -1078,7 +1271,23 @@ function vWipe(){
 function vAfter(){
   route='after';
   const total=B.ok+B.ng, acc=total?Math.round(B.ok/total*100):0;
-  if(B.boss&&acc>S.best) S.best=acc;
+  if(B.boss&&!B.chap&&acc>S.best) S.best=acc;
+  // ステージの ぬしを倒せたか。初クリアのときだけ ごほうびを出す
+  let chapMsg='';
+  if(B.chap){
+    const ch=CHAPTERS.find(c=>c.id===B.chap);
+    const won=B.monHp<=0, first=won&&!chapCleared(ch);
+    if(won){
+      const prev=S.chap[ch.id]||{};
+      S.chap[ch.id]={cleared:1,best:Math.max(prev.best||0,acc)};
+      if(first){ S.gold+=150; }
+      chapMsg=first
+        ? `\nステージ ${chapNo(ch)}「${ch.name}」を クリアした！\n150ゴールドを うけとった！`
+        : `\nステージ ${chapNo(ch)}を もう いちど クリアした！`;
+    }else{
+      chapMsg=`\n${ch.name}の ぬしは たおせなかった…\nもういちど いどめます。`;
+    }
+  }
   persist();
   const lvMsg=B.levelUps.length?`\nレベルが ${B.levelUps[B.levelUps.length-1]}に あがった！\nさいだいＨＰが ${B.levelUps.length*4} ふえた！`:'';
   $('#view').innerHTML=`
@@ -1097,9 +1306,68 @@ function vAfter(){
     ${B.wrong.length?`<button class="cmd" data-retry=""><span class="cur">▶</span><span>とりこぼしだけ もういちど${gl('Retry the missed ones')}</span></button>`:''}
     <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back to adventure')}</span></button>
   </div></div>`;
+  const extra=
+    (B.bonus?`\nきょうの ノルマ たっせい！ ${B.bonus}ゴールドの ごほうび！`:'')+
+    (B.markHit?`\n${B.markHit}にち れんぞくの しるしを てに いれた！ ${B.markHit*10}ゴールド！`:'')+
+    chapMsg;
+  paintHud();   // ステージのごほうびなどは戦闘の外で入るので、ここで数字を出し直す
   const head=B.killed?`${B.killed}たいを たおした！`:'たたかいを おえた。';
-  type($('#amsg'),`${head}\nけいけんち ${B.exp}を てに いれた！\n${B.gold}ゴールドを てに いれた！${esc(lvMsg)}`);
+  type($('#amsg'),`${head}\nけいけんち ${B.exp}を てに いれた！\n${B.gold}ゴールドを てに いれた！${esc(lvMsg)}${esc(extra)}`);
   if(B.levelUps.length) SFX.up(); else SFX.win();
+}
+
+/* ===== ステージ一覧 ===== */
+function vStages(){
+  const cur=currentChapter();
+  $('#view').innerHTML=`
+  <div class="win"><span class="win-t">ステージ いちらん${gl('All stages')}</span>
+    <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア</div>
+    <div style="margin-top:8px">${CHAPTERS.map((c,i)=>{
+      const cs=chapStats(c), done=chapCleared(c), now=c.id===cur.id;
+      return `<div class="chap ${done?'done':''} ${now?'now':''}">
+        <span class="cn">${done?'✔':i+1}</span>
+        <span><span>${esc(c.name)}</span>${gl(c.en)}${pbar(cs.rate)}</span>
+        <span class="st2">${cs.done} / ${cs.n}<br>${(cs.rate*100).toFixed(0)}％</span>
+      </div>`;
+    }).join('')}</div>
+  </div>
+  <div class="win tight"><div class="note">
+    ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
+    ${gl('New items are drawn from your current stage first.')}
+  </div></div>
+  <div class="win tight"><div class="cmds">
+    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back')}</span></button>
+  </div></div>`;
+}
+
+/* ===== どうぐや ===== */
+function vShop(){
+  $('#view').innerHTML=`
+  <div class="win"><span class="win-t">どうぐや${gl('Shop')}</span>
+    <div class="note">もっている ゴールド <span class="st-n">${S.gold}</span></div>
+    <div style="margin-top:8px">${SHOP.map(g=>{
+      const have=owned(g.id), full=have>=g.max, poor=S.gold<g.price;
+      const isRobe=g.id.indexOf('robe_')===0, worn=isRobe&&S.robe===g.id;
+      let label='かう', act=`data-buy="${esc(g.id)}"`, dis=(full||poor);
+      if(isRobe&&have){ label=worn?'きて いる':'きる'; act=`data-wear="${esc(g.id)}"`; dis=worn; }
+      else if(full) label='じゅうぶん';
+      else if(poor) label='たりない';
+      return `<div class="good">
+        <span><span class="gn">${esc(g.name)}</span>${gl(g.en)}
+          <span class="gd">${esc(g.desc)}${have?`　（もっている ${have}${g.max>1?' / '+g.max:''}）`:''}</span></span>
+        <span style="display:grid; gap:4px; justify-items:end">
+          <span class="gp">${g.price} Ｇ</span>
+          <button ${act} ${dis?'disabled':''}>${label}</button>
+        </span>
+      </div>`;
+    }).join('')}
+    ${S.robe?`<div class="good"><span><span class="gn">もとの ふくに もどす</span>${gl('Back to the default outfit')}</span>
+      <span><button data-wear="">もどす</button></span></div>`:''}
+    </div>
+  </div>
+  <div class="win tight"><div class="cmds">
+    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back')}</span></button>
+  </div></div>`;
 }
 
 /* ===== 図鑑 ===== */
@@ -1160,9 +1428,14 @@ function vStatus(){
       <span class="st-l">ＭＰ</span><span class="st-row"><span class="st-n">${S.mp} / ${S.maxMp}</span></span>
       <span class="st-l">けいけんち</span><span class="st-row"><span class="st-n">${S.exp}</span><span class="st-l">つぎまで ${expToNext(S.lv)-S.exp}</span></span>
       <span class="st-l">ゴールド</span><span class="st-row"><span class="st-n">${S.gold}</span></span>
-      <span class="st-l">れんぞく</span><span class="st-row"><span class="st-n">${S.streak} にち</span></span>
+      <span class="st-l">れんぞく</span><span class="st-row"><span class="st-n">${S.streak} にち</span>${S.charm?`<span class="st-l">まもりのふだ ${S.charm}</span>`:''}</span>
+      <span class="st-l">ステージ</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${CHAPTERS.length}</span><span class="st-l">クリア</span></span>
       <span class="st-l">たおした かず</span><span class="st-row"><span class="st-n">${Object.values(S.defeated).reduce((a,b)=>a+b,0)}</span></span>
     </div>
+  </div>
+  <div class="win"><span class="win-t">れんぞくの しるし${gl('Streak badges')}</span>
+    <div class="note">まいにち つづけると しるしが つきます。${MARKS.filter(n=>S.marks[n]).length} / ${MARKS.length}</div>
+    <div class="marks">${MARKS.map(n=>`<span class="mk ${S.marks[n]?'on':''}">${n}にち</span>`).join('')}</div>
   </div>
   <div class="win"><span class="win-t">ぶんやべつの おぼえた ぐあい${gl('Progress by area')}</span>
     <div class="meters">${['vocab','kanji','grammar'].map(sec=>{
@@ -1240,7 +1513,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -1272,6 +1545,10 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-dun')){ SFX.sel(); return startBattle(d.dun||null); }
   if(t.hasAttribute('data-boss')){ SFX.sel(); return startBattle(null,30,true); }
   if(t.hasAttribute('data-listen')){ SFX.sel(); return startBattle(null,10,false,'listen'); }
+  if(d.chap){ SFX.sel(); return startChapPractice(d.chap); }
+  if(d.chapboss){ SFX.sel(); return startChapBoss(d.chapboss); }
+  if(d.buy){ return buy(d.buy); }
+  if(t.hasAttribute('data-wear')){ S.robe=d.wear||''; persist(); SFX.sel(); return render(); }
   // 2回目からは ゆっくり 読み上げる。聞き取れなかった人に速さを合わせる
   if(t.hasAttribute('data-replay')){ return replaySay(true); }
   if(d.sayt){ return speak(d.sayt,t.hasAttribute('data-slow')); }
@@ -1282,11 +1559,10 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-next')) return nextStep();
   if(t.hasAttribute('data-run')){ SFX.sel(); return B&&B.i>0?vAfter():go('field'); }
   if(t.hasAttribute('data-retry')){
-    const ids=B.wrong.slice();
-    B={items:ids.map(i=>BY_ID[i]),i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
-       sec:B.sec,boss:false,mode:B.mode,mon:pick(MONSTERS.filter(m=>m.area==='any')),monHp:0,killed:0,levelUps:[]};
-    B.monHp=B.mon.hp; route='battle';
-    return drawBattle(`${B.mon.name}が たちふさがった！`);
+    const items=B.wrong.map(i=>BY_ID[i]).filter(Boolean);
+    if(!items.length) return go('field');
+    return beginBattle(items,{sec:B.sec,mode:B.mode,
+      mon:pick(MONSTERS.filter(m=>m.area==='any')),intro:'にげた ものたちが たちふさがった！'});
   }
   if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
   if(d.ask) return askAI(d.ask);

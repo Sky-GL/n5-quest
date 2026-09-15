@@ -9,9 +9,13 @@ const out = path.join(root, 'n5-quest.html');
 
 const VOCAB_FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const vocab = [];
+// ファイルごとの区切りは、そのまま「章」の区切りになる。
+// 章データを別に持たずファイル構成から起こすので、データ側の書き換えが要らない。
+const parts = {};
 for (const s of VOCAB_FILES) {
   const m = await import(new URL(`./src/vocab-${s}.js`, import.meta.url));
-  vocab.push(...m['VOCAB_' + s.toUpperCase()]);
+  parts['vocab-' + s] = m['VOCAB_' + s.toUpperCase()];
+  vocab.push(...parts['vocab-' + s]);
 }
 const { KANJI_A } = await import(new URL('./src/kanji-a.js', import.meta.url));
 const { KANJI_B } = await import(new URL('./src/kanji-b.js', import.meta.url));
@@ -26,6 +30,41 @@ const { pngOf, icoOf, svgOf } = await import(new URL('./icongen.mjs', import.met
 const kanji = [...KANJI_A, ...KANJI_B];
 const grammar = [...GRAMMAR_A, ...GRAMMAR_B];
 const MONSTERS = [...MON_A, ...MONSTERS_B];
+parts['kanji-a'] = KANJI_A; parts['kanji-b'] = KANJI_B;
+parts['grammar-a'] = GRAMMAR_A; parts['grammar-b'] = GRAMMAR_B;
+
+// --- 章（ステージ）---
+// 並びが そのまま学習順になる。やさしいものと、すぐ使うものを先に置く。
+// ことば → 動き → 助詞 → ようす … と、語彙と文法を交互に挟んで飽きにくくしている。
+const CHAP_ORDER = [
+  ['vocab-a',   'vocab',   'ひとと からだ',                 'People & Body'],
+  ['vocab-b',   'vocab',   'まいにちの うごき',             'Everyday Actions'],
+  ['grammar-a', 'grammar', 'ぶんぽう：てにをはと きほん',   'Grammar: Particles & Basics'],
+  ['vocab-c',   'vocab',   'ようすを あらわす ことば',      'Describing Things'],
+  ['kanji-a',   'kanji',   'かんじ：かずと とき',           'Kanji: Numbers & Time'],
+  ['vocab-d',   'vocab',   'たべものと いえの もの',        'Food & Home'],
+  ['vocab-e',   'vocab',   'ひにちと かず',                 'Dates & Numbers'],
+  ['grammar-b', 'grammar', 'ぶんぽう：どうしの かたち',     'Grammar: Verb Forms'],
+  ['vocab-f',   'vocab',   'まちと のりもの',               'Town & Travel'],
+  ['kanji-b',   'kanji',   'かんじ：しぜんと くらし',       'Kanji: Nature & Life'],
+  ['vocab-g',   'vocab',   'がっこうと しごと',             'School & Work'],
+  ['vocab-h',   'vocab',   'つなぎことばと あいさつ',       'Connectors & Greetings']
+];
+// 章ボスは、その分野に出るモンスターから順に割り当てる。最後の章だけ大ボスにする。
+const bossCount = {};
+const pickChapBoss = (sec, last) => {
+  if (last) return (MONSTERS.find(m => m.area === 'boss') || MONSTERS[0]).id;
+  const pool = MONSTERS.filter(m => m.area === sec);
+  const n = (bossCount[sec] = (bossCount[sec] || 0));
+  bossCount[sec]++;
+  return (pool.length ? pool[n % pool.length] : MONSTERS[0]).id;
+};
+const ID_PREFIX = { vocab: 'v:', kanji: 'k:', grammar: 'g:' };
+const CHAPTERS = CHAP_ORDER.map(([file, sec, name, en], i) => ({
+  id: file, sec, name, en,
+  boss: pickChapBoss(sec, i === CHAP_ORDER.length - 1),
+  ids: (parts[file] || []).map(r => ID_PREFIX[sec] + r[0])
+}));
 
 // --- 検証 ---
 const errs = [];
@@ -164,6 +203,22 @@ ICON.px.forEach((row, y) => {
   if (!MONSTERS.some(m => m.area === a || m.area === 'any')) errs.push(`${a} に出現するモンスターがいない`);
 });
 if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
+
+// 章の検証。全項目がどこかの章に1回だけ入っていないと、進めても埋まらない章が出る
+{
+  const sprite = new Set(MONSTERS.map(m => m.id));
+  const all = new Set();
+  CHAPTERS.forEach(c => {
+    if (!c.ids.length) errs.push(`章[${c.id}] に項目がない`);
+    if (!sprite.has(c.boss)) errs.push(`章[${c.id}] のボス ${c.boss} が見つからない`);
+    c.ids.forEach(id => {
+      if (all.has(id)) errs.push(`章[${c.id}] 項目の重複: ${id}`);
+      all.add(id);
+    });
+  });
+  const total = vocab.length + kanji.length + grammar.length;
+  if (all.size !== total) errs.push(`章に入っていない項目がある（章 ${all.size} / 全体 ${total}）`);
+}
 // 取りこぼし再戦と monPool のフォールバックは 'any' がいる前提なので、ここで担保する
 if (!MONSTERS.some(m => m.area === 'any')) errs.push("area:'any' のモンスターが1体もいない（取りこぼし再戦で落ちる）");
 
@@ -193,7 +248,8 @@ const dataJs =
   '"grammar":[' + NL + rows(grammar) + NL +
   ']};' + NL +
   'const MONSTERS=[' + NL + rows(MONSTERS) + NL + '];' + NL +
-  'const HEROES=[' + NL + rows(HEROES) + NL + '];';
+  'const HEROES=[' + NL + rows(HEROES) + NL + '];' + NL +
+  'const CHAPTERS=[' + NL + rows(CHAPTERS) + NL + '];';
 const inject = '<script>' + dataJs + '</script>';
 const html = tpl.replace('<script id="__DATA__"></script>', inject);
 if (html === tpl) { console.error('データ差し込み位置が見つかりません'); process.exit(1); }
@@ -272,6 +328,7 @@ const kb = f => (fs.statSync(path.join(distDir, f)).size / 1024).toFixed(0) + ' 
 console.log('OK ' + out + '（Artifact用の断片）');
 console.log('OK dist/  index.html ' + kb('index.html') + ' / data.js ' + kb('data.js') + ' / app.js ' + kb('app.js'));
 console.log(`  語彙 ${vocab.length} / 漢字 ${kanji.length}字→例語 ${kanjiWords} / 文法 ${grammar.length} / 敵 ${MONSTERS.length} / 勇者 ${HEROES.length}`);
+console.log(`  章 ${CHAPTERS.length}（${CHAPTERS.map(c => c.ids.length).join('/')}）`);
 // 出題の単位は 語彙=1語 / 漢字=1字 / 文法=1文型。例語は漢字の学習材料であって項目ではない
 console.log(`  出題項目 合計 ${vocab.length + kanji.length + grammar.length}`);
 console.log('OK アイコン ' + icons.map(([n]) => n).concat('favicon.ico', 'favicon.svg', 'site.webmanifest').join(' / '));
