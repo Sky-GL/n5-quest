@@ -110,6 +110,19 @@ rt{
 .stage-hp b{font-weight:normal; color:var(--gold)}
 .stage-hp .sh-hp b{color:var(--hp)}
 .stage-hp .sh-mp b{color:var(--mp)}
+/* 敵の隊列。1〜3体を横に並べ、狙っている相手だけ印を付ける */
+.foes{display:flex; align-items:flex-end; justify-content:center; gap:10px}
+.foe{display:grid; justify-items:center; gap:4px; position:relative}
+.foe.gone{visibility:hidden}
+/* 狙っている相手は、下の金の線と大きめのHPで示す。
+   舞台の上端にはHP/MPの行があるので、印を上に出すと重なる */
+.foe:not(.tgt) canvas{opacity:.72}
+/* ぬし・大ボスは、ふつうの敵と同じ大きさだと「区切り」に見えない */
+.foe.boss canvas{filter:drop-shadow(0 0 7px rgba(248,208,72,.55))}
+.foe .aim{width:62%; height:3px; border-radius:1px; background:transparent}
+.foe.tgt .aim{background:var(--gold)}
+.foe .mon-hp i{width:8px; height:8px}
+.foe.tgt .mon-hp i{width:11px; height:11px}
 .mon-name{font-size:13.5px; color:var(--dim); letter-spacing:.1em}
 .mon-hp{display:flex; gap:3px}
 .mon-hp i{width:11px; height:11px; background:var(--win-2); border:1px solid #35356A; border-radius:1px}
@@ -241,6 +254,25 @@ rt{
 .tg b{color:var(--gold); font-weight:normal; font-size:13.5px}
 
 /* ---- タイトル画面 ---- */
+/* 紋章。タイトル文字の後ろに敷く。
+   金一色だと「枠」にしか見えなかったので、青と紅で四分割した色付きにしてある。
+   文字は前面(z-index:1)＋濃い影で、重なっても読めるようにする。 */
+.crest{
+  /* 絶対配置にすると画面の上で切れるので、ふつうの流れに置いたまま
+     下マージンを負にして、タイトル文字を盾の下のほうに重ねる。
+     こうすると縦の中央ぞろえが紋章の高さも数に入れてくれる */
+  display:block; margin:0 auto -34px; position:relative;
+  z-index:0; opacity:.92; pointer-events:none;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.65));
+  animation:crestBreathe 7s steps(3,end) infinite;
+}
+@keyframes crestBreathe{0%,100%{opacity:.86}50%{opacity:1}}
+/* 紋章とロゴの後ろのほのかな光。奥行きを出して、上の余白を締める */
+.title-glow{
+  position:absolute; left:50%; top:30%; width:min(88vw,430px); aspect-ratio:1;
+  transform:translate(-50%,-50%); pointer-events:none; z-index:0;
+  background:radial-gradient(circle, rgba(248,208,72,.11) 0%, rgba(248,208,72,.04) 36%, transparent 66%);
+}
 .title{
   position:relative; min-height:calc(100vh - 24px); overflow:hidden;
   display:grid; align-content:center; justify-items:center; gap:22px; padding:24px 10px;
@@ -251,14 +283,18 @@ rt{
   animation:tw 3.2s steps(2,end) infinite;
 }
 @keyframes tw{0%,100%{opacity:.14}50%{opacity:.85}}
+.title-hero,.title-menu,.title-save{position:relative; z-index:1}
 .title-logo{text-align:center; position:relative}
+.title-main,.title-sub{position:relative; z-index:1}
 .title-main{
   font-size:clamp(34px,11vw,54px); color:var(--gold); letter-spacing:.1em; line-height:1.25;
-  text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000;
+  /* 紋章の上に重なるので、影を厚くして輪郭を立たせる */
+  text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000, 0 0 12px rgba(0,0,0,.85);
 }
 .title-sub{
-  display:inline-block; margin-top:12px; padding-top:11px; font-size:12.5px;
-  color:var(--dim); letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
+  display:inline-block; margin-top:12px; padding:11px 10px 0; font-size:12.5px;
+  color:#C6CCE4; letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
+  text-shadow:0 2px 5px #000, 0 0 10px #000;
 }
 .title-hero{position:relative; display:grid; place-items:center}
 .title-hero canvas{animation:bob 2.6s steps(2,end) infinite}
@@ -551,6 +587,8 @@ const SHOP=[
   {id:'robe_v',  price:400, max:1,  name:'むらさきの ころも', en:'Violet Robe',
    desc:'ゆうしゃの ふくが むらさきに なる。'}
 ];
+// 唱えても何も起きない呪文は最初から押させない（ＭＰの無駄うちを防ぐ）
+const spellOff = sp => S.mp<sp.mp || (sp.id==='heal' && S.hp>=S.maxHp);
 const owned = id => id==='charm' ? S.charm : (S.bought[id]||0);
 function buy(id){
   const g=SHOP.find(x=>x.id===id);
@@ -570,6 +608,15 @@ const ROBES={
   robe_g:{a:'#7A5A10', b:'#C89A20', c:'#F0D060'},
   robe_v:{a:'#3A1A5E', b:'#6A3A9E', c:'#A878D8'}
 };
+
+/* ===== まほう =====
+   ＭＰは宿屋とレベルアップでしか戻らず、スキャンひとつでは使い道が細かった。
+   敵が隊列で出るようになったので、全体に効く攻撃呪文が活きる。 */
+const SPELLS=[
+  {id:'scan',  mp:1, name:'スキャン', en:'Scan - remove 2 wrong answers'},
+  {id:'bolt',  mp:3, name:'イカズチ', en:'Bolt - 2 damage to every enemy'},
+  {id:'heal',  mp:2, name:'イヤシ',   en:'Heal - restore 8 HP'}
+];
 
 function daysLeft(){ return S.examDate?Math.ceil((new Date(S.examDate+'T09:00:00')-Date.now())/DAY):null; }
 function quota(){
@@ -706,6 +753,8 @@ const drawMon=(cv,m,scale)=>drawPx(cv,m.px,m.pal,scale);
 const SPRITES={};
 MONSTERS.forEach(m=>SPRITES[m.id]=m);
 HEROES.forEach(h=>SPRITES[h.id]=h);
+// 紋章も同じ描画経路に乗せる。専用の描画コードを増やさないため
+SPRITES.crest={id:'crest',px:CREST.px,pal:CREST.pal};
 const heroOf = id => SPRITES[id] || HEROES[0];
 const HERO_IDS=new Set(HEROES.map(h=>h.id));
 function withRobe(h){
@@ -720,6 +769,9 @@ function paintMons(root){
     if(m) drawMon(cv,m,+cv.dataset.scale||8);
   });
 }
+// 踏み込みアニメ(0.36s)で勇者がいちばん前に出る時刻。
+// 敵の被弾・ダメージ表示をここに合わせると、斬った瞬間に当たったように見える
+const HIT_AT=160;
 // 攻撃の間だけ、剣を振り上げた差分ポーズ(px2)に描き替える
 function heroSwing(){
   const sp=$('#heroSp'); if(!sp) return;
@@ -728,7 +780,8 @@ function heroSwing(){
   if(!cv||!h.px2) return;
   const sc=+cv.dataset.scale||4;
   drawPx(cv,h.px2,h.pal,sc);
-  setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,h.px,h.pal,sc); },340);
+  // 振り上げたまま戻ると「斬っていない」ように見える。いちばん前に出た瞬間に下ろす
+  setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,h.px,h.pal,sc); },HIT_AT);
 }
 
 /* ===== 出題 ===== */
@@ -887,7 +940,9 @@ function titleShell(inner, sub){
   return `
   <div class="title">
     <div class="stars" id="stars"></div>
+    <div class="title-glow"></div>
     <div class="title-logo">
+      <canvas class="crest" data-mon="crest" data-scale="5"></canvas>
       <div class="title-main">Ｎ５クエスト</div>
       <div class="title-sub">ことばの ぼうけん</div>
     </div>
@@ -1037,18 +1092,39 @@ function monPool(sec,boss){
   const p=MONSTERS.filter(m=>m.area===area||m.area==='any');
   return p.length?p:MONSTERS.filter(m=>m.area==='any');
 }
+// いま狙っている敵。倒した相手は隊列に残したまま、印だけ次へ送る
+const foe = () => B.foes[B.tgt] || B.foes[B.foes.length-1];
+const aliveFoes = () => B.foes.filter(f=>f.hp>0);
+function aimNext(){ const i=B.foes.findIndex(f=>f.hp>0); if(i>=0) B.tgt=i; }
+// 体が増えるほど1体を小さく描く。3体でも横幅に収まる大きさにしている
+const foeScale = (n,boss) => boss?13:(n>=3?7:(n===2?8:9));
+function makeFoes(sec,boss,mon,monMax){
+  if(mon){ const mx=monMax||mon.hp; return [{m:mon,max:mx,hp:mx}]; }
+  const pool=monPool(sec,boss);
+  // ボスは1体で立ちはだかる。ふつうの探索は1〜3体。2体をいちばん出やすくする
+  const n=boss?1:pick([1,1,2,2,2,3]);
+  const out=[];
+  for(let i=0;i<n;i++){ const m=pick(pool); out.push({m,max:m.hp,hp:m.hp}); }
+  return out;
+}
+// 「AとAとB」では読みにくいので、同じ相手はまとめて数える
+function foesName(fs){
+  const order=[], cnt={};
+  fs.forEach(f=>{ if(!cnt[f.m.name]){ cnt[f.m.name]=0; order.push(f.m.name); } cnt[f.m.name]++; });
+  return order.map(n=>cnt[n]>1?`${n} ${cnt[n]}たい`:n).join('と ');
+}
+
 // 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
 // どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
 function beginBattle(items,opts){
   opts=opts||{};
-  const mon=opts.mon||pick(monPool(opts.sec,opts.boss));
-  const max=opts.monMax||mon.hp;
+  const foes=makeFoes(opts.sec,opts.boss,opts.mon,opts.monMax);
   B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
      sec:opts.sec||null,boss:!!opts.boss,mode:opts.mode||null,chap:opts.chap||null,
-     mon,monMax:max,monHp:max,killed:0,levelUps:[]};
+     foes,tgt:0,killed:0,levelUps:[]};
   route='battle';
   document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
-  drawBattle(opts.intro||`${mon.name}が あらわれた！`);
+  drawBattle(opts.intro||`${foesName(foes)}が あらわれた！`);
 }
 function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
@@ -1085,19 +1161,26 @@ function stageHp(){
          `<span class="sh-mp">ＭＰ <b>${S.mp}</b>/${S.maxMp}</span>`+
          `<span style="margin-left:auto">Ｌｖ <b>${S.lv}</b></span>`;
 }
-function monHpBar(){
-  const max=B.monMax||B.mon.hp;
-  let h=''; for(let i=0;i<max;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
+function hpPips(f){
+  let h=''; for(let i=0;i<f.max;i++) h+=`<i class="${i<f.hp?'on':''}"></i>`;
   return h;
+}
+// 隊列ぜんぶを描き直す。狙っている相手の印もここで付け替える
+function foesHtml(){
+  const sc=foeScale(B.foes.length,B.boss);
+  return B.foes.map((f,i)=>`<span class="foe ${f.hp<=0?'gone':''} ${i===B.tgt&&f.hp>0?'tgt':''} ${B.boss?'boss':''}" data-foe="${i}">
+      ${monHtml(f.m,sc,'mon')}
+      <span class="mon-hp">${hpPips(f)}</span>
+      <span class="aim"></span>
+    </span>`).join('');
 }
 function drawBattle(intro){
   const Q=makeQ(B.items[B.i],B.mode); B.q=Q;
   $('#view').innerHTML=`
   <div class="stage" id="stage">
     <div class="stage-hp" id="stageHp">${stageHp()}</div>
-    ${monHtml(B.mon,9,'mon')}
-    <div class="mon-name">${esc(B.mon.name)}</div>
-    <div class="mon-hp" id="mhp">${monHpBar()}</div>
+    <div class="foes" id="foes">${foesHtml()}</div>
+    <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}</div>
     <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),4)}</span>
   </div>
   <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?'　れんげき '+B.combo:''}</span>
@@ -1108,11 +1191,14 @@ function drawBattle(intro){
       ${Q.opts.map((o,n)=>`<button class="cmd" data-a="${n}"><span class="cur">▶</span><span>${Q.ruby?rb(o.v):esc(o.v)}</span></button>`).join('')}
     </div>
   </div>
-  <div class="win tight"><div class="cmds row">
-    <button class="cmd" data-spell="scan" ${S.mp<1?'disabled':''}><span class="cur">▶</span><span>スキャン MP1${gl('Scan - remove 2 wrong answers')}</span></button>
-    <button class="cmd" data-run=""><span class="cur">▶</span><span>にげる${gl('Run away')}</span></button>
-  </div></div>
-  <div class="note" style="padding:0 4px 10px">スキャン＝ちがう こたえを 2つ けす</div>
+  <div class="win tight"><span class="win-t">まほう${gl('Magic')}</span>
+    <div class="cmds row">
+      ${SPELLS.map(sp=>`<button class="cmd" data-spell="${sp.id}" ${spellOff(sp)?'disabled':''}><span class="cur">▶</span><span>${sp.name} MP${sp.mp}${gl(sp.en)}</span></button>`).join('')}
+    </div>
+    <div class="cmds row" style="margin-top:6px">
+      <button class="cmd" data-run=""><span class="cur">▶</span><span>にげる${gl('Run away')}</span></button>
+    </div>
+  </div>
   <div id="after"></div>`;
   paintMons();
   window.scrollTo(0,0);  // 前の問題のスクロール位置を引きずらない
@@ -1125,10 +1211,52 @@ function replaySay(slow){
   const b=$('#earBtn'); if(b) b.classList.add('on');
   speak(Q.say,slow,()=>{ const e=$('#earBtn'); if(e) e.classList.remove('on'); });
 }
+// 剣が届く時刻に合わせて演出を出す。
+// 待っている間に次の問題へ進んだら、前の問題の演出は捨てる
+function hitAt(fn,q){
+  setTimeout(()=>{ if(B && B.q===q) fn(); },HIT_AT);
+}
 function popDmg(txt,miss){
   const st=$('#stage'); if(!st) return;
   const d=document.createElement('div'); d.className='dmg'+(miss?' miss':''); d.textContent=txt;
   st.appendChild(d); setTimeout(()=>d.remove(),750);
+}
+// 呪文。ＭＰが足りていれば何度でも唱えられる。
+// スキャンだけは同じ問題で二度唱えても意味がないので、押した時点で閉じる
+function cast(id,btn){
+  const sp=SPELLS.find(x=>x.id===id);
+  if(!sp || !B || spellOff(sp)) return;
+  S.mp-=sp.mp; SFX.sel();
+  if(id==='scan'){
+    btn.disabled=true;
+    const wrongIdx=B.q.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0);
+    shuffle(wrongIdx).slice(0,2).forEach(i=>{
+      const b=document.querySelector(`#cmds .cmd[data-a="${i}"]`);
+      if(b){ b.disabled=true; b.classList.add('gone'); }
+    });
+  }else if(id==='bolt'){
+    // 隊列ぜんぶに効く。1体しかいない相手にも同じダメージが入る
+    const hit=aliveFoes();
+    hit.forEach(f=>{ f.hp=Math.max(0,f.hp-2); });
+    const box=$('#foes'); if(box) box.innerHTML=foesHtml();
+    paintMons($('#foes'));
+    document.querySelectorAll('#foes .mon').forEach(m=>m.classList.add('hit'));
+    popDmg('2'); SFX.hit();
+    const st=$('#stage'); if(st){ st.classList.add('flash'); setTimeout(()=>st.classList.remove('flash'),400); }
+    aimNext();
+  }else if(id==='heal'){
+    const before=S.hp;
+    S.hp=Math.min(S.maxHp,S.hp+8);
+    popDmg('+'+(S.hp-before)); SFX.up();
+    $('#heroSp')?.classList.add('atk');
+  }
+  persist(); paintHud();
+  { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
+  // ＭＰが減って唱えられなくなった呪文を閉じる
+  document.querySelectorAll('[data-spell]').forEach(b=>{
+    const x=SPELLS.find(y=>y.id===b.dataset.spell);
+    if(x && spellOff(x)) b.disabled=true;
+  });
 }
 function answer(n){
   const Q=B.q, it=Q.item, ok=Q.opts[n].ok;
@@ -1140,18 +1268,28 @@ function answer(n){
   if(ok){
     B.ok++; B.combo++; B.maxCombo=Math.max(B.maxCombo,B.combo);
     const crit=B.combo>=3, dmg=crit?2:1;
-    B.monHp=Math.max(0,B.monHp-dmg);
+    const t=foe();
+    t.hp=Math.max(0,t.hp-dmg);
     gainExp=12+Math.min(18,(B.combo-1)*3)+(r.lv===MAX_LV?25:0);
-    log=(crit?'かいしんの いちげき！\n':'せいかい！\n')+`${B.mon.name}に ${dmg*8}の ダメージ！`;
-    $('#mhp').innerHTML=monHpBar();
+    log=(crit?'かいしんの いちげき！\n':'せいかい！\n')+`${t.m.name}に ${dmg*8}の ダメージ！`;
     heroSwing();
-    document.querySelector('.mon').classList.add('hit');
-    popDmg(String(dmg*8)); SFX.hit();
+    // 敵の反応は剣が届いてから。先に敵が痛がると、順番が逆に見える。
+    // 正解かどうかは選択肢の色で即座に返しているので、ここを遅らせても手応えは落ちない
+    // 待っている間にイカズチで狙いが移ることがあるので、相手の位置はここで固定する
+    const ti=B.tgt;
+    hitAt(()=>{
+      const cell=document.querySelector(`[data-foe="${ti}"]`);
+      if(cell){
+        const bar=cell.querySelector('.mon-hp'); if(bar) bar.innerHTML=hpPips(t);
+        const mon=cell.querySelector('.mon'); if(mon) mon.classList.add('hit');
+      }
+      popDmg(String(dmg*8)); SFX.hit();
+    },Q);
   }else{
     B.ng++; B.combo=0; B.wrong.push(it.id);
     const dmg=B.boss?4:3;
     S.hp=Math.max(0,S.hp-dmg); gainExp=3;
-    log=`ミス！\n${B.mon.name}の こうげき！\n${dmg}の ダメージを うけた！`;
+    log=`ミス！\n${foe().m.name}の こうげき！\n${dmg}の ダメージを うけた！`;
     $('#stage').classList.add('flash'); $('#heroSp')?.classList.add('hurt');
     popDmg(String(dmg),true); SFX.miss();
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
@@ -1176,18 +1314,26 @@ function answer(n){
   }
   persist(); paintHud();
   { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
-  const dead=B.monHp<=0, wipe=S.hp<=0;
+  const fallen=foe(), dead=fallen.hp<=0, wipe=S.hp<=0;
   $('#bmsg').innerHTML='';
   type($('#bmsg'),esc(log)+`\n<span class="q">けいけんち ${gainExp}を てに いれた。</span>`);
   $('#after').innerHTML=`
     <div class="win"><span class="win-t">まなび${gl('Learn')}</span><div class="learn ruby-on">${learnHtml(it)}</div></div>
     <div class="win tight"><div class="cmds">
       <button class="cmd" data-next=""><span class="cur">▶</span><span>${
-        wipe?'…':(dead?`${esc(B.mon.name)}を たおした！`:(B.i+1>=B.items.length?'たたかいを おえる':'つぎの もんだいへ'))
+        wipe?'…':(dead?`${esc(fallen.m.name)}を たおした！`:(B.i+1>=B.items.length?'たたかいを おえる':'つぎの もんだいへ'))
       }</span></button>
     </div></div>`;
+  // こたえた後は魔法を閉じる。答えが見えている状態でスキャンを撃っても
+  // ＭＰが減るだけで何も起きず、プレイヤーには理由が分からない
+  document.querySelectorAll('[data-spell]').forEach(b=>{ b.disabled=true; });
   $('[data-next]').focus({preventScroll:true});  // 勝手にスクロールさせない
-  if(dead && !wipe){ document.querySelector('.mon').classList.add('dead'); SFX.down(); }
+  const deadIdx=B.foes.indexOf(fallen);
+  if(dead && !wipe) hitAt(()=>{
+    const cell=document.querySelector(`[data-foe="${deadIdx}"]`);
+    const mon=cell&&cell.querySelector('.mon'); if(mon) mon.classList.add('dead');
+    SFX.down();
+  },Q);
   if(wipe) SFX.miss();
 }
 function learnHtml(it){
@@ -1237,19 +1383,28 @@ async function askAI(id){
 }
 function nextStep(){
   if(S.hp<=0){ persist(); return vWipe(); }
-  if(B.monHp<=0){
-    B.killed++;
-    const g=(B.monMax||B.mon.hp)*7+(B.boss?60:0);
-    B.gold+=g; S.gold+=g;
-    S.defeated[B.mon.id]=(S.defeated[B.mon.id]||0)+1;
-    persist();
+  // 倒した相手の精算。1問で複数体は倒せないが、まとめて見ておけば取りこぼさない
+  let got=0;
+  B.foes.forEach(f=>{
+    if(f.hp>0||f.paid) return;
+    f.paid=1; B.killed++;
+    // 倒すと少しＭＰが戻る。宿屋まで魔法を温存するだけの戦い方にしない
+    S.mp=Math.min(S.maxMp,S.mp+1);
+    const g=f.max*7+(B.boss?60:0);
+    got+=g; B.gold+=g; S.gold+=g;
+    S.defeated[f.m.id]=(S.defeated[f.m.id]||0)+1;
+  });
+  if(got) persist();
+  if(!aliveFoes().length){
     // ステージの ぬしは1体だけ。倒した時点で決着
     if(B.chap||B.i+1>=B.items.length) return vAfter();
-    // 次の敵が現れる
-    const pool=monPool(B.sec,B.boss);
-    B.mon=pick(pool); B.monMax=B.mon.hp; B.monHp=B.mon.hp;
-    B.i++; return drawBattle(`${g}ゴールドを てに いれた！\n${B.mon.name}が あらわれた！`);
+    // 隊列を全部たおした。次の一団が現れる
+    B.foes=makeFoes(B.sec,B.boss); B.tgt=0;
+    B.i++;
+    return drawBattle(`${got}ゴールドを てに いれた！\n${foesName(B.foes)}が あらわれた！`);
   }
+  // まだ残っている相手がいる。狙いを次へ送る
+  aimNext();
   B.i++;
   if(B.i>=B.items.length) return vAfter();
   drawBattle('');
@@ -1276,7 +1431,7 @@ function vAfter(){
   let chapMsg='';
   if(B.chap){
     const ch=CHAPTERS.find(c=>c.id===B.chap);
-    const won=B.monHp<=0, first=won&&!chapCleared(ch);
+    const won=!aliveFoes().length, first=won&&!chapCleared(ch);
     if(won){
       const prev=S.chap[ch.id]||{};
       S.chap[ch.id]={cleared:1,best:Math.max(prev.best||0,acc)};
@@ -1566,17 +1721,7 @@ document.addEventListener('click',e=>{
   }
   if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
   if(d.ask) return askAI(d.ask);
-  if(d.spell==='scan'){
-    if(S.mp<1) return;
-    S.mp--; persist(); paintHud(); SFX.sel(); t.disabled=true;
-    const wrongIdx=B.q.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0);
-    shuffle(wrongIdx).slice(0,2).forEach(i=>{
-      const b=document.querySelector(`#cmds .cmd[data-a="${i}"]`);
-      if(b){ b.disabled=true; b.classList.add('gone'); }
-    });
-    { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
-    return;
-  }
+  if(d.spell) return cast(d.spell,t);
   // 画面全体の見た目が変わる設定（uiEn）もあるので、vConf() ではなく render() を通す
   if(d.tg){ S[d.tg]=!S[d.tg]; persist(); SFX.sel(); return render(); }
   if(t.hasAttribute('data-reset')){

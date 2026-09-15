@@ -25,6 +25,7 @@ const { MONSTERS: MON_A } = await import(new URL('./src/monsters.js', import.met
 const { MONSTERS_B } = await import(new URL('./src/monsters-b.js', import.meta.url));
 const { HEROES } = await import(new URL('./src/heroes.js', import.meta.url));
 const { ICON } = await import(new URL('./src/icon.js', import.meta.url));
+const { CREST } = await import(new URL('./src/crest.js', import.meta.url));
 const { pngOf, icoOf, svgOf } = await import(new URL('./icongen.mjs', import.meta.url));
 
 const kanji = [...KANJI_A, ...KANJI_B];
@@ -50,14 +51,26 @@ const CHAP_ORDER = [
   ['vocab-g',   'vocab',   'がっこうと しごと',             'School & Work'],
   ['vocab-h',   'vocab',   'つなぎことばと あいさつ',       'Connectors & Greetings']
 ];
-// 章ボスは、その分野に出るモンスターから順に割り当てる。最後の章だけ大ボスにする。
-const bossCount = {};
+// 章ボスは全章ちがう相手にする。同じ敵が何度も「ぬし」として出てくると、
+// せっかくの区切りが「またこいつか」になってしまう。
+// その分野の敵 → どこにでも出る敵 → 残り、の順に、使っていないものから取る。
+const usedBoss = new Set();
 const pickChapBoss = (sec, last) => {
-  if (last) return (MONSTERS.find(m => m.area === 'boss') || MONSTERS[0]).id;
-  const pool = MONSTERS.filter(m => m.area === sec);
-  const n = (bossCount[sec] = (bossCount[sec] || 0));
-  bossCount[sec]++;
-  return (pool.length ? pool[n % pool.length] : MONSTERS[0]).id;
+  if (last) {
+    const b = MONSTERS.find(m => m.area === 'boss' && !usedBoss.has(m.id)) || MONSTERS.find(m => m.area === 'boss');
+    usedBoss.add(b.id);
+    return b.id;
+  }
+  const tiers = [
+    MONSTERS.filter(m => m.area === sec),
+    MONSTERS.filter(m => m.area === 'any'),
+    MONSTERS.filter(m => m.area !== 'boss')
+  ];
+  for (const t of tiers) {
+    const m = t.find(x => !usedBoss.has(x.id));
+    if (m) { usedBoss.add(m.id); return m.id; }
+  }
+  return MONSTERS[0].id;
 };
 const ID_PREFIX = { vocab: 'v:', kanji: 'k:', grammar: 'g:' };
 const CHAPTERS = CHAP_ORDER.map(([file, sec, name, en], i) => ({
@@ -199,6 +212,11 @@ ICON.px.forEach((row, y) => {
   if (row.length !== ICON.size) errs.push(`icon: 行${y}の長さが ${row.length}（${ICON.size}であるべき）`);
   for (const c of row) if (c !== '.' && !ICON.pal[c]) errs.push(`icon: 行${y} パレット未定義の文字: ${JSON.stringify(c)}`);
 });
+if (CREST.px.length !== CREST.size) errs.push(`crest: 行数が ${CREST.px.length}（${CREST.size}であるべき）`);
+CREST.px.forEach((row, y) => {
+  if (row.length !== CREST.size) errs.push(`crest: 行${y}の長さが ${row.length}（${CREST.size}であるべき）`);
+  for (const c of row) if (c !== '.' && !CREST.pal[c]) errs.push(`crest: 行${y} パレット未定義の文字: ${JSON.stringify(c)}`);
+});
 ['vocab', 'kanji', 'grammar'].forEach(a => {
   if (!MONSTERS.some(m => m.area === a || m.area === 'any')) errs.push(`${a} に出現するモンスターがいない`);
 });
@@ -207,10 +225,13 @@ if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
 // 章の検証。全項目がどこかの章に1回だけ入っていないと、進めても埋まらない章が出る
 {
   const sprite = new Set(MONSTERS.map(m => m.id));
+  const bossSeen = new Map();
   const all = new Set();
   CHAPTERS.forEach(c => {
     if (!c.ids.length) errs.push(`章[${c.id}] に項目がない`);
     if (!sprite.has(c.boss)) errs.push(`章[${c.id}] のボス ${c.boss} が見つからない`);
+    if (bossSeen.has(c.boss)) errs.push(`章ボスの重複: ${c.boss}（${bossSeen.get(c.boss)} と ${c.id}）`);
+    else bossSeen.set(c.boss, c.id);
     c.ids.forEach(id => {
       if (all.has(id)) errs.push(`章[${c.id}] 項目の重複: ${id}`);
       all.add(id);
@@ -249,7 +270,8 @@ const dataJs =
   ']};' + NL +
   'const MONSTERS=[' + NL + rows(MONSTERS) + NL + '];' + NL +
   'const HEROES=[' + NL + rows(HEROES) + NL + '];' + NL +
-  'const CHAPTERS=[' + NL + rows(CHAPTERS) + NL + '];';
+  'const CHAPTERS=[' + NL + rows(CHAPTERS) + NL + '];' + NL +
+  'const CREST=' + JSON.stringify(CREST) + ';';
 const inject = '<script>' + dataJs + '</script>';
 const html = tpl.replace('<script id="__DATA__"></script>', inject);
 if (html === tpl) { console.error('データ差し込み位置が見つかりません'); process.exit(1); }

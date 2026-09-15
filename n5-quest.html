@@ -110,6 +110,19 @@ rt{
 .stage-hp b{font-weight:normal; color:var(--gold)}
 .stage-hp .sh-hp b{color:var(--hp)}
 .stage-hp .sh-mp b{color:var(--mp)}
+/* 敵の隊列。1〜3体を横に並べ、狙っている相手だけ印を付ける */
+.foes{display:flex; align-items:flex-end; justify-content:center; gap:10px}
+.foe{display:grid; justify-items:center; gap:4px; position:relative}
+.foe.gone{visibility:hidden}
+/* 狙っている相手は、下の金の線と大きめのHPで示す。
+   舞台の上端にはHP/MPの行があるので、印を上に出すと重なる */
+.foe:not(.tgt) canvas{opacity:.72}
+/* ぬし・大ボスは、ふつうの敵と同じ大きさだと「区切り」に見えない */
+.foe.boss canvas{filter:drop-shadow(0 0 7px rgba(248,208,72,.55))}
+.foe .aim{width:62%; height:3px; border-radius:1px; background:transparent}
+.foe.tgt .aim{background:var(--gold)}
+.foe .mon-hp i{width:8px; height:8px}
+.foe.tgt .mon-hp i{width:11px; height:11px}
 .mon-name{font-size:13.5px; color:var(--dim); letter-spacing:.1em}
 .mon-hp{display:flex; gap:3px}
 .mon-hp i{width:11px; height:11px; background:var(--win-2); border:1px solid #35356A; border-radius:1px}
@@ -241,6 +254,25 @@ rt{
 .tg b{color:var(--gold); font-weight:normal; font-size:13.5px}
 
 /* ---- タイトル画面 ---- */
+/* 紋章。タイトル文字の後ろに敷く。
+   金一色だと「枠」にしか見えなかったので、青と紅で四分割した色付きにしてある。
+   文字は前面(z-index:1)＋濃い影で、重なっても読めるようにする。 */
+.crest{
+  /* 絶対配置にすると画面の上で切れるので、ふつうの流れに置いたまま
+     下マージンを負にして、タイトル文字を盾の下のほうに重ねる。
+     こうすると縦の中央ぞろえが紋章の高さも数に入れてくれる */
+  display:block; margin:0 auto -34px; position:relative;
+  z-index:0; opacity:.92; pointer-events:none;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.65));
+  animation:crestBreathe 7s steps(3,end) infinite;
+}
+@keyframes crestBreathe{0%,100%{opacity:.86}50%{opacity:1}}
+/* 紋章とロゴの後ろのほのかな光。奥行きを出して、上の余白を締める */
+.title-glow{
+  position:absolute; left:50%; top:30%; width:min(88vw,430px); aspect-ratio:1;
+  transform:translate(-50%,-50%); pointer-events:none; z-index:0;
+  background:radial-gradient(circle, rgba(248,208,72,.11) 0%, rgba(248,208,72,.04) 36%, transparent 66%);
+}
 .title{
   position:relative; min-height:calc(100vh - 24px); overflow:hidden;
   display:grid; align-content:center; justify-items:center; gap:22px; padding:24px 10px;
@@ -251,14 +283,18 @@ rt{
   animation:tw 3.2s steps(2,end) infinite;
 }
 @keyframes tw{0%,100%{opacity:.14}50%{opacity:.85}}
+.title-hero,.title-menu,.title-save{position:relative; z-index:1}
 .title-logo{text-align:center; position:relative}
+.title-main,.title-sub{position:relative; z-index:1}
 .title-main{
   font-size:clamp(34px,11vw,54px); color:var(--gold); letter-spacing:.1em; line-height:1.25;
-  text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000;
+  /* 紋章の上に重なるので、影を厚くして輪郭を立たせる */
+  text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000, 0 0 12px rgba(0,0,0,.85);
 }
 .title-sub{
-  display:inline-block; margin-top:12px; padding-top:11px; font-size:12.5px;
-  color:var(--dim); letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
+  display:inline-block; margin-top:12px; padding:11px 10px 0; font-size:12.5px;
+  color:#C6CCE4; letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
+  text-shadow:0 2px 5px #000, 0 0 10px #000;
 }
 .title-hero{position:relative; display:grid; place-items:center}
 .title-hero canvas{animation:bob 2.6s steps(2,end) infinite}
@@ -1395,13 +1431,14 @@ const CHAPTERS=[
 {"id":"vocab-c","sec":"vocab","name":"ようすを あらわす ことば","en":"Describing Things","boss":"ruigigoke","ids":["v:大きい","v:小さい","v:高い","v:安い","v:低い","v:長い","v:短い","v:新しい","v:古い","v:若い","v:多い","v:少ない","v:早い","v:速い","v:遅い","v:近い","v:遠い","v:広い","v:狭い","v:暑い","v:寒い","v:熱い","v:冷たい","v:暖かい","v:涼しい","v:おいしい","v:まずい","v:甘い","v:辛い","v:塩辛い","v:苦い","v:酸っぱい","v:面白い","v:つまらない","v:楽しい","v:嬉しい","v:悲しい","v:寂しい","v:怖い","v:痛い","v:忙しい","v:難しい","v:易しい","v:優しい","v:軽い","v:重い","v:強い","v:弱い","v:明るい","v:暗い","v:白い","v:黒い","v:赤い","v:青い","v:黄色い","v:茶色い","v:丸い","v:細い","v:太い","v:汚い","v:危ない","v:眠い","v:うるさい","v:欲しい","v:いい","v:悪い","v:きれい","v:静か","v:賑やか","v:便利","v:不便","v:簡単","v:大変","v:好き","v:嫌い","v:色々","v:同じ","v:特別","v:必要","v:無理","v:真面目","v:残念","v:心配","v:安全","v:自由","v:立派","v:新鮮","v:十分","v:結構","v:変","v:大好き","v:苦手","v:すごい","v:楽","v:うまい","v:柔らかい","v:固い","v:深い","v:浅い","v:珍しい"]},
 {"id":"kanji-a","sec":"kanji","name":"かんじ：かずと とき","en":"Kanji: Numbers & Time","boss":"fudeobake","ids":["k:一","k:二","k:三","k:四","k:五","k:六","k:七","k:八","k:九","k:十","k:百","k:千","k:万","k:円","k:時","k:年","k:月","k:日","k:上","k:下","k:右","k:左","k:中","k:北","k:南","k:東","k:西","k:人","k:今","k:休","k:会","k:何","k:先","k:入","k:出","k:分","k:前","k:午","k:半","k:友","k:口","k:古","k:名","k:国","k:土","k:外","k:多"]},
 {"id":"vocab-d","sec":"vocab","name":"たべものと いえの もの","en":"Food & Home","boss":"katakanabachi","ids":["v:ご飯","v:朝ご飯","v:昼ご飯","v:晩ご飯","v:食事","v:パン","v:肉","v:魚","v:野菜","v:果物","v:卵","v:牛乳","v:水","v:お茶","v:コーヒー","v:紅茶","v:ジュース","v:お酒","v:ビール","v:塩","v:砂糖","v:醤油","v:味","v:料理","v:お弁当","v:お菓子","v:ケーキ","v:家","v:部屋","v:台所","v:お風呂","v:トイレ","v:玄関","v:庭","v:窓","v:ドア","v:鍵","v:階段","v:エレベーター","v:壁","v:机","v:椅子","v:ベッド","v:テーブル","v:棚","v:冷蔵庫","v:電話","v:時計","v:テレビ","v:ラジオ","v:パソコン","v:カメラ","v:電気","v:エアコン","v:傘","v:鞄","v:財布","v:眼鏡","v:靴","v:服","v:洋服","v:シャツ","v:ズボン","v:帽子","v:上着","v:ハンカチ","v:タオル","v:歯ブラシ","v:石鹸","v:紙","v:本","v:雑誌","v:新聞","v:辞書","v:ノート","v:鉛筆","v:ボールペン","v:消しゴム","v:手紙","v:切手","v:封筒","v:葉書","v:写真","v:絵","v:地図","v:荷物","v:箱","v:袋","v:ごみ","v:物","v:事","v:花","v:木","v:犬","v:猫","v:鳥","v:動物","v:自転車","v:車","v:お金"]},
-{"id":"vocab-e","sec":"vocab","name":"ひにちと かず","en":"Dates & Numbers","boss":"kotonoha","ids":["v:今","v:今日","v:昨日","v:明日","v:一昨日","v:明後日","v:毎日","v:毎朝","v:毎晩","v:毎週","v:毎月","v:毎年","v:朝","v:昼","v:夕方","v:晩","v:夜","v:午前","v:午後","v:今朝","v:今晩","v:今夜","v:今週","v:先週","v:来週","v:今月","v:先月","v:来月","v:今年","v:去年","v:来年","v:時間","v:時","v:分","v:秒","v:半","v:日曜日","v:月曜日","v:火曜日","v:水曜日","v:木曜日","v:金曜日","v:土曜日","v:週末","v:一日","v:二日","v:三日","v:四日","v:五日","v:六日","v:七日","v:九日","v:二十日","v:一月","v:二月","v:五月","v:六月","v:八月","v:十月","v:十一月","v:十二月","v:春","v:夏","v:秋","v:冬","v:季節","v:天気","v:雨","v:雪","v:風","v:雲","v:空","v:太陽","v:月","v:星","v:一","v:二","v:三","v:四","v:五","v:六","v:七","v:八","v:九","v:十","v:百","v:千","v:万","v:半分","v:番号","v:歳","v:人","v:枚","v:本数","v:回","v:階","v:度","v:最初","v:最後","v:次","v:前","v:後"]},
+{"id":"vocab-e","sec":"vocab","name":"ひにちと かず","en":"Dates & Numbers","boss":"machigai","ids":["v:今","v:今日","v:昨日","v:明日","v:一昨日","v:明後日","v:毎日","v:毎朝","v:毎晩","v:毎週","v:毎月","v:毎年","v:朝","v:昼","v:夕方","v:晩","v:夜","v:午前","v:午後","v:今朝","v:今晩","v:今夜","v:今週","v:先週","v:来週","v:今月","v:先月","v:来月","v:今年","v:去年","v:来年","v:時間","v:時","v:分","v:秒","v:半","v:日曜日","v:月曜日","v:火曜日","v:水曜日","v:木曜日","v:金曜日","v:土曜日","v:週末","v:一日","v:二日","v:三日","v:四日","v:五日","v:六日","v:七日","v:九日","v:二十日","v:一月","v:二月","v:五月","v:六月","v:八月","v:十月","v:十一月","v:十二月","v:春","v:夏","v:秋","v:冬","v:季節","v:天気","v:雨","v:雪","v:風","v:雲","v:空","v:太陽","v:月","v:星","v:一","v:二","v:三","v:四","v:五","v:六","v:七","v:八","v:九","v:十","v:百","v:千","v:万","v:半分","v:番号","v:歳","v:人","v:枚","v:本数","v:回","v:階","v:度","v:最初","v:最後","v:次","v:前","v:後"]},
 {"id":"grammar-b","sec":"grammar","name":"ぶんぽう：どうしの かたち","en":"Grammar: Verb Forms","boss":"jokenryu","ids":["g:〜ます","g:〜ません","g:〜ました","g:〜ませんでした","g:〜ませんか","g:〜ましょう","g:〜ましょうか","g:〜たいです","g:〜に いきます","g:〜てください","g:〜ないでください","g:〜ています（しんこう）","g:〜ています（じょうたい）","g:〜てから","g:〜てもいいです","g:〜てはいけません","g:〜なければなりません","g:〜なくてもいいです","g:〜たことがあります","g:〜たり〜たりします","g:〜ながら","g:〜まえに","g:〜あとで","g:〜とき","g:〜ことができます","g:〜のがすきです","g:〜と おもいます","g:〜と いいました","g:〜でしょう","g:〜んです","g:〜つもりです","g:〜ほうがいいです","g:〜くなります","g:〜になります","g:〜くします","g:〜にします","g:〜くて","g:〜で（けいようし）","g:〜すぎます","g:〜を ください","g:〜は いかがですか","g:〜てから（じゅんばん）","g:〜も（かず）","g:〜しましょうか","g:〜が、〜（ぜんおき）","g:どうして〜か"]},
-{"id":"vocab-f","sec":"vocab","name":"まちと のりもの","en":"Town & Travel","boss":"goiworm","ids":["v:所","v:場所","v:町","v:村","v:市","v:国","v:世界","v:道","v:角","v:交差点","v:橋","v:公園","v:駅","v:空港","v:港","v:銀行","v:郵便局","v:図書館","v:美術館","v:映画館","v:店","v:デパート","v:スーパー","v:コンビニ","v:八百屋","v:本屋","v:喫茶店","v:食堂","v:レストラン","v:ホテル","v:建物","v:ビル","v:アパート","v:会社","v:学校","v:教室","v:事務所","v:工場","v:寮","v:電車","v:地下鉄","v:バス","v:タクシー","v:飛行機","v:船","v:切符","v:改札","v:ホーム","v:席","v:信号","v:横断歩道","v:駐車場","v:上","v:下","v:中","v:外","v:右","v:左","v:隣","v:横","v:近く","v:後ろ","v:向こう","v:間","v:真ん中","v:北","v:南","v:東","v:西","v:ほう","v:こちら","v:そちら","v:あちら","v:どちら","v:ここ","v:そこ","v:あそこ","v:どこ","v:山","v:川","v:海","v:池","v:森","v:島","v:空気","v:旅行","v:散歩","v:買い物","v:交番","v:入口","v:出口","v:受付","v:窓口","v:お寺","v:プール","v:住所","v:ふるさと","v:動物園","v:高速道路"]},
+{"id":"vocab-f","sec":"vocab","name":"まちと のりもの","en":"Town & Travel","boss":"wasureme","ids":["v:所","v:場所","v:町","v:村","v:市","v:国","v:世界","v:道","v:角","v:交差点","v:橋","v:公園","v:駅","v:空港","v:港","v:銀行","v:郵便局","v:図書館","v:美術館","v:映画館","v:店","v:デパート","v:スーパー","v:コンビニ","v:八百屋","v:本屋","v:喫茶店","v:食堂","v:レストラン","v:ホテル","v:建物","v:ビル","v:アパート","v:会社","v:学校","v:教室","v:事務所","v:工場","v:寮","v:電車","v:地下鉄","v:バス","v:タクシー","v:飛行機","v:船","v:切符","v:改札","v:ホーム","v:席","v:信号","v:横断歩道","v:駐車場","v:上","v:下","v:中","v:外","v:右","v:左","v:隣","v:横","v:近く","v:後ろ","v:向こう","v:間","v:真ん中","v:北","v:南","v:東","v:西","v:ほう","v:こちら","v:そちら","v:あちら","v:どちら","v:ここ","v:そこ","v:あそこ","v:どこ","v:山","v:川","v:海","v:池","v:森","v:島","v:空気","v:旅行","v:散歩","v:買い物","v:交番","v:入口","v:出口","v:受付","v:窓口","v:お寺","v:プール","v:住所","v:ふるさと","v:動物園","v:高速道路"]},
 {"id":"kanji-b","sec":"kanji","name":"かんじ：しぜんと くらし","en":"Kanji: Nature & Life","boss":"kanjigolem","ids":["k:大","k:天","k:女","k:子","k:学","k:安","k:小","k:少","k:山","k:川","k:店","k:後","k:手","k:新","k:書","k:木","k:本","k:来","k:校","k:母","k:毎","k:気","k:水","k:火","k:父","k:生","k:男","k:白","k:目","k:社","k:空","k:立","k:耳","k:聞","k:花","k:行","k:見","k:言","k:話","k:語","k:読","k:買","k:足","k:車","k:週","k:道","k:金","k:長","k:間","k:雨","k:電","k:食","k:飲","k:駅","k:高","k:魚"]},
-{"id":"vocab-g","sec":"vocab","name":"がっこうと しごと","en":"School & Work","boss":"ruigigoke","ids":["v:勉強","v:宿題","v:授業","v:試験","v:テスト","v:問題","v:答え","v:質問","v:意味","v:言葉","v:文字","v:字","v:漢字","v:平仮名","v:片仮名","v:発音","v:会話","v:文法","v:作文","v:言語","v:日本語","v:英語","v:中国語","v:数学","v:科学","v:歴史","v:音楽","v:スポーツ","v:映画","v:ニュース","v:番組","v:歌","v:絵本","v:小説","v:物語","v:紙袋","v:会議","v:約束","v:予定","v:準備","v:用事","v:連絡","v:電話番号","v:メール","v:住所録","v:財産","v:値段","v:お釣り","v:レジ","v:切符売り場","v:旅館","v:部長","v:社長","v:名刺","v:書類","v:コピー","v:残業","v:休み","v:夏休み","v:春休み","v:冬休み","v:祭り","v:パーティー","v:プレゼント","v:お土産","v:チケット","v:席順","v:写真集","v:練習","v:試合","v:選手","v:野球","v:サッカー","v:テニス","v:水泳","v:自動車","v:工事","v:説明書","v:地震","v:火事","v:事故","v:経験","v:理由","v:方法","v:意見","v:返事","v:相談","v:注意","v:規則","v:自由時間","v:受験","v:合格","v:卒業","v:入学","v:留学","v:生活","v:習慣","v:文化","v:社会","v:自然"]},
+{"id":"vocab-g","sec":"vocab","name":"がっこうと しごと","en":"School & Work","boss":"carelesskoumori","ids":["v:勉強","v:宿題","v:授業","v:試験","v:テスト","v:問題","v:答え","v:質問","v:意味","v:言葉","v:文字","v:字","v:漢字","v:平仮名","v:片仮名","v:発音","v:会話","v:文法","v:作文","v:言語","v:日本語","v:英語","v:中国語","v:数学","v:科学","v:歴史","v:音楽","v:スポーツ","v:映画","v:ニュース","v:番組","v:歌","v:絵本","v:小説","v:物語","v:紙袋","v:会議","v:約束","v:予定","v:準備","v:用事","v:連絡","v:電話番号","v:メール","v:住所録","v:財産","v:値段","v:お釣り","v:レジ","v:切符売り場","v:旅館","v:部長","v:社長","v:名刺","v:書類","v:コピー","v:残業","v:休み","v:夏休み","v:春休み","v:冬休み","v:祭り","v:パーティー","v:プレゼント","v:お土産","v:チケット","v:席順","v:写真集","v:練習","v:試合","v:選手","v:野球","v:サッカー","v:テニス","v:水泳","v:自動車","v:工事","v:説明書","v:地震","v:火事","v:事故","v:経験","v:理由","v:方法","v:意見","v:返事","v:相談","v:注意","v:規則","v:自由時間","v:受験","v:合格","v:卒業","v:入学","v:留学","v:生活","v:習慣","v:文化","v:社会","v:自然"]},
 {"id":"vocab-h","sec":"vocab","name":"つなぎことばと あいさつ","en":"Connectors & Greetings","boss":"goukaku","ids":["v:とても","v:少し","v:ちょっと","v:たくさん","v:もっと","v:よく","v:時々","v:いつも","v:たいてい","v:あまり","v:全然","v:まだ","v:もう","v:すぐ","v:だんだん","v:ゆっくり","v:はやく","v:まっすぐ","v:ちょうど","v:だいたい","v:ほとんど","v:きっと","v:たぶん","v:必ず","v:ぜひ","v:また","v:まず","v:やっと","v:もうすぐ","v:これから","v:さっき","v:あとで","v:先に","v:一緒に","v:自分で","v:一人で","v:みんなで","v:本当に","v:はっきり","v:ちゃんと","v:いろいろ","v:どうぞ","v:どうも","v:もちろん","v:やはり","v:こう","v:そう","v:どう","v:なぜ","v:どうして","v:いくつ","v:いくら","v:どのぐらい","v:何回","v:何時","v:何曜日","v:これ","v:それ","v:あれ","v:どれ","v:この","v:その","v:あの","v:どの","v:こんな","v:そんな","v:あんな","v:どんな","v:そして","v:それから","v:でも","v:しかし","v:だから","v:それで","v:じゃあ","v:では","v:または","v:けれども","v:おはようございます","v:こんにちは","v:こんばんは","v:さようなら","v:ありがとうございます","v:すみません","v:ごめんなさい","v:いただきます","v:ごちそうさま","v:いってきます","v:ただいま","v:おかえりなさい","v:はじめまして","v:よろしく","v:おめでとう","v:はい","v:いいえ","v:ええ","v:あのう","v:もしもし","v:お願いします","v:失礼します","v:お元気ですか"]}
-];</script>
+];
+const CREST={"size":56,"pal":{"g":"#F8D048","y":"#FFF0A8","o":"#B8860B","b":"#3A6ABE","B":"#24477E","r":"#C03A58","R":"#7E1E38","s":"#C3CAE6","S":"#79809E","w":"#FFFFFF","k":"#14142A"},"px":["...........................y............................","..........................yyy...........................",".........................yyyyy..........................","....Sss...................yyy.....................ssSS..",".....Sss...................y.....................ssSS...","......Sss.......................................ssSS....",".......Sss.....................................ssSS.....","........Sss...................................ssSS......",".........SsggggggggggggggggggggggggggggggggggssSS.......","..........SggggggggggggggggggggggggggggggggggsSS........","...........ggggggggggggggggggggggggggggggggggSS.........","...........yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyS..........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbkkkkkkkkkboorkkkkkkkkkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkkwwwwwkkboorkkwwwwwkkrryggg...........","...........gggybbbkwwwwwkkboorkkwwwwwkrrryggg...........","...........gggybbbkkwwwwwkboorkwwwwwkkrrryggg...........","...........gggybbbbkwwwwwkbookkwwwwwkrrrryggg...........","...........gggybbbbkwwwwwkkookwwwwwkkrrrryggg...........","...........gggybbbbkkwwwwwkookwwwwwkrrrrryggg...........","...........gggybbbbbkwwwwwkkkkwwwwwkrrrrryggg...........","...........gggybbbbbkkwwwwwkkwwwwwkkrrrrryggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyRRRRRRkkwwwwwwwwwwkkBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkkwwwwwwwwkkBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........ggggyRRRRRRRkkwwwwwwkkBBBBBBBygggg...........","............ggggyRRRRRRRkwwwwwwkBBBBBBBygggg............",".............gggyRRRRRRRkkwwwwwkBBBBBBByggg.............",".............ggggyRRRRRRRkkkkkkkBBBBBBygggg.............","..............ggggyRRRRRRRRooBBBBBBBBygggg..............","...............ggggyRRRRRRRooBBBBBBBygggg...............",".........gggggggggggyRRRRRRooBBBBBByggggggggggg.........","........rrrrrrrrrggggyRRRRRooBBBBByggggrrrrrrrrr........",".......RRRRRRRRRRRggggyRRRRooBBBByggggRRRRRRRRRRR.......","........RRRRRRRRRRRggggyRRRooBBByggggRRRRRRRRRRR........",".........gggggggggggggggyRRooBByggggggggggggggg.........",".....................gggggyooyggggg.....................",".......................gggggggggg.......................",".........................gggggg.........................","........................................................","........................................................","........................................................","........................................................","........................................................"]};</script>
 <script>
 (function(){
 "use strict";
@@ -1591,6 +1628,8 @@ const SHOP=[
   {id:'robe_v',  price:400, max:1,  name:'むらさきの ころも', en:'Violet Robe',
    desc:'ゆうしゃの ふくが むらさきに なる。'}
 ];
+// 唱えても何も起きない呪文は最初から押させない（ＭＰの無駄うちを防ぐ）
+const spellOff = sp => S.mp<sp.mp || (sp.id==='heal' && S.hp>=S.maxHp);
 const owned = id => id==='charm' ? S.charm : (S.bought[id]||0);
 function buy(id){
   const g=SHOP.find(x=>x.id===id);
@@ -1610,6 +1649,15 @@ const ROBES={
   robe_g:{a:'#7A5A10', b:'#C89A20', c:'#F0D060'},
   robe_v:{a:'#3A1A5E', b:'#6A3A9E', c:'#A878D8'}
 };
+
+/* ===== まほう =====
+   ＭＰは宿屋とレベルアップでしか戻らず、スキャンひとつでは使い道が細かった。
+   敵が隊列で出るようになったので、全体に効く攻撃呪文が活きる。 */
+const SPELLS=[
+  {id:'scan',  mp:1, name:'スキャン', en:'Scan - remove 2 wrong answers'},
+  {id:'bolt',  mp:3, name:'イカズチ', en:'Bolt - 2 damage to every enemy'},
+  {id:'heal',  mp:2, name:'イヤシ',   en:'Heal - restore 8 HP'}
+];
 
 function daysLeft(){ return S.examDate?Math.ceil((new Date(S.examDate+'T09:00:00')-Date.now())/DAY):null; }
 function quota(){
@@ -1746,6 +1794,8 @@ const drawMon=(cv,m,scale)=>drawPx(cv,m.px,m.pal,scale);
 const SPRITES={};
 MONSTERS.forEach(m=>SPRITES[m.id]=m);
 HEROES.forEach(h=>SPRITES[h.id]=h);
+// 紋章も同じ描画経路に乗せる。専用の描画コードを増やさないため
+SPRITES.crest={id:'crest',px:CREST.px,pal:CREST.pal};
 const heroOf = id => SPRITES[id] || HEROES[0];
 const HERO_IDS=new Set(HEROES.map(h=>h.id));
 function withRobe(h){
@@ -1760,6 +1810,9 @@ function paintMons(root){
     if(m) drawMon(cv,m,+cv.dataset.scale||8);
   });
 }
+// 踏み込みアニメ(0.36s)で勇者がいちばん前に出る時刻。
+// 敵の被弾・ダメージ表示をここに合わせると、斬った瞬間に当たったように見える
+const HIT_AT=160;
 // 攻撃の間だけ、剣を振り上げた差分ポーズ(px2)に描き替える
 function heroSwing(){
   const sp=$('#heroSp'); if(!sp) return;
@@ -1768,7 +1821,8 @@ function heroSwing(){
   if(!cv||!h.px2) return;
   const sc=+cv.dataset.scale||4;
   drawPx(cv,h.px2,h.pal,sc);
-  setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,h.px,h.pal,sc); },340);
+  // 振り上げたまま戻ると「斬っていない」ように見える。いちばん前に出た瞬間に下ろす
+  setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,h.px,h.pal,sc); },HIT_AT);
 }
 
 /* ===== 出題 ===== */
@@ -1927,7 +1981,9 @@ function titleShell(inner, sub){
   return `
   <div class="title">
     <div class="stars" id="stars"></div>
+    <div class="title-glow"></div>
     <div class="title-logo">
+      <canvas class="crest" data-mon="crest" data-scale="5"></canvas>
       <div class="title-main">Ｎ５クエスト</div>
       <div class="title-sub">ことばの ぼうけん</div>
     </div>
@@ -2077,18 +2133,39 @@ function monPool(sec,boss){
   const p=MONSTERS.filter(m=>m.area===area||m.area==='any');
   return p.length?p:MONSTERS.filter(m=>m.area==='any');
 }
+// いま狙っている敵。倒した相手は隊列に残したまま、印だけ次へ送る
+const foe = () => B.foes[B.tgt] || B.foes[B.foes.length-1];
+const aliveFoes = () => B.foes.filter(f=>f.hp>0);
+function aimNext(){ const i=B.foes.findIndex(f=>f.hp>0); if(i>=0) B.tgt=i; }
+// 体が増えるほど1体を小さく描く。3体でも横幅に収まる大きさにしている
+const foeScale = (n,boss) => boss?13:(n>=3?7:(n===2?8:9));
+function makeFoes(sec,boss,mon,monMax){
+  if(mon){ const mx=monMax||mon.hp; return [{m:mon,max:mx,hp:mx}]; }
+  const pool=monPool(sec,boss);
+  // ボスは1体で立ちはだかる。ふつうの探索は1〜3体。2体をいちばん出やすくする
+  const n=boss?1:pick([1,1,2,2,2,3]);
+  const out=[];
+  for(let i=0;i<n;i++){ const m=pick(pool); out.push({m,max:m.hp,hp:m.hp}); }
+  return out;
+}
+// 「AとAとB」では読みにくいので、同じ相手はまとめて数える
+function foesName(fs){
+  const order=[], cnt={};
+  fs.forEach(f=>{ if(!cnt[f.m.name]){ cnt[f.m.name]=0; order.push(f.m.name); } cnt[f.m.name]++; });
+  return order.map(n=>cnt[n]>1?`${n} ${cnt[n]}たい`:n).join('と ');
+}
+
 // 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
 // どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
 function beginBattle(items,opts){
   opts=opts||{};
-  const mon=opts.mon||pick(monPool(opts.sec,opts.boss));
-  const max=opts.monMax||mon.hp;
+  const foes=makeFoes(opts.sec,opts.boss,opts.mon,opts.monMax);
   B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
      sec:opts.sec||null,boss:!!opts.boss,mode:opts.mode||null,chap:opts.chap||null,
-     mon,monMax:max,monHp:max,killed:0,levelUps:[]};
+     foes,tgt:0,killed:0,levelUps:[]};
   route='battle';
   document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
-  drawBattle(opts.intro||`${mon.name}が あらわれた！`);
+  drawBattle(opts.intro||`${foesName(foes)}が あらわれた！`);
 }
 function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
@@ -2125,19 +2202,26 @@ function stageHp(){
          `<span class="sh-mp">ＭＰ <b>${S.mp}</b>/${S.maxMp}</span>`+
          `<span style="margin-left:auto">Ｌｖ <b>${S.lv}</b></span>`;
 }
-function monHpBar(){
-  const max=B.monMax||B.mon.hp;
-  let h=''; for(let i=0;i<max;i++) h+=`<i class="${i<B.monHp?'on':''}"></i>`;
+function hpPips(f){
+  let h=''; for(let i=0;i<f.max;i++) h+=`<i class="${i<f.hp?'on':''}"></i>`;
   return h;
+}
+// 隊列ぜんぶを描き直す。狙っている相手の印もここで付け替える
+function foesHtml(){
+  const sc=foeScale(B.foes.length,B.boss);
+  return B.foes.map((f,i)=>`<span class="foe ${f.hp<=0?'gone':''} ${i===B.tgt&&f.hp>0?'tgt':''} ${B.boss?'boss':''}" data-foe="${i}">
+      ${monHtml(f.m,sc,'mon')}
+      <span class="mon-hp">${hpPips(f)}</span>
+      <span class="aim"></span>
+    </span>`).join('');
 }
 function drawBattle(intro){
   const Q=makeQ(B.items[B.i],B.mode); B.q=Q;
   $('#view').innerHTML=`
   <div class="stage" id="stage">
     <div class="stage-hp" id="stageHp">${stageHp()}</div>
-    ${monHtml(B.mon,9,'mon')}
-    <div class="mon-name">${esc(B.mon.name)}</div>
-    <div class="mon-hp" id="mhp">${monHpBar()}</div>
+    <div class="foes" id="foes">${foesHtml()}</div>
+    <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}</div>
     <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),4)}</span>
   </div>
   <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?'　れんげき '+B.combo:''}</span>
@@ -2148,11 +2232,14 @@ function drawBattle(intro){
       ${Q.opts.map((o,n)=>`<button class="cmd" data-a="${n}"><span class="cur">▶</span><span>${Q.ruby?rb(o.v):esc(o.v)}</span></button>`).join('')}
     </div>
   </div>
-  <div class="win tight"><div class="cmds row">
-    <button class="cmd" data-spell="scan" ${S.mp<1?'disabled':''}><span class="cur">▶</span><span>スキャン MP1${gl('Scan - remove 2 wrong answers')}</span></button>
-    <button class="cmd" data-run=""><span class="cur">▶</span><span>にげる${gl('Run away')}</span></button>
-  </div></div>
-  <div class="note" style="padding:0 4px 10px">スキャン＝ちがう こたえを 2つ けす</div>
+  <div class="win tight"><span class="win-t">まほう${gl('Magic')}</span>
+    <div class="cmds row">
+      ${SPELLS.map(sp=>`<button class="cmd" data-spell="${sp.id}" ${spellOff(sp)?'disabled':''}><span class="cur">▶</span><span>${sp.name} MP${sp.mp}${gl(sp.en)}</span></button>`).join('')}
+    </div>
+    <div class="cmds row" style="margin-top:6px">
+      <button class="cmd" data-run=""><span class="cur">▶</span><span>にげる${gl('Run away')}</span></button>
+    </div>
+  </div>
   <div id="after"></div>`;
   paintMons();
   window.scrollTo(0,0);  // 前の問題のスクロール位置を引きずらない
@@ -2165,10 +2252,52 @@ function replaySay(slow){
   const b=$('#earBtn'); if(b) b.classList.add('on');
   speak(Q.say,slow,()=>{ const e=$('#earBtn'); if(e) e.classList.remove('on'); });
 }
+// 剣が届く時刻に合わせて演出を出す。
+// 待っている間に次の問題へ進んだら、前の問題の演出は捨てる
+function hitAt(fn,q){
+  setTimeout(()=>{ if(B && B.q===q) fn(); },HIT_AT);
+}
 function popDmg(txt,miss){
   const st=$('#stage'); if(!st) return;
   const d=document.createElement('div'); d.className='dmg'+(miss?' miss':''); d.textContent=txt;
   st.appendChild(d); setTimeout(()=>d.remove(),750);
+}
+// 呪文。ＭＰが足りていれば何度でも唱えられる。
+// スキャンだけは同じ問題で二度唱えても意味がないので、押した時点で閉じる
+function cast(id,btn){
+  const sp=SPELLS.find(x=>x.id===id);
+  if(!sp || !B || spellOff(sp)) return;
+  S.mp-=sp.mp; SFX.sel();
+  if(id==='scan'){
+    btn.disabled=true;
+    const wrongIdx=B.q.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0);
+    shuffle(wrongIdx).slice(0,2).forEach(i=>{
+      const b=document.querySelector(`#cmds .cmd[data-a="${i}"]`);
+      if(b){ b.disabled=true; b.classList.add('gone'); }
+    });
+  }else if(id==='bolt'){
+    // 隊列ぜんぶに効く。1体しかいない相手にも同じダメージが入る
+    const hit=aliveFoes();
+    hit.forEach(f=>{ f.hp=Math.max(0,f.hp-2); });
+    const box=$('#foes'); if(box) box.innerHTML=foesHtml();
+    paintMons($('#foes'));
+    document.querySelectorAll('#foes .mon').forEach(m=>m.classList.add('hit'));
+    popDmg('2'); SFX.hit();
+    const st=$('#stage'); if(st){ st.classList.add('flash'); setTimeout(()=>st.classList.remove('flash'),400); }
+    aimNext();
+  }else if(id==='heal'){
+    const before=S.hp;
+    S.hp=Math.min(S.maxHp,S.hp+8);
+    popDmg('+'+(S.hp-before)); SFX.up();
+    $('#heroSp')?.classList.add('atk');
+  }
+  persist(); paintHud();
+  { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
+  // ＭＰが減って唱えられなくなった呪文を閉じる
+  document.querySelectorAll('[data-spell]').forEach(b=>{
+    const x=SPELLS.find(y=>y.id===b.dataset.spell);
+    if(x && spellOff(x)) b.disabled=true;
+  });
 }
 function answer(n){
   const Q=B.q, it=Q.item, ok=Q.opts[n].ok;
@@ -2180,18 +2309,28 @@ function answer(n){
   if(ok){
     B.ok++; B.combo++; B.maxCombo=Math.max(B.maxCombo,B.combo);
     const crit=B.combo>=3, dmg=crit?2:1;
-    B.monHp=Math.max(0,B.monHp-dmg);
+    const t=foe();
+    t.hp=Math.max(0,t.hp-dmg);
     gainExp=12+Math.min(18,(B.combo-1)*3)+(r.lv===MAX_LV?25:0);
-    log=(crit?'かいしんの いちげき！\n':'せいかい！\n')+`${B.mon.name}に ${dmg*8}の ダメージ！`;
-    $('#mhp').innerHTML=monHpBar();
+    log=(crit?'かいしんの いちげき！\n':'せいかい！\n')+`${t.m.name}に ${dmg*8}の ダメージ！`;
     heroSwing();
-    document.querySelector('.mon').classList.add('hit');
-    popDmg(String(dmg*8)); SFX.hit();
+    // 敵の反応は剣が届いてから。先に敵が痛がると、順番が逆に見える。
+    // 正解かどうかは選択肢の色で即座に返しているので、ここを遅らせても手応えは落ちない
+    // 待っている間にイカズチで狙いが移ることがあるので、相手の位置はここで固定する
+    const ti=B.tgt;
+    hitAt(()=>{
+      const cell=document.querySelector(`[data-foe="${ti}"]`);
+      if(cell){
+        const bar=cell.querySelector('.mon-hp'); if(bar) bar.innerHTML=hpPips(t);
+        const mon=cell.querySelector('.mon'); if(mon) mon.classList.add('hit');
+      }
+      popDmg(String(dmg*8)); SFX.hit();
+    },Q);
   }else{
     B.ng++; B.combo=0; B.wrong.push(it.id);
     const dmg=B.boss?4:3;
     S.hp=Math.max(0,S.hp-dmg); gainExp=3;
-    log=`ミス！\n${B.mon.name}の こうげき！\n${dmg}の ダメージを うけた！`;
+    log=`ミス！\n${foe().m.name}の こうげき！\n${dmg}の ダメージを うけた！`;
     $('#stage').classList.add('flash'); $('#heroSp')?.classList.add('hurt');
     popDmg(String(dmg),true); SFX.miss();
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
@@ -2216,18 +2355,26 @@ function answer(n){
   }
   persist(); paintHud();
   { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
-  const dead=B.monHp<=0, wipe=S.hp<=0;
+  const fallen=foe(), dead=fallen.hp<=0, wipe=S.hp<=0;
   $('#bmsg').innerHTML='';
   type($('#bmsg'),esc(log)+`\n<span class="q">けいけんち ${gainExp}を てに いれた。</span>`);
   $('#after').innerHTML=`
     <div class="win"><span class="win-t">まなび${gl('Learn')}</span><div class="learn ruby-on">${learnHtml(it)}</div></div>
     <div class="win tight"><div class="cmds">
       <button class="cmd" data-next=""><span class="cur">▶</span><span>${
-        wipe?'…':(dead?`${esc(B.mon.name)}を たおした！`:(B.i+1>=B.items.length?'たたかいを おえる':'つぎの もんだいへ'))
+        wipe?'…':(dead?`${esc(fallen.m.name)}を たおした！`:(B.i+1>=B.items.length?'たたかいを おえる':'つぎの もんだいへ'))
       }</span></button>
     </div></div>`;
+  // こたえた後は魔法を閉じる。答えが見えている状態でスキャンを撃っても
+  // ＭＰが減るだけで何も起きず、プレイヤーには理由が分からない
+  document.querySelectorAll('[data-spell]').forEach(b=>{ b.disabled=true; });
   $('[data-next]').focus({preventScroll:true});  // 勝手にスクロールさせない
-  if(dead && !wipe){ document.querySelector('.mon').classList.add('dead'); SFX.down(); }
+  const deadIdx=B.foes.indexOf(fallen);
+  if(dead && !wipe) hitAt(()=>{
+    const cell=document.querySelector(`[data-foe="${deadIdx}"]`);
+    const mon=cell&&cell.querySelector('.mon'); if(mon) mon.classList.add('dead');
+    SFX.down();
+  },Q);
   if(wipe) SFX.miss();
 }
 function learnHtml(it){
@@ -2277,19 +2424,28 @@ async function askAI(id){
 }
 function nextStep(){
   if(S.hp<=0){ persist(); return vWipe(); }
-  if(B.monHp<=0){
-    B.killed++;
-    const g=(B.monMax||B.mon.hp)*7+(B.boss?60:0);
-    B.gold+=g; S.gold+=g;
-    S.defeated[B.mon.id]=(S.defeated[B.mon.id]||0)+1;
-    persist();
+  // 倒した相手の精算。1問で複数体は倒せないが、まとめて見ておけば取りこぼさない
+  let got=0;
+  B.foes.forEach(f=>{
+    if(f.hp>0||f.paid) return;
+    f.paid=1; B.killed++;
+    // 倒すと少しＭＰが戻る。宿屋まで魔法を温存するだけの戦い方にしない
+    S.mp=Math.min(S.maxMp,S.mp+1);
+    const g=f.max*7+(B.boss?60:0);
+    got+=g; B.gold+=g; S.gold+=g;
+    S.defeated[f.m.id]=(S.defeated[f.m.id]||0)+1;
+  });
+  if(got) persist();
+  if(!aliveFoes().length){
     // ステージの ぬしは1体だけ。倒した時点で決着
     if(B.chap||B.i+1>=B.items.length) return vAfter();
-    // 次の敵が現れる
-    const pool=monPool(B.sec,B.boss);
-    B.mon=pick(pool); B.monMax=B.mon.hp; B.monHp=B.mon.hp;
-    B.i++; return drawBattle(`${g}ゴールドを てに いれた！\n${B.mon.name}が あらわれた！`);
+    // 隊列を全部たおした。次の一団が現れる
+    B.foes=makeFoes(B.sec,B.boss); B.tgt=0;
+    B.i++;
+    return drawBattle(`${got}ゴールドを てに いれた！\n${foesName(B.foes)}が あらわれた！`);
   }
+  // まだ残っている相手がいる。狙いを次へ送る
+  aimNext();
   B.i++;
   if(B.i>=B.items.length) return vAfter();
   drawBattle('');
@@ -2316,7 +2472,7 @@ function vAfter(){
   let chapMsg='';
   if(B.chap){
     const ch=CHAPTERS.find(c=>c.id===B.chap);
-    const won=B.monHp<=0, first=won&&!chapCleared(ch);
+    const won=!aliveFoes().length, first=won&&!chapCleared(ch);
     if(won){
       const prev=S.chap[ch.id]||{};
       S.chap[ch.id]={cleared:1,best:Math.max(prev.best||0,acc)};
@@ -2606,17 +2762,7 @@ document.addEventListener('click',e=>{
   }
   if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
   if(d.ask) return askAI(d.ask);
-  if(d.spell==='scan'){
-    if(S.mp<1) return;
-    S.mp--; persist(); paintHud(); SFX.sel(); t.disabled=true;
-    const wrongIdx=B.q.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0);
-    shuffle(wrongIdx).slice(0,2).forEach(i=>{
-      const b=document.querySelector(`#cmds .cmd[data-a="${i}"]`);
-      if(b){ b.disabled=true; b.classList.add('gone'); }
-    });
-    { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
-    return;
-  }
+  if(d.spell) return cast(d.spell,t);
   // 画面全体の見た目が変わる設定（uiEn）もあるので、vConf() ではなく render() を通す
   if(d.tg){ S[d.tg]=!S[d.tg]; persist(); SFX.sel(); return render(); }
   if(t.hasAttribute('data-reset')){
