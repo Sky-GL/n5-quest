@@ -68,7 +68,9 @@ rt{
   position:sticky; top:0; z-index:20;
   border:var(--px) solid var(--frame); border-radius:5px; margin-bottom:10px;
   background:radial-gradient(120% 90% at 50% 100%, #1B1B3A 0%, #0C0C1B 62%, #07070F 100%);
-  min-height:186px; display:grid; place-items:center; gap:8px; padding:16px 12px 13px;
+  /* 左下に勇者が立つぶん、敵の列を右へ寄せる。
+     place-items:center は padding の内側で効くので、左padding を厚くすると中心が右へずれる */
+  min-height:186px; display:grid; place-items:center; gap:8px; padding:16px 12px 13px 62px;
 }
 .stage::after{ /* 地面のドット線 */
   content:""; position:absolute; left:10%; right:10%; bottom:12px; height:var(--px);
@@ -129,9 +131,9 @@ rt{
 .hero-sprite.atk{animation:heroAtk .36s steps(1,end)}
 @keyframes heroAtk{
   0%  {transform:translate(0,0)}
-  22% {transform:translate(13px,-5px)}
-  44% {transform:translate(21px,0)}
-  68% {transform:translate(9px,0)}
+  22% {transform:translate(18px,-6px)}
+  44% {transform:translate(33px,0)}
+  68% {transform:translate(14px,0)}
   100%{transform:translate(0,0)}
 }
 .hero-sprite.hurt{animation:heroHurt .45s steps(1,end)}
@@ -295,6 +297,22 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* ---- 聴解 ---- */
+.earbox{display:flex; gap:12px; align-items:center; margin:10px 0 4px}
+.ear{
+  display:inline-grid; place-items:center; width:74px; height:74px; flex:none;
+  border:var(--px) solid var(--gold); border-radius:6px; color:var(--gold); font-size:34px; line-height:1;
+}
+.ear:hover{background:var(--win-2)}
+.ear.on{animation:earPulse .5s steps(2,end) infinite}
+@keyframes earPulse{50%{background:var(--win-2)}}
+.earhint{font-size:12.5px; color:var(--dim); line-height:1.8}
+.say{
+  display:inline-grid; place-items:center; width:30px; height:30px; flex:none;
+  border:var(--px) solid #3A3A6E; border-radius:4px; color:var(--gold); font-size:15px; line-height:1;
+  vertical-align:-8px; margin-left:6px;
+}
+.say:hover{background:var(--win-2)}
 .hide{display:none !important}
 @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
 </style>
@@ -366,8 +384,8 @@ const expToNext = lv => 100 + (lv-1)*60;
 const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
-  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, sound:true, hero:'hero_m',
-  name:'', srs:{}, defeated:{}, best:0, updatedAt:0
+  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, sound:true, speech:true, hero:'hero_m',
+  name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0, updatedAt:0
 };
 // ぼうけんのしょは3つ。1つを1人ぶんの進捗と設定にあてる
 const SLOTS=[1,2,3];
@@ -470,6 +488,50 @@ const SFX={
   sel:()=>tone(880,.04,0,.03)
 };
 
+/* ===== 読み上げ（聴解） =====
+   Web Speech API は端末によって日本語の声が無いことがある。
+   声が見つかったときだけ聴解の機能を出し、無い端末では黙って隠す。 */
+const TTS={ready:false, voice:null};
+function pickVoice(){
+  try{
+    const vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+    const ja=vs.filter(v=>/^ja(-|_|$)/i.test(v.lang||''));
+    if(!ja.length) return false;
+    // ローカルの声のほうが遅延がなく、オフラインでも鳴る
+    TTS.voice=ja.find(v=>v.localService)||ja[0];
+    TTS.ready=true; return true;
+  }catch(e){ return false; }
+}
+function initTTS(){
+  if(!('speechSynthesis' in window)) return;
+  pickVoice();
+  // 声の一覧は非同期で埋まる。あとから届いたら冒険メニューを描き直す
+  try{
+    speechSynthesis.addEventListener('voiceschanged',()=>{
+      const was=TTS.ready;
+      if(pickVoice()&&!was&&(route==='field'||route==='conf')) render();
+    });
+  }catch(e){}
+}
+let sayTimer=null;
+function speak(text,slow,onEnd){
+  if(!TTS.ready||!S.speech||!text) { onEnd&&onEnd(); return false; }
+  try{
+    speechSynthesis.cancel();
+    clearTimeout(sayTimer);
+    const u=new SpeechSynthesisUtterance(String(text));
+    u.voice=TTS.voice; u.lang=(TTS.voice&&TTS.voice.lang)||'ja-JP';
+    u.rate=slow?0.7:0.92; u.pitch=1;
+    if(onEnd) u.onend=onEnd;
+    // cancel 直後の speak は Chrome で無視されることがあるので、少し置いてから鳴らす
+    sayTimer=setTimeout(()=>{ try{ speechSynthesis.speak(u); }catch(e){ onEnd&&onEnd(); } },70);
+    return true;
+  }catch(e){ onEnd&&onEnd(); return false; }
+}
+// 読み上げに渡す文。ルビ記法と出題用の 【】 を外した素の日本語にする
+const sayText = s => bare(s).replace(/[【】]/g,'');
+const sayBtn = (t,slow) => `<button class="say" data-sayt="${esc(t)}"${slow?' data-slow="1"':''} aria-label="よみあげ">🔊</button>`;
+
 /* ===== 文字送り ===== */
 let typing=null;
 function type(el,text,done,noCursor){
@@ -486,6 +548,8 @@ function type(el,text,done,noCursor){
     if(nd.parentNode && nd.parentNode.nodeName==='RT') continue;
     // 英語を消している間は、見えない文字を送って無言の間を作らない
     if(hideEn && nd.parentElement && nd.parentElement.closest('.gl')) continue;
+    // 聴解の説明のような「読ませるより先に見せたい」ものは一度に出す
+    if(nd.parentElement && nd.parentElement.closest('.no-type')) continue;
     nodes.push({node:nd,full:nd.nodeValue});
   }
   nodes.forEach(o=>o.node.nodeValue='');
@@ -612,7 +676,38 @@ function kanjiQ(item){
   return {label:'この かんじの いみは？',labelEn:'What does this kanji mean?',main:W(item.w,''),item,
     opts:optsOf(item.mean,pool.map(x=>x.mean)),ruby:true};
 }
-function makeQ(item){
+// 聴解の設問。文字を見せずに音だけで出し、答えの選択肢は読める形にする
+function earHtml(){
+  return `<span class="earbox no-type">
+    <button class="ear" id="earBtn" data-replay="" aria-label="もういちど きく">🔊</button>
+    <span class="earhint">おとを きいて こたえて ください。<br>
+      ボタンで もういちど きけます。${gl('Listen and answer. Tap to replay.')}</span>
+  </span>`;
+}
+function listenQ(item){
+  if(item.sec==='kanji'){
+    const pool=BY_SEC.kanji.filter(x=>x.id!==item.id);
+    const j=pick(item.words);
+    return {label:'きこえた ことばは？',labelEn:'Which word did you hear?',main:earHtml(),item,
+      say:j[1],opts:optsOf(j[0],pool.flatMap(x=>x.words.map(w=>w[0]))),ruby:false};
+  }
+  if(item.sec==='grammar'){
+    return {label:'この ぶんで つかって いる かたちは？',labelEn:'Which pattern is used in the sentence?',
+      main:earHtml(),item,say:sayText(item.ex),
+      opts:optsOf(item.w,distractors(item,'w',8).map(d=>d.w)),ruby:false};
+  }
+  // ことばは「語だけ聞く」と「文の中で聞く」を交互に出す
+  if(item.ex&&Math.random()<0.5){
+    return {label:'この ぶんに でて きた ことばは？',labelEn:'Which word did you hear in the sentence?',
+      main:earHtml(),item,say:sayText(item.ex),
+      opts:optsOf(item.read,distractors(item,'read',8).map(d=>d.read)),ruby:false};
+  }
+  return {label:'きこえた ことばの いみは？',labelEn:'What does the word you heard mean?',
+    main:earHtml(),item,say:item.read,
+    opts:optsOf(item.mean,distractors(item,'mean',8).map(d=>d.mean)),ruby:true};
+}
+function makeQ(item,mode){
+  if(mode==='listen') return listenQ(item);
   if(item.sec==='kanji') return kanjiQ(item);
   const t=[];
   if(item.sec==='vocab'){
@@ -761,6 +856,8 @@ function vField(){
           <br><span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}</span></span></button>`;
       }).join('')}
       <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（3つの ばしょを まわる）${gl("Today's journey - all three areas")}</span></button>
+      ${TTS.ready?`<button class="cmd" data-listen="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ちょうかいの どうくつ${gl('Listening Cave - answer by ear')}
+        <br><span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}</span></span></button>`:''}
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
         <br><span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
@@ -787,12 +884,12 @@ function monPool(sec,boss){
   const p=MONSTERS.filter(m=>m.area===area||m.area==='any');
   return p.length?p:MONSTERS.filter(m=>m.area==='any');
 }
-function startBattle(sec,n,boss){
+function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
   const items=buildQueue(sec||null,limit);
   if(!items.length){ alert('いま、いどめる もんだいが ありません。'); return; }
   const pool=monPool(sec,boss);
-  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],sec,boss:!!boss,
+  B={items,i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],sec,boss:!!boss,mode:mode||null,
      mon:pick(pool),monHp:0,killed:0,levelUps:[]};
   B.monHp=B.mon.hp;
   route='battle';
@@ -810,7 +907,7 @@ function monHpBar(){
   return h;
 }
 function drawBattle(intro){
-  const Q=makeQ(B.items[B.i]); B.q=Q;
+  const Q=makeQ(B.items[B.i],B.mode); B.q=Q;
   $('#view').innerHTML=`
   <div class="stage" id="stage">
     <div class="stage-hp" id="stageHp">${stageHp()}</div>
@@ -836,6 +933,13 @@ function drawBattle(intro){
   paintMons();
   window.scrollTo(0,0);  // 前の問題のスクロール位置を引きずらない
   type($('#bmsg'), (intro?esc(intro)+'\n':'')+`<span class="q">${esc(Q.label)}${Q.labelEn?gl(Q.labelEn):''}</span>\n`+Q.main);
+  // 聴解は音がすべてなので、文字送りの終わりを待たずに鳴らす
+  if(Q.say) replaySay();
+}
+function replaySay(slow){
+  const Q=B&&B.q; if(!Q||!Q.say) return;
+  const b=$('#earBtn'); if(b) b.classList.add('on');
+  speak(Q.say,slow,()=>{ const e=$('#earBtn'); if(e) e.classList.remove('on'); });
 }
 function popDmg(txt,miss){
   const st=$('#stage'); if(!st) return;
@@ -869,6 +973,8 @@ function answer(n){
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
   }
   B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true; markStudied();
+  // 聴解は本試験で別区分なので、成績も分けて数える
+  if(B.mode==='listen'){ S.listenN++; if(ok) S.listenOk++; }
   // レベルアップ判定
   while(S.exp>=expToNext(S.lv)){
     S.exp-=expToNext(S.lv); S.lv++;
@@ -898,17 +1004,17 @@ function learnHtml(it){
        <dt>いみ</dt><dd>${rb(it.mean)}</dd>
        <dt>よみ</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}</dd></dl>`;
     if(it.words.length) h+=`<div class="ex">${it.words.map(j=>
-      `<b>${esc(j[0])}</b>（${esc(j[1])}）　${rb(j[2])}`+
+      `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
   }else if(it.sec==='vocab'){
-    h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}）<span class="en"> ${rb(it.pos)}</span></dd>
+    h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
        <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd></dl>`;
-    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}</div>`;
+    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
   }else{
     h=`<dl><dt>かたち</dt><dd><b>${esc(it.w)}</b></dd>
        <dt>つなぎ</dt><dd>${rb(it.conn)}</dd>
        <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd></dl>`;
-    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}</div>`;
+    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
     if(it.note) h+=`<div class="en">${rb(it.note)}</div>`;
   }
   if(sample) h+=`<div><button class="cmd" data-ask="${esc(it.id)}"><span class="cur">▶</span><span>けんじゃに きく</span></button><div id="ai"></div></div>`;
@@ -1043,6 +1149,8 @@ function vStatus(){
   const d=daysLeft(), st=stats();
   // 収録項目の定着率を、①の目安点に置きかえて見せる（あくまで目安）
   const est=Math.round(st.rate*N5_EXAM.s1.max);
+  // 聴解は20問こなすまでは数字を出さない。少ない回数の正答率は当てにならない
+  const est2=S.listenN>=20?Math.round(S.listenOk/S.listenN*N5_EXAM.s2.max):null;
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">${S.name?esc(S.name)+'の つよさ':'つよさ'}${gl('Status')}</span>
     <div class="st">
@@ -1068,14 +1176,17 @@ function vStatus(){
     <div class="meters">
       <div class="meter"><span class="lab">①ちしき</span>${pips(est,N5_EXAM.s1.max,est>=N5_EXAM.s1.base?'var(--exp)':'var(--hp)',14)}
         <span class="v">${est} / ${N5_EXAM.s1.max}</span></div>
-      <div class="meter"><span class="lab">②ちょうかい</span>${pips(0,N5_EXAM.s2.max,'var(--dim)',14)}
-        <span class="v">— / ${N5_EXAM.s2.max}</span></div>
+      <div class="meter"><span class="lab">②ちょうかい</span>${
+        est2==null?pips(0,N5_EXAM.s2.max,'var(--dim)',14)
+                  :pips(est2,N5_EXAM.s2.max,est2>=N5_EXAM.s2.base?'var(--exp)':'var(--hp)',14)}
+        <span class="v">${est2==null?'—':est2} / ${N5_EXAM.s2.max}</span></div>
     </div>
     <div class="note" style="margin-top:9px">
       ①「げんごちしき（もじ・ごい・ぶんぽう）・どっかい」は 120てんまんてん、きじゅんてんは 38てん。<br>
       ②「ちょうかい」は 60てんまんてん、きじゅんてんは 19てん。<br>
       ごうけい 180てんで、80てん いじょう とれば ごうかくです。<br>
       ①の めやすは、この アプリに はいって いる ${st.n}この おぼえた ぐあいから けいさんした ものです。
+      ②の めやすは「ちょうかいの どうくつ」の せいかいりつ（${S.listenN}もん）から けいさんします。
       ${est>=N5_EXAM.s1.base?'いまの ペースなら ①の きじゅんてんは こえて います。':'まず ①の きじゅんてん 38てんを めざしましょう。'}
     </div>
   </div>
@@ -1085,8 +1196,8 @@ function vStatus(){
       `のこり ${d}にち。\nきょうの ノルマを こなせば、しけんの 2しゅうかん まえに ぜんぶ 1かい まわれます。`}</div>
   </div>
   <div class="win tight"><div class="note">
-    「ちょうかい」は この アプリでは れんしゅう できません。
-    おとを きく れんしゅうは、べつに やって ください。
+    ${TTS.ready?'「ちょうかいの どうくつ」で、おとだけの もんだいが れんしゅう できます。ただし ほんばんの ちょうかいは もっと ながい かいわを ききます。'
+               :'この きかいには にほんごの こえが ないので、ちょうかいの れんしゅうは できません。'}
   </div></div>`;
 }
 
@@ -1100,6 +1211,8 @@ function vConf(){
       <input type="number" id="f-new" min="3" max="40" value="${S.newPerDay}"></div>
     <div class="tg"><span>えいごの いみも みせる${gl('Show English meanings')}</span><button data-tg="showEn"><b>${S.showEn?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>がめんに えいごを つける${gl('Show English on the menus')}</span><button data-tg="uiEn"><b>${S.uiEn?'オン':'オフ'}</b></button></div>
+    ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
+      `<div class="tg"><span>よみあげ${gl('Speech')}</span><b style="color:var(--dim)">この きかいでは つかえません</b></div>`}
     <div class="tg"><span>こうかおん${gl('Sound')}</span><button data-tg="sound"><b>${S.sound?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>ゆうしゃ${gl('Hero')}</span><span class="heropick" style="margin:0; padding:0; border:none">
       ${HEROES.map(h=>`<button class="hp-b" data-hero="${esc(h.id)}" aria-pressed="${S.hero===h.id}">${esc(h.name)}</button>`).join('')}
@@ -1126,7 +1239,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -1157,6 +1270,10 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-go2')) return go(d.go2);
   if(t.hasAttribute('data-dun')){ SFX.sel(); return startBattle(d.dun||null); }
   if(t.hasAttribute('data-boss')){ SFX.sel(); return startBattle(null,30,true); }
+  if(t.hasAttribute('data-listen')){ SFX.sel(); return startBattle(null,10,false,'listen'); }
+  // 2回目からは ゆっくり 読み上げる。聞き取れなかった人に速さを合わせる
+  if(t.hasAttribute('data-replay')){ return replaySay(true); }
+  if(d.sayt){ return speak(d.sayt,t.hasAttribute('data-slow')); }
   if(t.hasAttribute('data-inn')){
     S.hp=S.maxHp; S.mp=S.maxMp; persist(); SFX.up(); return go('field');
   }
@@ -1166,7 +1283,7 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-retry')){
     const ids=B.wrong.slice();
     B={items:ids.map(i=>BY_ID[i]),i:0,ok:0,ng:0,combo:0,maxCombo:0,exp:0,gold:0,wrong:[],
-       sec:B.sec,boss:false,mon:pick(MONSTERS.filter(m=>m.area==='any')),monHp:0,killed:0,levelUps:[]};
+       sec:B.sec,boss:false,mode:B.mode,mon:pick(MONSTERS.filter(m=>m.area==='any')),monHp:0,killed:0,levelUps:[]};
     B.monHp=B.mon.hp; route='battle';
     return drawBattle(`${B.mon.name}が たちふさがった！`);
   }
@@ -1206,6 +1323,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ===== 起動 ===== */
+initTTS();
 render();
 const CL=(typeof window!=='undefined'&&window.claude&&window.claude.use)
   ? window.claude.use.bind(window.claude) : ()=>Promise.resolve(null);
