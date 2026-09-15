@@ -481,8 +481,11 @@ function type(el,text,done,noCursor){
   // ふりがな(<rt>)まで1文字ずつ出すとちらつくので、ルビは親文字と同時に出す。
   el.innerHTML=text;
   const nodes=[]; const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+  const hideEn=document.body.classList.contains('no-en');
   let nd; while((nd=walk.nextNode())){
     if(nd.parentNode && nd.parentNode.nodeName==='RT') continue;
+    // 英語を消している間は、見えない文字を送って無言の間を作らない
+    if(hideEn && nd.parentElement && nd.parentElement.closest('.gl')) continue;
     nodes.push({node:nd,full:nd.nodeValue});
   }
   nodes.forEach(o=>o.node.nodeValue='');
@@ -1180,7 +1183,8 @@ document.addEventListener('click',e=>{
     { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
     return;
   }
-  if(d.tg){ S[d.tg]=!S[d.tg]; persist(); SFX.sel(); return vConf(); }
+  // 画面全体の見た目が変わる設定（uiEn）もあるので、vConf() ではなく render() を通す
+  if(d.tg){ S[d.tg]=!S[d.tg]; persist(); SFX.sel(); return render(); }
   if(t.hasAttribute('data-reset')){
     if(confirm(`ぼうけんのしょ ${SLOT}${S.name?'（'+S.name+'）':''} を けします。よろしいですか？`)){
       try{ localStorage.removeItem(KEY(SLOT)); }catch(e){}

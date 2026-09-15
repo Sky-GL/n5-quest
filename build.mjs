@@ -164,6 +164,8 @@ ICON.px.forEach((row, y) => {
   if (!MONSTERS.some(m => m.area === a || m.area === 'any')) errs.push(`${a} に出現するモンスターがいない`);
 });
 if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
+// 取りこぼし再戦と monPool のフォールバックは 'any' がいる前提なので、ここで担保する
+if (!MONSTERS.some(m => m.area === 'any')) errs.push("area:'any' のモンスターが1体もいない（取りこぼし再戦で落ちる）");
 
 // 生成事故（ハングル・キリル）検出
 const BAD = /[Ѐ-ӿ가-힯]/;
