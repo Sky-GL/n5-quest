@@ -280,9 +280,10 @@ rt{
    文字は前面(z-index:1)＋濃い影で、重なっても読めるようにする。 */
 .crest{
   /* 絶対配置にすると画面の上で切れるので、ふつうの流れに置いたまま
-     下マージンを負にして、タイトル文字を盾の下のほうに重ねる。
-     こうすると縦の中央ぞろえが紋章の高さも数に入れてくれる */
-  display:block; margin:0 auto -34px; position:relative;
+     下マージンを負にして、タイトル文字を紋章の上に重ねる。
+     こうすると縦の中央ぞろえが紋章の高さも数に入れてくれる。
+     重ねる深さは、盾のＶを隠さず、リボンが文字の左右から見える位置 */
+  display:block; margin:0 auto -104px; position:relative;
   z-index:0; opacity:.92; pointer-events:none;
   filter:drop-shadow(0 3px 10px rgba(0,0,0,.65));
   animation:crestBreathe 7s steps(3,end) infinite;
@@ -308,34 +309,31 @@ rt{
 .title-logo{text-align:center; position:relative}
 .title-main,.title-sub{position:relative; z-index:1}
 .title-main{
-  font-size:clamp(34px,11vw,54px); color:var(--gold); letter-spacing:.1em; line-height:1.25;
-  /* 紋章の上に重なるので、影を厚くして輪郭を立たせる */
-  text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000, 0 0 12px rgba(0,0,0,.85);
+  font-size:clamp(38px,12.5vw,60px); letter-spacing:.1em; line-height:1.25;
+  /* 金のロゴを金の紋章に重ねると埋もれるので、字は青、縁を金にして抜く。
+     ドット絵なので縁取りは stroke ではなく影を8方向に重ねて作る */
+  color:#59A6FF;
+  text-shadow:
+    -3px 0 0 #E8B84B, 3px 0 0 #E8B84B, 0 -3px 0 #E8B84B, 0 3px 0 #E8B84B,
+    -3px -3px 0 #E8B84B, 3px -3px 0 #E8B84B, -3px 3px 0 #E8B84B, 3px 3px 0 #E8B84B,
+    5px 6px 0 #000, 0 0 14px rgba(0,0,0,.9);
 }
 .title-sub{
   display:inline-block; margin-top:20px; padding:11px 10px 0; font-size:12.5px;
   color:#C6CCE4; letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
   text-shadow:0 2px 5px #000, 0 0 10px #000;
 }
-/* ロゴ。ドラクエのマークは「DRAGON」が小さく上、「QUEST」が大きく下で、
-   しかも下段は水平に並んでいない。両端の字ほど大きく、外へ倒れて弧を描く。
-   その傾きが出ないと、ただの太字の行になってしまう。
-   --d は中央からの距離、--s は左右どちら側か（-1 / 0 / +1）。 */
+/* ロゴ。ドラクエのマークは DRAGONQUEST を1行に組み、
+   両端の字だけが極端に大きく外へ倒れ、内側はほぼ水平のまま中央が沈む。
+   （両端が上がって中央が下がる。逆向きにすると歪んだ字に見える）
+   1字ずつの寸法は archWord() が出す。 */
 .title-main{
-  display:flex; flex-direction:column; align-items:center;
-  line-height:1; letter-spacing:.06em;
+  display:flex; align-items:baseline; justify-content:center;
+  line-height:1; letter-spacing:.02em;
+  /* 端の字が倒れて外へはみ出すぶんの逃げ */
+  padding:0 .12em;
 }
-.tl-sm{
-  font-size:.54em; letter-spacing:.42em; margin-left:.42em; margin-bottom:.02em;
-  /* 紋章の濃い中央に重なる位置なので、下段より影を強くしないと沈む */
-  color:#FFD66B; text-shadow:2px 2px 0 #6B4A00, 4px 4px 0 #000, 0 0 14px #000;
-}
-.tl-lg{display:flex; align-items:baseline; justify-content:center; gap:.06em}
-.tl-lg i{
-  font-style:normal; display:inline-block;
-  font-size:calc(1em + var(--d) * .2em);
-  transform:translateY(calc(var(--d) * .1em)) rotate(calc(var(--s) * var(--d) * 4deg));
-}
+.title-main i{font-style:normal; display:inline-block}
 /* 英語は字数が多いので、字間をつめないと携帯で折り返す */
 .title-sub.en{letter-spacing:.13em; font-size:11.5px}
 .title-ja{
@@ -1135,18 +1133,24 @@ function slotSummary(n){
 // ロゴは日本語をえらんでも英語のまま。
 // ドラクエも日本版のマークは英字の DRAGON QUEST で、そこは訳していない。
 // 副題だけ、読む人の言語に合わせる
+// 中央からの距離に比例させると、全体が均等に扇状へ開いてしまってあの形にならない。
+// ドラクエのマークは端に寄った曲線で、内側はほとんど動いていない。
+// そこで 距離を0〜1に正規化してから 2乗前後で効かせる。
 function archWord(w){
+  if(w.length<2) return esc(w);   // c が 0 になって距離が割れない
   const c=(w.length-1)/2;
   return [...w].map((ch,i)=>{
-    const d=Math.abs(i-c), sgn=i<c?-1:(i>c?1:0);
-    return `<i style="--d:${d};--s:${sgn}">${esc(ch)}</i>`;
+    const t=Math.abs(i-c)/c;              // 0=中央 … 1=端
+    const sgn=i<c?-1:(i>c?1:0);
+    const size=1+Math.pow(t,2.2)*0.55;    // 端の1字だけ大きく
+    const dy=-Math.pow(t,2)*0.14;         // 端が上がり、中央が沈む
+    const rot=sgn*Math.pow(t,2)*14;       // 端ほど外へ倒れる
+    return `<i style="font-size:${size.toFixed(3)}em;`
+      +`transform:translateY(${dy.toFixed(3)}em) rotate(${rot.toFixed(1)}deg)">${esc(ch)}</i>`;
   }).join('');
 }
 function titleLogo(){
-  const logo=`<div class="title-main">
-        <span class="tl-sm">N5</span>
-        <span class="tl-lg">${archWord('QUEST')}</span>
-      </div>`;
+  const logo=`<div class="title-main">${archWord('N5QUEST')}</div>`;
   if(!S.uiEn) return logo+`
       <div class="title-sub">ことばの ぼうけん</div>`;
   return logo+`
