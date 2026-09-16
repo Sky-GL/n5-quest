@@ -112,6 +112,30 @@ function checkRuby(where, s) {
   }
   if (/[\[\]]/.test(bare)) errs.push(`${where} ルビの書き方が壊れている: ${s}`);
 }
+/* 例文のローマ字（sentRomaji）は、区切りの直前の は・へ を助詞とみなして
+   wa・e と読む。「はは」のように語そのものが は で終わる文節が
+   ルビ無しで書かれると、haha が ha wa になって読みが壊れる。
+   語はルビ [漢字|よみ] で書くという決まりを、ここで守らせる。 */
+// 読みが は・へ で終わる語は、ローマ字にするとき判断が分かれる。
+//   PARTICLE_SOUND … 語の中の は だが、読みは「わ」。助詞と同じ音なので何もしなくてよい
+//   WORD_TAIL       … 読みが「は」のまま。ルビ無しで書くと ha が wa に化ける
+// 新しい語が増えたら、下の検査がどちらかに分類するよう促す
+const PARTICLE_SOUND = new Set(['では', 'または', 'こんにちは', 'こんばんは']);
+const WORD_TAIL = new Set(['はは']);
+function checkParticle(where, s) {
+  if (!s) return;
+  // ルビの中は語なので見ない。空文字に置くと前後がつながって
+  // 元の文に無い語ができてしまうので、区切りに置きかえる
+  String(s).replace(/\[[^\[\]|]+\|[^\[\]|]+\]/g, ' ')
+    .split(/[\s　]+/)
+    .forEach(chunk => {
+      const c = chunk.replace(/[。、！？【】]/g, '');
+      if (WORD_TAIL.has(c)) {
+        errs.push(`${where} 「${c}」は語なので、ルビ付きの漢字で書く（助詞の は と区別できない）: ${s}`);
+      }
+    });
+}
+
 // 出題の穴埋めに使う 【…】 が ちょうど1組あるか
 // 「〜から〜まで」のように2か所を同時に問う文型があるので、1〜2組まで許す
 function checkMark(where, s) {
@@ -171,6 +195,7 @@ vocab.forEach((r, i) => {
   checkRuby(w + ' 意味', r[3]);
   checkRuby(w + ' 例文', r[5]);
   checkMark(w + ' 例文', r[5]);
+  checkParticle(w + ' 例文', r[5]);
   if (!KANA_ONLY.test(r[1])) errs.push(`${w} 読みがかなではない: ${r[1]}`);
 });
 // 文法
@@ -181,6 +206,7 @@ grammar.forEach((r, i) => {
   checkRuby(w + ' 例文', r[4]);
   checkRuby(w + ' 注意', r[5]);
   checkMark(w + ' 例文', r[4]);
+  checkParticle(w + ' 例文', r[4]);
   if (KANJI_CH.test(r[0])) errs.push(`${w} 文型に漢字が入っている（N5では読めない）`);
 });
 // 収録すべき漢字は、もらった一覧表（11行103字）そのもの。
@@ -252,6 +278,15 @@ const checkSprite = (kind, m) => {
     checkFrame(kind + '(攻撃)', m.id, m.px2, m.pal);
   }
 };
+// は・へ で終わる読みが増えたら、必ずどちらかに分類させる。
+// 分類しないまま通すと、例文のローマ字が黙って壊れる
+[...vocab.map(v => [v[0], v[1]]), ...kanji.flatMap(k => k[5].map(w => [w[0], w[1]]))]
+  .forEach(([w, r]) => {
+    if (!/[はへ]$/.test(r) || [...r].length < 2) return;
+    if (PARTICLE_SOUND.has(r) || WORD_TAIL.has(r)) return;
+    errs.push(`「${w}（${r}）」の読みが は・へ で終わる。build.mjs の PARTICLE_SOUND か WORD_TAIL に入れること`);
+  });
+
 const AREAS = new Set(['vocab', 'kanji', 'grammar', 'any', 'boss']);
 MONSTERS.forEach(m => {
   checkSprite('monster', m);

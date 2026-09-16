@@ -404,6 +404,11 @@ rt{
 }
 /* ローマ字。かなを覚えきる前の人のための補助なので、かなより一段弱く見せる */
 .rj{color:#8A92B6; font-size:.86em; letter-spacing:.04em}
+/* ふりがなの下のローマ字。ふりがなより さらに一段弱く */
+/* ローマ字のふりがなは、かなより横に長い。字間を詰めないと親字からはみ出す */
+ruby.rjr rt{font-size:.5em; letter-spacing:-.02em}
+/* 例文ぜんぶのローマ字。かなだけの文は ふりがなが付かないので、ここが頼り */
+.exrj{margin-top:4px; font-size:13px; line-height:1.7}
 /* 覚えた項目の英語。消さずに ひと手間 おく。
    消すと「読めるが意味が分からない」で詰むので、たたむだけにする */
 .enfold{margin-top:3px}
@@ -497,15 +502,66 @@ const pick = a=>a[Math.random()*a.length|0];
    N5では画面に出る漢字にふりがなが無いと読めないので、
    日本語を出す経路はすべて rb() を通す。 */
 const RUBY=/\[([^\[\]|]+)\|([^\[\]|]+)\]/g;
+/* ふりがなの中身。
+   英語版から入った人は ひらがなが読めないので、ふりがなが ひらがな だけでは
+   支えになっていない。かなを覚えるまでは ふりがなの下に ローマ字も出す。
+   かなが読めるようになったら自動で外れ、ふつうの ふりがな に戻る。 */
+const rjOn = () => !!(S.romaji || (S.uiEn && stats('kana').rate < KANA_DONE));
+/* かなが読めないうちは、ふりがなそのものをローマ字にする。
+   かなとローマ字を2段に積むと、ルビの中では小さすぎて読めない。
+   この段階では どのみち かなが読めないので、ローマ字だけで置きかえる。
+   かなは 例文の本体と「かなの いずみ」で覚えていき、
+   8わり読めるようになった時点で ふりがなは ふつうの かな に戻る。 */
+const rt = (r,on) => esc(on ? toRomaji(r) : r);
+// ローマ字のふりがなは かな より横に長い。字間を詰めないと親字からはみ出す。
+// 状態を body に持たせると、render() を通らない戦闘中の描き直しで取り残されるので、
+// ふりがな自身に持たせる
+const rubyTag = on => on ? '<ruby class="rjr">' : '<ruby>';
 function rb(s){
-  let out='', last=0, m;
+  let out='', last=0, m, on=rjOn();   // ルビごとに数え直さない
   RUBY.lastIndex=0;
   while((m=RUBY.exec(s))){
-    out+=esc(s.slice(last,m.index))+'<ruby>'+esc(m[1])+'<rt>'+esc(m[2])+'</rt></ruby>';
+    out+=esc(s.slice(last,m.index))+rubyTag(on)+esc(m[1])+'<rt>'+rt(m[2],on)+'</rt></ruby>';
     last=m.index+m[0].length;
   }
   return out+esc(s.slice(last));
 }
+/* 文まるごとのローマ字。
+   かなだけの文には ふりがなが付かないので、これが無いと
+   「あさごはんを たべました。」を一文字も読めないままになる。
+   助詞の は・へ は「わ・え」と読む。ha・he のまま出すと声に出して通じない。
+   ルビ [漢字|よみ] の中は語なので助詞を探さない。外に出ている は・へ だけを見る。 */
+const PUNC={'。':'.','、':',','！':'!','？':'?','　':' '};
+function sentRomaji(src){
+  let out='', last=0, m;
+  RUBY.lastIndex=0;
+  const raw=[];
+  while((m=RUBY.exec(src))){
+    if(m.index>last) raw.push([0,src.slice(last,m.index)]);
+    raw.push([1,m[2]]);                    // ルビの読み＝語。助詞を探さない
+    last=m.index+m[0].length;
+  }
+  if(last<src.length) raw.push([0,src.slice(last)]);
+  raw.forEach(([isWord,t])=>{
+    t=t.replace(/【|】/g,'');
+    if(isWord){ out+=toRomaji(t); return; }
+    // 区切り（空白・句読点・文末）の直前の は・へ だけ助詞とみなす
+    let buf='';
+    for(let i=0;i<t.length;i++){
+      const c=t[i], nx=t[i+1];
+      const edge = nx===undefined || nx===' ' || nx==='　' || PUNC[nx];
+      if((c==='は'||c==='へ') && edge){
+        out+=toRomaji(buf)+(buf?' ':'')+(c==='は'?'wa':'e'); buf='';
+      }else if(c===' '||PUNC[c]){
+        out+=toRomaji(buf)+(PUNC[c]||' '); buf='';
+      }else buf+=c;
+    }
+    out+=toRomaji(buf);
+  });
+  return out;
+}
+// 学びの窓の例文に添えるローマ字の行
+const exRj = t => rjOn()&&t ? `<div class="rj exrj">${esc(sentRomaji(t))}</div>` : '';
 // ルビ記法を外した素の文（読み上げや比較に使う）
 const bare = s => String(s).replace(RUBY,'$1');
 // 例文の 【…】 は出題の対象語。学びの窓では強調、穴埋めでは空欄にする
@@ -711,13 +767,13 @@ function enBlock(it,text){
 // 出しっぱなしだと「ふりがなが無いと読めない」まま試験に行くことになる
 function rbFade(s){
   if(!S.fadeRuby) return rb(s);
-  let out='', last=0, m;
+  let out='', last=0, m, on=rjOn();   // ルビごとに数え直さない
   RUBY.lastIndex=0;
   while((m=RUBY.exec(s))){
     out+=esc(s.slice(last,m.index));
     const base=m[1];
     const known = base.length===1 && BY_ID['k:'+base] && rec('k:'+base).lv>=FADE.ruby;
-    out += known ? esc(base) : '<ruby>'+esc(base)+'<rt>'+esc(m[2])+'</rt></ruby>';
+    out += known ? esc(base) : rubyTag(on)+esc(base)+'<rt>'+rt(m[2],on)+'</rt></ruby>';
     last=m.index+m[0].length;
   }
   return out+esc(s.slice(last));
@@ -1012,7 +1068,7 @@ function q(label,main,item,field){
 function W(word,read,sm,en){
   const cls='qword'+(sm?' sm':'')+(en?' en':'');
   // ローマ字はかなの下にさらに小さく。かなを読む練習の邪魔にならない大きさにする
-  const rj=(S.romaji&&read&&!en)?` <span class="rj">${esc(toRomaji(read))}</span>`:'';
+  const rj=(rjOn()&&read&&!en)?` <span class="rj">${esc(toRomaji(read))}</span>`:'';
   return `<span class="${cls}">${esc(word)}${read?`<span class="qread">${esc(read)}${rj}</span>`:''}</span>`;
 }
 // 漢字は問い方が語彙と違うので、選択肢を自前で組み立てる
@@ -1659,14 +1715,14 @@ function learnHtml(it){
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
   }else if(it.sec==='vocab'){
-    h=`<dl><dt>ことば${gl('Word')}</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${S.romaji?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
+    h=`<dl><dt>ことば${gl('Word')}</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${rjOn()?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
        <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
-    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
+    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}${exRj(it.ex)}</div>`;
   }else{
     h=`<dl><dt>かたち${gl('Pattern')}</dt><dd><b>${esc(it.w)}</b></dd>
        <dt>つなぎ${gl('Attaches to')}</dt><dd>${rb(it.conn)}</dd>
        <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
-    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
+    if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}${exRj(it.ex)}</div>`;
     if(it.note) h+=`<div class="en">${rb(it.note)}</div>`;
   }
   if(sample) h+=`<div><button class="cmd" data-ask="${esc(it.id)}"><span class="cur">▶</span><span>けんじゃに きく${gl('Ask the sage')}</span></button><div id="ai"></div></div>`;
@@ -1935,7 +1991,7 @@ function vBook(){
   <div class="win"><span class="win-t">にがてな もの${gl('Weak points')}</span>
     <div class="entries ruby-on">${listed.slice(0,60).map(i=>{const r=rec(i.id);
       return `<div class="entry"><span class="pip tile s${r.lv}"></span>
-        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${S.romaji&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}
+        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${rjOn()&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}
         <br><span class="m">${rb(i.mean)}</span></span>
         <span class="lv">★${r.lv}${r.seen?`<br>${r.seen}かい`:''}</span></div>`;}).join('')}</div>
     <div class="note" style="margin-top:8px">おぼえが あさい ものから 60こ。まだの ものは うしろ。${gl('The 60 you know least well, weakest first. Items you have not met yet come last.')}</div>
