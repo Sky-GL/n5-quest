@@ -17,6 +17,9 @@ for (const s of VOCAB_FILES) {
   parts['vocab-' + s] = m['VOCAB_' + s.toUpperCase()];
   vocab.push(...parts['vocab-' + s]);
 }
+const { KANA_A } = await import(new URL('./src/kana-a.js', import.meta.url));
+const { KANA_B } = await import(new URL('./src/kana-b.js', import.meta.url));
+const { toRomaji } = await import(new URL('./src/romaji.js', import.meta.url));
 const { KANJI_A } = await import(new URL('./src/kanji-a.js', import.meta.url));
 const { KANJI_B } = await import(new URL('./src/kanji-b.js', import.meta.url));
 const { GRAMMAR_A } = await import(new URL('./src/grammar-a.js', import.meta.url));
@@ -28,9 +31,11 @@ const { ICON } = await import(new URL('./src/icon.js', import.meta.url));
 const { CREST } = await import(new URL('./src/crest.js', import.meta.url));
 const { pngOf, icoOf, svgOf } = await import(new URL('./icongen.mjs', import.meta.url));
 
+const kana = [...KANA_A, ...KANA_B];
 const kanji = [...KANJI_A, ...KANJI_B];
 const grammar = [...GRAMMAR_A, ...GRAMMAR_B];
 const MONSTERS = [...MON_A, ...MONSTERS_B];
+parts['kana-a'] = KANA_A; parts['kana-b'] = KANA_B;
 parts['kanji-a'] = KANJI_A; parts['kanji-b'] = KANJI_B;
 parts['grammar-a'] = GRAMMAR_A; parts['grammar-b'] = GRAMMAR_B;
 
@@ -38,6 +43,9 @@ parts['grammar-a'] = GRAMMAR_A; parts['grammar-b'] = GRAMMAR_B;
 // 並びが そのまま学習順になる。やさしいものと、すぐ使うものを先に置く。
 // ことば → 動き → 助詞 → ようす … と、語彙と文法を交互に挟んで飽きにくくしている。
 const CHAP_ORDER = [
+  // かなは JLPT N5 の出題範囲ではなく、その手前の準備。だから先頭に置く
+  ['kana-a',    'kana',    'ひらがな',                      'Hiragana'],
+  ['kana-b',    'kana',    'カタカナ',                      'Katakana'],
   ['vocab-a',   'vocab',   'ひとと からだ',                 'People & Body'],
   ['vocab-b',   'vocab',   'まいにちの うごき',             'Everyday Actions'],
   ['grammar-a', 'grammar', 'ぶんぽう：てにをはと きほん',   'Grammar: Particles & Basics'],
@@ -72,7 +80,7 @@ const pickChapBoss = (sec, last) => {
   }
   return MONSTERS[0].id;
 };
-const ID_PREFIX = { vocab: 'v:', kanji: 'k:', grammar: 'g:' };
+const ID_PREFIX = { kana: 'n:', vocab: 'v:', kanji: 'k:', grammar: 'g:' };
 const CHAPTERS = CHAP_ORDER.map(([file, sec, name, en], i) => ({
   id: file, sec, name, en,
   boss: pickChapBoss(sec, i === CHAP_ORDER.length - 1),
@@ -127,9 +135,22 @@ const req = (arr, name, n) => arr.forEach((r, i) => {
   if (seen.has(key)) errs.push(`${name} 重複: ${r[0]}`);
   seen.add(key);
 });
+req(kana, 'kana', 5);
 req(vocab, 'vocab', 6);
 req(kanji, 'kanji', 5);
 req(grammar, 'grammar', 6);
+
+// かな: 見出しはかな1字、ローマ字は変換器と突き合わせる。
+// ここで検算しておけば、変換器を直したときに壊れた箇所がビルドで分かる
+const KANA_ONE = /^[ぁ-ゖァ-ヺ]$/;
+kana.forEach((r, i) => {
+  const w = `kana[${i}] ${r[0]}`;
+  if (!KANA_ONE.test(r[0])) errs.push(`${w} 見出しがかな1字ではない`);
+  if (toRomaji(r[0]) !== r[1]) errs.push(`${w} ローマ字が変換結果と違う: ${r[1]}（変換は ${toRomaji(r[0])}）`);
+  if (!KANA_ONLY.test(r[2])) errs.push(`${w} 例語がかなだけではない: ${r[2]}`);
+  if (toRomaji(r[2]) !== r[3]) errs.push(`${w} 例語のローマ字が違う: ${r[3]}（変換は ${toRomaji(r[2])}）`);
+  if (!/^[ -~]+$/.test(r[4])) errs.push(`${w} 英語が半角英字ではない: ${r[4]}`);
+});
 
 // 語彙: 品詞・意味・例文はそのまま画面に出るのでルビが要る
 vocab.forEach((r, i) => {
@@ -150,6 +171,31 @@ grammar.forEach((r, i) => {
   checkMark(w + ' 例文', r[4]);
   if (KANJI_CH.test(r[0])) errs.push(`${w} 文型に漢字が入っている（N5では読めない）`);
 });
+// 収録すべき漢字は、もらった一覧表（11行103字）そのもの。
+// 並び順も含めてここに写してあるので、字を足し引きしたらビルドで気づける。
+const N5_KANJI_LIST = [
+  '一二三四五六七八九十',
+  '百千万円時年月日',
+  '上下右左中北南東西',
+  '人今休会何先入出分前',
+  '午半友口古名国土外多',
+  '大天女子学安小少山川',
+  '店後手新書木本来校',
+  '母毎気水火父生男白目',
+  '社空立耳聞花行見言話',
+  '語読買足車週道金長間',
+  '雨電食飲駅高魚'
+].join('');
+{
+  const want = [...N5_KANJI_LIST];
+  const have = new Set(kanji.map(r => r[0]));
+  const missing = want.filter(c => !have.has(c));
+  const extra = kanji.map(r => r[0]).filter(c => want.indexOf(c) < 0);
+  if (missing.length) errs.push(`一覧表にあるのに未収録の漢字: ${missing.join('')}`);
+  if (extra.length) errs.push(`一覧表にない漢字が入っている: ${extra.join('')}`);
+  if (have.size !== want.length) errs.push(`漢字の字数が ${have.size}（${want.length}であるべき）`);
+}
+
 // 漢字: 字義と、例語の意味にルビが要る。例語そのものは読みが別にあるので対象外
 const words = new Map();
 kanji.forEach((r, i) => {
@@ -217,7 +263,7 @@ CREST.px.forEach((row, y) => {
   if (row.length !== CREST.size) errs.push(`crest: 行${y}の長さが ${row.length}（${CREST.size}であるべき）`);
   for (const c of row) if (c !== '.' && !CREST.pal[c]) errs.push(`crest: 行${y} パレット未定義の文字: ${JSON.stringify(c)}`);
 });
-['vocab', 'kanji', 'grammar'].forEach(a => {
+['kana', 'vocab', 'kanji', 'grammar'].forEach(a => {
   if (!MONSTERS.some(m => m.area === a || m.area === 'any')) errs.push(`${a} に出現するモンスターがいない`);
 });
 if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
@@ -237,7 +283,7 @@ if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
       all.add(id);
     });
   });
-  const total = vocab.length + kanji.length + grammar.length;
+  const total = kana.length + vocab.length + kanji.length + grammar.length;
   if (all.size !== total) errs.push(`章に入っていない項目がある（章 ${all.size} / 全体 ${total}）`);
 }
 // 取りこぼし再戦と monPool のフォールバックは 'any' がいる前提なので、ここで担保する
@@ -260,8 +306,14 @@ const tpl = fs.readFileSync(path.join(src, 'app.template.html'), 'utf8');
 // 1項目1行で出力する。git差分が読め、分割して扱えるようにするため。
 const NL = String.fromCharCode(10);
 const rows = a => a.map(r => JSON.stringify(r)).join(',' + NL);
+// ローマ字の変換器はソースをそのまま埋め込む。
+// アプリとビルド検証で実装が二重にならないようにするため。
+const romajiJs = fs.readFileSync(path.join(src, 'romaji.js'), 'utf8').replace(/^export /gm, '');
 const dataJs =
+  romajiJs + NL +
   'const DATA={' + NL +
+  '"kana":[' + NL + rows(kana) + NL +
+  '],' + NL +
   '"vocab":[' + NL + rows(vocab) + NL +
   '],' + NL +
   '"kanji":[' + NL + rows(kanji) + NL +
@@ -303,7 +355,7 @@ const HEAD_BASE =
   '<meta name="color-scheme" content="dark">\n' +
   '<meta name="theme-color" content="#07070F">\n';
 // ?v= はブラウザが古いアイコンを握り続けるのを外すため
-const V = '1';
+const V = '2';   // 紋章の意匠に描き替えたので、古いアイコンを握らせない
 const HEAD_ICONS =
   `<link rel="icon" href="./favicon-32.png?v=${V}" sizes="32x32" type="image/png">\n` +
   `<link rel="icon" href="./favicon-16.png?v=${V}" sizes="16x16" type="image/png">\n` +
@@ -321,6 +373,12 @@ fs.writeFileSync(path.join(root, 'preview.html'),
 // 片方だけ直したときにもう片方を送り直さずに済む。
 const distDir = path.join(root, 'dist');
 fs.mkdirSync(distDir, { recursive: true });
+// 出力したJSが構文として通るか、書き出す前に確かめる。
+// テンプレートの文字列に生の改行が紛れると、ブラウザで初めて真っ白になって気づく。
+[['data.js', dataJs], ['app.js', appJs]].forEach(([name, code]) => {
+  try { new Function(code); }
+  catch (e) { console.error(`${name} の構文エラー: ${e.message}`); process.exit(1); }
+});
 fs.writeFileSync(path.join(distDir, 'data.js'), dataJs + '\n', 'utf8');
 fs.writeFileSync(path.join(distDir, 'app.js'), appJs.replace(/^\n/, ''), 'utf8');
 fs.writeFileSync(path.join(distDir, 'index.html'),
@@ -349,8 +407,8 @@ fs.writeFileSync(path.join(distDir, 'site.webmanifest'), JSON.stringify({
 const kb = f => (fs.statSync(path.join(distDir, f)).size / 1024).toFixed(0) + ' KB';
 console.log('OK ' + out + '（Artifact用の断片）');
 console.log('OK dist/  index.html ' + kb('index.html') + ' / data.js ' + kb('data.js') + ' / app.js ' + kb('app.js'));
-console.log(`  語彙 ${vocab.length} / 漢字 ${kanji.length}字→例語 ${kanjiWords} / 文法 ${grammar.length} / 敵 ${MONSTERS.length} / 勇者 ${HEROES.length}`);
+console.log(`  かな ${kana.length} / 語彙 ${vocab.length} / 漢字 ${kanji.length}字→例語 ${kanjiWords} / 文法 ${grammar.length} / 敵 ${MONSTERS.length} / 勇者 ${HEROES.length}`);
 console.log(`  章 ${CHAPTERS.length}（${CHAPTERS.map(c => c.ids.length).join('/')}）`);
 // 出題の単位は 語彙=1語 / 漢字=1字 / 文法=1文型。例語は漢字の学習材料であって項目ではない
-console.log(`  出題項目 合計 ${vocab.length + kanji.length + grammar.length}`);
+console.log(`  出題項目 合計 ${kana.length + vocab.length + kanji.length + grammar.length}`);
 console.log('OK アイコン ' + icons.map(([n]) => n).concat('favicon.ico', 'favicon.svg', 'site.webmanifest').join(' / '));

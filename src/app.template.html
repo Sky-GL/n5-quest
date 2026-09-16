@@ -334,6 +334,9 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* ローマ字。かなを覚えきる前の人のための補助なので、かなより一段弱く見せる */
+.rj{color:#8A92B6; font-size:.86em; letter-spacing:.04em}
+.qword .rj{font-size:.62em}
 /* ---- ステージ ---- */
 .stage-card{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:center}
 .stage-card .no{
@@ -354,6 +357,9 @@ rt{
 .chap.done .cn{color:var(--gold)}
 .chap.now{background:var(--win-2); border-radius:3px}
 .chap .st2{font-size:11.5px; color:var(--dim); text-align:right; white-space:nowrap}
+.chap{width:100%}
+.chap:hover:not(:disabled){background:var(--win-2); border-radius:3px}
+.chap:disabled{opacity:.5; cursor:default}
 /* ---- みせ ---- */
 .good{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:10px 4px; border-bottom:1px solid #1E1E3C}
 .good:last-child{border-bottom:none}
@@ -431,6 +437,12 @@ const blankHtml = s => rb(String(s).replace(MARK_G,'')).replace(//g,'<span cla
 
 /* ===== 出題項目 ===== */
 const ITEMS=[];
+// かなは「1字」が1項目。例語は読みの練習台として持たせる
+DATA.kana.forEach(k=>ITEMS.push({
+  id:'n:'+k[0], sec:'kana', w:k[0], read:k[1], romaji:k[1],
+  ex:k[2], exr:k[3], en:k[4], mean:`${k[2]}（${k[3]}）${k[4]}`,
+  kata:/[ァ-ヺ]/.test(k[0])
+}));
 DATA.vocab.forEach(v=>ITEMS.push({id:'v:'+v[0],sec:'vocab',w:v[0],read:v[1],pos:v[2],mean:v[3],en:v[4],ex:v[5]}));
 // 漢字は「1字」を1項目にする。例語をそのまま項目にすると、
 // 食べる・電話のような中心的な語が「ことば」側と二重に登録されてしまうため。
@@ -439,11 +451,13 @@ DATA.kanji.forEach(k=>ITEMS.push({
   on:k[1],kun:k[2],words:k[4]||[]}));
 DATA.grammar.forEach(g=>ITEMS.push({id:'g:'+g[0],sec:'grammar',w:g[0],read:'',conn:g[1],mean:g[2],en:g[3],ex:g[4],note:g[5]}));
 const BY_ID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const BY_SEC={vocab:[],kanji:[],grammar:[]};
+const BY_SEC={kana:[],vocab:[],kanji:[],grammar:[]};
 ITEMS.forEach(i=>BY_SEC[i.sec].push(i));
-const SEC={vocab:'ことばの もり',kanji:'かんじの いせき',grammar:'ぶんぽうの とう'};
-const SEC_SHORT={vocab:'ことば',kanji:'かんじ',grammar:'ぶんぽう'};
-const SEC_EN={vocab:'Word Forest',kanji:'Kanji Ruins',grammar:'Grammar Tower'};
+const SEC={kana:'かなの いずみ',vocab:'ことばの もり',kanji:'かんじの いせき',grammar:'ぶんぽうの とう'};
+const SEC_SHORT={kana:'かな',vocab:'ことば',kanji:'かんじ',grammar:'ぶんぽう'};
+const SEC_EN={kana:'Kana Spring',vocab:'Word Forest',kanji:'Kanji Ruins',grammar:'Grammar Tower'};
+// かなは JLPT の出題範囲ではなく その手前の準備。点数の見積もりからは外す
+const JLPT_SECS=['vocab','kanji','grammar'];
 // UIに添える英語。出し分けは body のクラスでまとめて行う（静的なナビにも効かせるため）
 const gl = t => `<span class="gl">${esc(t)}</span>`;
 
@@ -453,9 +467,9 @@ const expToNext = lv => 100 + (lv-1)*60;
 const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
-  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, sound:true, speech:true, hero:'hero_m',
+  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, sound:true, speech:true, hero:'hero_m',
   name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
-  chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', updatedAt:0
+  chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', knowsKana:null, updatedAt:0
 };
 // ぼうけんのしょは3つ。1つを1人ぶんの進捗と設定にあてる
 const SLOTS=[1,2,3];
@@ -550,7 +564,7 @@ function grade(id,ok){
   S.srs[id]=r; return r;
 }
 function stats(sec){
-  const pool=sec?BY_SEC[sec]:ITEMS;
+  const pool=!sec?ITEMS:(Array.isArray(sec)?sec.reduce((a,x)=>a.concat(BY_SEC[x]),[]):BY_SEC[sec]);
   let done=0,sum=0,due=0,fresh=0; const dist=[0,0,0,0,0,0,0];
   pool.forEach(i=>{const r=rec(i.id); dist[r.lv]++; sum+=r.lv;
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
@@ -822,7 +836,9 @@ function q(label,main,item,field){
 // 見出し語。読みを下に小さく添える（読みを問う設問のときだけ隠す）
 function W(word,read,sm,en){
   const cls='qword'+(sm?' sm':'')+(en?' en':'');
-  return `<span class="${cls}">${esc(word)}${read?`<span class="qread">${esc(read)}</span>`:''}</span>`;
+  // ローマ字はかなの下にさらに小さく。かなを読む練習の邪魔にならない大きさにする
+  const rj=(S.romaji&&read&&!en)?` <span class="rj">${esc(toRomaji(read))}</span>`:'';
+  return `<span class="${cls}">${esc(word)}${read?`<span class="qread">${esc(read)}${rj}</span>`:''}</span>`;
 }
 // 漢字は問い方が語彙と違うので、選択肢を自前で組み立てる
 function optsOf(correct,cands){
@@ -861,6 +877,7 @@ function earHtml(){
   </span>`;
 }
 function listenQ(item){
+  if(item.sec==='kana') return kanaQ(item,'n_listen');
   if(item.sec==='kanji'){
     const pool=BY_SEC.kanji.filter(x=>x.id!==item.id);
     const j=pick(item.words);
@@ -882,8 +899,28 @@ function listenQ(item){
     main:earHtml(),item,say:item.read,
     opts:optsOf(item.mean,distractors(item,'mean',8).map(d=>d.mean)),ruby:true};
 }
+// かなの出題。選択肢は同じ字種（ひらがな同士・カタカナ同士）でそろえる
+function kanaQ(item,force){
+  const pool=BY_SEC.kana.filter(x=>x.id!==item.id && x.kata===item.kata);
+  const t=['n_read','n_write','n_word'];
+  if(TTS.ready) t.push('n_listen');
+  // 聴解の洞窟からは音の問題を名指しで頼まれる。声が無い端末だけ通常の出題に落とす
+  const kind=(force&&(force!=='n_listen'||TTS.ready))?force
+            :(rec(item.id).lv<=1?'n_read':pick(t));
+  if(kind==='n_write') return {label:'この おとの かなは？',labelEn:'Which kana makes this sound?',
+    main:W(item.romaji,'',false,true),item,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+  if(kind==='n_word') return {label:'この ことばの よみかたは？',labelEn:'How do you read this word?',
+    main:W(item.ex,''),item,opts:optsOf(item.exr,pool.map(x=>x.exr)),ruby:false};
+  if(kind==='n_listen') return {label:'きこえた ことばは？',labelEn:'Which word did you hear?',
+    main:earHtml(),item,say:item.ex,opts:optsOf(item.ex,pool.map(x=>x.ex)),ruby:false};
+  return {label:'この かなの おとは？',labelEn:'What sound is this kana?',
+    main:W(item.w,''),item,opts:optsOf(item.romaji,pool.map(x=>x.romaji)),ruby:false};
+}
 function makeQ(item,mode){
+  // モードの判定を先に置く。かなを先に見てしまうと、聴解モードでも
+  // 音の出ない問題が混ざって「おとだけで こたえる」と食い違う
   if(mode==='listen') return listenQ(item);
+  if(item.sec==='kana') return kanaQ(item);
   if(item.sec==='kanji') return kanjiQ(item);
   const t=[];
   if(item.sec==='vocab'){
@@ -1017,6 +1054,11 @@ function vNewGame(){
         <span class="hp-l">ゆうしゃ</span>
         ${HEROES.map(h=>`<button class="hp-b" data-hero="${esc(h.id)}" aria-pressed="${S.hero===h.id}">${esc(h.name)}</button>`).join('')}
       </div>
+      <div class="heropick" style="margin-bottom:8px">
+        <span class="hp-l">ひらがなは よめますか？${gl('Can you read hiragana?')}</span>
+        <button class="hp-b" data-kanaq="1" aria-pressed="${S.knowsKana===true}">はい</button>
+        <button class="hp-b" data-kanaq="0" aria-pressed="${S.knowsKana===false}">いいえ</button>
+      </div>
       <div class="cmds">
         <button class="cmd" data-newgo=""><span class="cur">▶</span><span>この なまえで はじめる</span></button>
         <button class="cmd" data-go2="title"><span class="cur">▶</span><span>やめる</span></button>
@@ -1056,12 +1098,12 @@ function vField(){
   <div class="win"><span class="win-t">コマンド${gl('Command')}</span>
     <div class="cmds">
       ${S.hp<=0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
-      ${['vocab','kanji','grammar'].map(sec=>{
+      ${['kana','vocab','kanji','grammar'].map(sec=>{
         const s=stats(sec);
         return `<button class="cmd" data-dun="${sec}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>${SEC[sec]}${gl(SEC_EN[sec])}
           <span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}</span></span></button>`;
       }).join('')}
-      <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（3つの ばしょを まわる）${gl("Today's journey - all three areas")}</span></button>
+      <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（ぜんぶの ばしょを まわる）${gl("Today's journey - every area")}</span></button>
       ${TTS.ready?`<button class="cmd" data-listen="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ちょうかいの どうくつ${gl('Listening Cave - answer by ear')}
         <span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}</span></span></button>`:''}
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
@@ -1338,7 +1380,11 @@ function answer(n){
 }
 function learnHtml(it){
   let h='';
-  if(it.sec==='kanji'){
+  if(it.sec==='kana'){
+    h=`<dl><dt>かな</dt><dd><b>${esc(it.w)}</b>　<span class="rj">${esc(it.romaji)}</span></dd>
+       <dt>れい</dt><dd><b>${esc(it.ex)}</b>　<span class="rj">${esc(it.exr)}</span><br><span class="en">${esc(it.en)}</span></dd></dl>`;
+    if(TTS.ready) h+=`<div class="ex">${esc(it.ex)}${sayBtn(it.ex)}</div>`;
+  }else if(it.sec==='kanji'){
     h=`<dl><dt>かんじ</dt><dd><b>${esc(it.w)}</b></dd>
        <dt>いみ</dt><dd>${rb(it.mean)}</dd>
        <dt>よみ</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}</dd></dl>`;
@@ -1346,7 +1392,7 @@ function learnHtml(it){
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
   }else if(it.sec==='vocab'){
-    h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
+    h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${S.romaji?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
        <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd></dl>`;
     if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
   }else{
@@ -1479,15 +1525,17 @@ function vStages(){
     <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア</div>
     <div style="margin-top:8px">${CHAPTERS.map((c,i)=>{
       const cs=chapStats(c), done=chapCleared(c), now=c.id===cur.id;
-      return `<div class="chap ${done?'done':''} ${now?'now':''}">
+      // 行ごと押せるようにして、クリアずみの章にも戻れるようにする
+      return `<button class="chap ${done?'done':''} ${now?'now':''}" data-chap="${esc(c.id)}" ${S.hp<=0?'disabled':''}>
         <span class="cn">${done?'✔':i+1}</span>
         <span><span>${esc(c.name)}</span>${gl(c.en)}${pbar(cs.rate)}</span>
         <span class="st2">${cs.done} / ${cs.n}<br>${(cs.rate*100).toFixed(0)}％</span>
-      </div>`;
+      </button>`;
     }).join('')}</div>
   </div>
   <div class="win tight"><div class="note">
     ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
+    どの ステージも おして れんしゅう できます。
     ${gl('New items are drawn from your current stage first.')}
   </div></div>
   <div class="win tight"><div class="cmds">
@@ -1535,7 +1583,7 @@ function vBook(){
     return (ra.seen?ra.lv:99)-(rb2.seen?rb2.lv:99)||rb2.miss-ra.miss||a.id.localeCompare(b.id,'ja');
   });
   $('#view').innerHTML=`
-  <div class="tabs">${['vocab','kanji','grammar'].map(k=>
+  <div class="tabs">${['kana','vocab','kanji','grammar'].map(k=>
     `<button data-bs="${k}" aria-pressed="${k===bookSec}">${SEC_SHORT[k]} ${BY_SEC[k].length}</button>`).join('')}</div>
   <div class="win"><span class="win-t">おぼえた ぐあい${gl('Progress')}</span>
     <div class="note">${s.done} / ${s.n} こ おぼえました（★4いじょう）</div>
@@ -1546,7 +1594,7 @@ function vBook(){
   <div class="win"><span class="win-t">にがてな もの${gl('Weak points')}</span>
     <div class="entries ruby-on">${listed.slice(0,60).map(i=>{const r=rec(i.id);
       return `<div class="entry"><span class="pip tile s${r.lv}"></span>
-        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}</span>`:''}
+        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${S.romaji&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}
         <br><span class="m">${rb(i.mean)}</span></span>
         <span class="lv">★${r.lv}${r.seen?`<br>${r.seen}かい`:''}</span></div>`;}).join('')}</div>
     <div class="note" style="margin-top:8px">おぼえが あさい ものから 60こ。まだの ものは うしろ。</div>
@@ -1572,7 +1620,9 @@ const N5_EXAM={pass:80, total:180, s1:{name:'げんごちしき・どっかい',
 function vStatus(){
   const d=daysLeft(), st=stats();
   // 収録項目の定着率を、①の目安点に置きかえて見せる（あくまで目安）
-  const est=Math.round(st.rate*N5_EXAM.s1.max);
+  // かなは N5 の出題範囲ではないので、点数の見積もりからは外す
+  const jl=stats(JLPT_SECS);
+  const est=Math.round(jl.rate*N5_EXAM.s1.max);
   // 聴解は20問こなすまでは数字を出さない。少ない回数の正答率は当てにならない
   const est2=S.listenN>=20?Math.round(S.listenOk/S.listenN*N5_EXAM.s2.max):null;
   $('#view').innerHTML=`
@@ -1593,7 +1643,7 @@ function vStatus(){
     <div class="marks">${MARKS.map(n=>`<span class="mk ${S.marks[n]?'on':''}">${n}にち</span>`).join('')}</div>
   </div>
   <div class="win"><span class="win-t">ぶんやべつの おぼえた ぐあい${gl('Progress by area')}</span>
-    <div class="meters">${['vocab','kanji','grammar'].map(sec=>{
+    <div class="meters">${['kana','vocab','kanji','grammar'].map(sec=>{
       const s=stats(sec), p=(s.rate*100);
       return `<div class="meter"><span class="lab">${SEC_SHORT[sec]}</span>
         ${pips(p,100,'var(--exp)',14)}<span class="v">${p.toFixed(0)}％</span></div>`;}).join('')}
@@ -1614,7 +1664,7 @@ function vStatus(){
       ①「げんごちしき（もじ・ごい・ぶんぽう）・どっかい」は 120てんまんてん、きじゅんてんは 38てん。<br>
       ②「ちょうかい」は 60てんまんてん、きじゅんてんは 19てん。<br>
       ごうけい 180てんで、80てん いじょう とれば ごうかくです。<br>
-      ①の めやすは、この アプリに はいって いる ${st.n}この おぼえた ぐあいから けいさんした ものです。
+      ①の めやすは、ことば・かんじ・ぶんぽうの ${jl.n}この おぼえた ぐあいから けいさんした ものです（かなは Ｎ５の しけんに 出ないので ふくみません）。
       ②の めやすは「ちょうかいの どうくつ」の せいかいりつ（${S.listenN}もん）から けいさんします。
       ${est>=N5_EXAM.s1.base?'いまの ペースなら ①の きじゅんてんは こえて います。':'まず ①の きじゅんてん 38てんを めざしましょう。'}
     </div>
@@ -1640,6 +1690,7 @@ function vConf(){
       <input type="number" id="f-new" min="3" max="40" value="${S.newPerDay}"></div>
     <div class="tg"><span>えいごの いみも みせる${gl('Show English meanings')}</span><button data-tg="showEn"><b>${S.showEn?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>がめんに えいごを つける${gl('Show English on the menus')}</span><button data-tg="uiEn"><b>${S.uiEn?'オン':'オフ'}</b></button></div>
+    <div class="tg"><span>ローマ字も みせる${gl('Show romaji under the kana')}</span><button data-tg="romaji"><b>${S.romaji?'オン':'オフ'}</b></button></div>
     ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
       `<div class="tg"><span>よみあげ${gl('Speech')}</span><b style="color:var(--dim)">この きかいでは つかえません</b></div>`}
     <div class="tg"><span>こうかおん${gl('Sound')}</span><button data-tg="sound"><b>${S.sound?'オン':'オフ'}</b></button></div>
@@ -1668,7 +1719,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-chap],[data-chapboss],[data-buy],[data-wear]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-kanaq],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -1682,6 +1733,12 @@ document.addEventListener('click',e=>{
     }
     return;
   }
+  if(t.hasAttribute('data-kanaq')){
+    S.knowsKana=(d.kanaq==='1'); SFX.sel();
+    S.name=($('#f-name')?.value||'').trim();   // 入力中のなまえを持ち越す
+    vNewGame(); paintMons();
+    return;
+  }
   if(d.slot){
     const n=Number(d.slot); SFX.sel();
     if(slotUsed(n)){ useSlot(n); return go('field'); }
@@ -1693,7 +1750,21 @@ document.addEventListener('click',e=>{
   if(t.hasAttribute('data-newgo')){
     const v=($('#f-name')?.value||'').trim();
     if(!v){ alert('なまえを いれて ください。'); $('#f-name')?.focus(); return; }
-    S.name=v; persist(); SFX.up(); return go('field');
+    if(S.knowsKana===null){ alert('ひらがなが よめるか、えらんで ください。\nPlease answer the hiragana question.'); return; }
+    S.name=v;
+    if(S.knowsKana){
+      // かなが読めるなら、ステージだけでなく項目じたいを「おぼえた」ことにする。
+      // ここを飛ばすと、139字が未学習のまま残って今日の目標や図鑑の数字が狂う。
+      // ★5なので、あとで忘れていても復習にちゃんと戻ってくる
+      CHAPTERS.filter(c=>c.sec==='kana').forEach(c=>{
+        S.chap[c.id]={cleared:1,best:0,skip:1};
+        c.ids.forEach(id=>{ S.srs[id]={lv:5,due:Date.now()+INTERVALS[5]*DAY,seen:1,miss:0}; });
+      });
+    }else{
+      // かなが読めない人は、選択肢のかなも読めない。ローマ字を最初から出す
+      S.romaji=true;
+    }
+    persist(); SFX.up(); return go('field');
   }
   if(d.go!==undefined&&t.hasAttribute('data-go')) return go(d.go);
   if(t.hasAttribute('data-go2')) return go(d.go2);
