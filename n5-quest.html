@@ -317,6 +317,23 @@ rt{
   color:#C6CCE4; letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
   text-shadow:0 2px 5px #000, 0 0 10px #000;
 }
+/* 英語のときのロゴ。ドラクエの海外版は「DRAGON」が小さく上、「QUEST」が
+   大きく下という組み方なので、それをなぞる */
+.title-main.en{
+  display:flex; flex-direction:column; align-items:center;
+  line-height:1; letter-spacing:.12em;
+}
+.title-main.en .tl-sm{
+  font-size:.5em; letter-spacing:.46em; margin-left:.46em; margin-bottom:.1em;
+  /* 紋章の濃い中央に重なる位置なので、下段より影を強くしないと沈む */
+  color:#FFD66B; text-shadow:2px 2px 0 #6B4A00, 4px 4px 0 #000, 0 0 14px #000;
+}
+/* 英語は字数が多いので、字間をつめないと携帯で折り返す */
+.title-sub.en{letter-spacing:.13em; font-size:11.5px}
+.title-ja{
+  margin-top:6px; font-size:10.5px; color:#7F87AB; letter-spacing:.22em;
+  text-shadow:0 2px 4px #000;
+}
 .title-hero{position:relative; display:grid; place-items:center}
 .title-hero canvas{animation:bob 2.6s steps(2,end) infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
@@ -2376,6 +2393,15 @@ function slotSummary(n){
   for(const k in srs) if(srs[k] && srs[k].lv>=4) done++;
   return {name:d.name||'なまえなし', lv:d.lv||1, done, streak:d.streak||0, hero:d.hero||'hero_m'};
 }
+// 英語をえらんだ人には、ロゴも副題も英語で出す。
+// かなも読めない段階で「ことばの ぼうけん」だけ出ていても、飾りにしかならない
+function titleLogo(){
+  if(!S.uiEn) return `<div class="title-main">Ｎ５クエスト</div>
+      <div class="title-sub">ことばの ぼうけん</div>`;
+  return `<div class="title-main en"><span class="tl-sm">N5</span><span>QUEST</span></div>
+      <div class="title-sub en">The Journey of a Thousand Words</div>
+      <div class="title-ja">ことばの ぼうけん</div>`;
+}
 function titleShell(inner, sub){
   return `
   <div class="title">
@@ -2383,8 +2409,7 @@ function titleShell(inner, sub){
     <div class="title-glow"></div>
     <div class="title-logo">
       <canvas class="crest" data-mon="crest" data-scale="5"></canvas>
-      <div class="title-main">Ｎ５クエスト</div>
-      <div class="title-sub">ことばの ぼうけん</div>
+      ${titleLogo()}
     </div>
     <div class="langpick">
       <button class="hp-b" data-uien="0" aria-pressed="${!S.uiEn}">にほんご</button>
