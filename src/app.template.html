@@ -211,8 +211,13 @@ rt{
 .ai.err{color:var(--ng)}
 
 /* ---- 図鑑 ---- */
-.tabs{display:flex; gap:7px; margin-bottom:10px}
-.tabs button{padding:4px 12px; border:var(--px) solid #3A3A6E; border-radius:4px; font-size:13.5px; color:var(--dim)}
+/* 区分が5つになったので、携帯の幅では折り返させずに詰める */
+.tabs{display:flex; gap:5px; margin-bottom:10px}
+.tabs button{
+  flex:1 1 0; min-width:0; padding:4px 4px; text-align:center; white-space:nowrap;
+  border:var(--px) solid #3A3A6E; border-radius:4px; font-size:clamp(10.5px,3.1vw,13.5px); color:var(--dim);
+}
+.tabs .n{display:block; font-size:.82em; opacity:.85}
 .tabs button[aria-pressed="true"]{border-color:var(--gold); color:var(--gold); background:var(--win-2)}
 .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(13px,1fr)); gap:3px; margin:6px 0 10px}
 .tile{aspect-ratio:1; border-radius:1px; background:var(--win-2); border:1px solid #2A2A52}
@@ -230,6 +235,7 @@ rt{
   aspect-ratio:1; display:grid; place-items:center; align-content:center;
   border-radius:3px; background:var(--win-2); border:1px solid #2A2A52;
 }
+button.kc{padding:0; font-family:inherit; color:inherit; cursor:pointer}
 .kc b{font-weight:normal; font-size:clamp(14px,4.6vw,19px); line-height:1.1}
 .kc i{font-style:normal; font-size:clamp(8px,2.6vw,11px); color:var(--dim); line-height:1.3}
 .kc.s1{background:#2E2E58; border-color:#3A3A6E}
@@ -974,6 +980,16 @@ function speak(text,slow,onEnd){
 // 読み上げに渡す文。ルビ記法と出題用の 【】 を外した素の日本語にする
 const sayText = s => bare(s).replace(/[【】]/g,'');
 const sayBtn = (t,slow) => `<button class="say" data-sayt="${esc(t)}"${slow?' data-slow="1"':''} aria-label="よみあげ">🔊</button>`;
+/* ずかんから鳴らすときの読み。区分ごとに取る場所が違う。
+   漢字の read は「音、訓」を並べた見出しなので、そのまま読ませると
+   読点まで読み上げて意味が取れない。例語があればそちらを鳴らす。 */
+function sayOf(i){
+  // かなの read はローマ字。そのまま渡すと「あ」ではなく "a" を読み上げてしまう
+  if(i.sec==='kana') return i.w;
+  if(i.sec==='kanji') return (i.words&&i.words[0]&&i.words[0][1])||String(i.read||'').split(/[、／\/]/)[0];
+  if(i.sec==='grammar') return i.ex?sayText(i.ex):'';
+  return i.read||i.w;
+}
 
 /* ===== 文字送り ===== */
 let typing=null;
@@ -2030,7 +2046,12 @@ function kanaCell(ch){
   // ヲ・ヂ・ヅ は現代のカタカナ表記で使わないので収録していない。表には薄く残す
   if(!it) return `<span class="kc none"><b>${esc(ch)}</b></span>`;
   const r=rec(it.id);
-  return `<span class="kc s${r.lv}" title="${esc(it.romaji)}"><b>${esc(ch)}</b><i>${esc(it.romaji)}</i></span>`;
+  const in_=`<b>${esc(ch)}</b><i>${esc(it.romaji)}</i>`;
+  // 声が出る端末では、字そのものを押して音を確かめられるようにする。
+  // かなを覚える段では「形と音を結ぶ」ことが目的なので、ここが効く
+  return TTS.ready
+    ? `<button class="kc s${r.lv}" data-sayt="${esc(ch)}" data-slow="1" aria-label="${esc(it.romaji)}">${in_}</button>`
+    : `<span class="kc s${r.lv}" title="${esc(it.romaji)}">${in_}</span>`;
 }
 function kanaChart(kata){
   const conv=rows=>rows.map(r=>r.map(c=>kata?toKata(c):c));
@@ -2050,8 +2071,8 @@ function vBook(){
     return (ra.seen?ra.lv:99)-(rb2.seen?rb2.lv:99)||rb2.miss-ra.miss||a.id.localeCompare(b.id,'ja');
   });
   $('#view').innerHTML=`
-  <div class="tabs">${['kana','vocab','kanji','grammar'].map(k=>
-    `<button data-bs="${k}" aria-pressed="${k===bookSec}">${SEC_SHORT[k]} ${BY_SEC[k].length}</button>`).join('')}</div>
+  <div class="tabs">${['kana','phrase','vocab','kanji','grammar'].map(k=>
+    `<button data-bs="${k}" aria-pressed="${k===bookSec}">${SEC_SHORT[k]}<span class="n">${BY_SEC[k].length}</span></button>`).join('')}</div>
   <div class="win"><span class="win-t">おぼえた ぐあい${gl('Progress')}</span>
     <div class="note">${s.done} / ${s.n} こ おぼえました（★4いじょう）${gl(`${s.done} of ${s.n} learned (4 stars or more)`)}</div>
     ${bookSec==='kana'
@@ -2064,7 +2085,8 @@ function vBook(){
   <div class="win"><span class="win-t">にがてな もの${gl('Weak points')}</span>
     <div class="entries ruby-on">${listed.slice(0,60).map(i=>{const r=rec(i.id);
       return `<div class="entry"><span class="pip tile s${r.lv}"></span>
-        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${rjOn()&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}
+        <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${rjOn()&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}${
+          TTS.ready&&sayOf(i)?sayBtn(sayOf(i),1):''}
         <br><span class="m">${rb(i.mean)}</span></span>
         <span class="lv">★${r.lv}${r.seen?`<br>${r.seen}かい`:''}</span></div>`;}).join('')}</div>
     <div class="note" style="margin-top:8px">おぼえが あさい ものから 60こ。まだの ものは うしろ。${gl('The 60 you know least well, weakest first. Items you have not met yet come last.')}</div>
