@@ -390,6 +390,9 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* 覚えた分だけ英語を引く。段の決め方は uiStage() */
+.en-2 .gl-s{display:none !important}
+.en-1 .gl-s,.en-1 .gl-m{display:none !important}
 /* ---- ホーム画面への案内 ---- */
 .hint{border-color:var(--gold)}
 .hint .hb{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:start}
@@ -473,10 +476,10 @@ rt{
   <main id="view"></main>
 </div>
 <nav class="nav"><div class="nav-in">
-  <button data-go="field" aria-current="page"><span class="i">ぼ</span>ぼうけん<span class="gl" data-en>Adventure</span></button>
-  <button data-go="book"><span class="i">ず</span>ずかん<span class="gl" data-en>Book</span></button>
-  <button data-go="status"><span class="i">つ</span>つよさ<span class="gl" data-en>Status</span></button>
-  <button data-go="conf"><span class="i">せ</span>せってい<span class="gl" data-en>Settings</span></button>
+  <button data-go="field" aria-current="page"><span class="i">ぼ</span>ぼうけん<span class="gl gl-s" data-en>Adventure</span></button>
+  <button data-go="book"><span class="i">ず</span>ずかん<span class="gl gl-s" data-en>Book</span></button>
+  <button data-go="status"><span class="i">つ</span>つよさ<span class="gl gl-s" data-en>Status</span></button>
+  <button data-go="conf"><span class="i">せ</span>せってい<span class="gl gl-s" data-en>Settings</span></button>
 </div></nav>
 
 <script>// かな → ローマ字。
@@ -1708,28 +1711,28 @@ const DATA={
 ["どうして〜か","どうして＋ぶん＋か","りゆうを きく","why ~?","【どうして】 [来|こ]なかったのです【か】。","こたえは「〜からです」"]
 ]};
 const MONSTERS=[
-{"id":"kotonoha","name":"ことのはガ","area":"vocab","hp":3,"msg":"ひらひらと ことばを まきちらしている。","pal":{"a":"#3E8E4A","b":"#6FCE6A","c":"#BFF07A","d":"#14240F"},"px":[".......daad..daad.......","......daaad..daaad......",".....ddaaad..daaadd.....","....daaaaaddddaaaaad....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daaaabbbbccbbbbaaaad..",".daaabbbbccccccbbbbaaad.",".daaabbbbccccccbbbbaaad.","daaabbbbccccccccbbbbaaad","daaabbbbccccccccbbbbaaad","aaaabbbbccccccccbbbbaaaa","aaaabbbbccddddccbbbbaaaa","daaabbbbccddddccbbbbaaad","daaabbbbccccccccbbbbaaad",".ddaabbbbccccccbbbbaadd.","..daabbbbccccccbbbbaad..","...ddaabbbbccbbbbaadd...","....daaaabbbbbbaaaad....",".....ddaaabbbbaaadd.....","......daaaddddaaad......",".......daad..daad.......","........dd....dd........","........................"]},
-{"id":"goiworm","name":"ゴイワーム","area":"vocab","hp":4,"msg":"ずかんの ページを かじって そだった。","pal":{"a":"#7A4E9E","b":"#B47FD8","c":"#E4C6F5","d":"#18102A"},"px":[".........ddbbbbdd.......","........dbbbbbbbbd......","........dbbccccbbd......",".......dbbccccccbbd.....",".......dbbccddccbbd.....",".......dbbccddccbbd.....",".......dbbccccccbbd.....","........dbbccccbbd......","........dbbbbbbbbd......",".........dbbbbbbd.......",".......ddaaaaaaaadd.....","......daaaaaaaaaaaad....",".....ddaaaabbbbaaaadd...","....daaaabbbbbbbbaaaad..","...ddaaaabbbbbbbbaaaadd.","..daaaabbbbbbbbbbbbaaaad","..daaaabbbbbbbbbbbbaaaad",".daaaabbbbbbbbbbbbbbaaaa",".daaaabbbbbbbbbbbbbbaaaa","..daaaabbbbbbbbbbbbaaaad","..daaaaaabbbbbbbbaaaaaad","...ddaaaaaabbbbaaaaaadd.",".....ddaaaaaaaaaaaadd...",".......ddaaaaaaaadd....."]},
-{"id":"fudeobake","name":"ふでおばけ","area":"kanji","hp":3,"msg":"すみを たらしながら ういている。","pal":{"d":"#14142A","a":"#8B5A2B","b":"#C89050","c":"#1C1C2E","e":"#F0E060"},"px":["..........daad..........",".........daaaad.........",".........daaaad.........","........daaaaaad........","........daabbaad........",".......daabbbbaad.......",".......daabbbbaad.......","......daabbbbbbaad......","......daabbbbbbaad......",".....daabbbbbbbbaad.....",".....daabbbbbbbbaad.....","....daaabbbbbbbbaaad....","....daaccccccccccaad....","...daccccccccccccccad...","...dcccceecccceeccccd...","...dcccceecccceeccccd...","...dccccccccccccccccd...","....dccccccccccccccd....","....dccccccccccccccd....",".....ddccccccccccdd.....","......dccccccccccd......",".......ddccccccdd.......","........dccccccd........",".........ddccdd........."]},
-{"id":"kanjigolem","name":"カンジゴーレム","area":"kanji","hp":5,"msg":"からだが すべて へんと つくりで できている。","pal":{"a":"#5A6472","b":"#8C97A8","c":"#D2DAE6","d":"#E8603A"},"px":["...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daabbbbbbbbbbbbbbaad..",".daabbbbbbbbbbbbbbbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbbbbbbbbbbbaad.","..daabbbbbbbbbbbbbbaad..","...daaabbbbbbbbbbaaad...",".dddaaaabbbbbbbbaaaaddd.","daaaaaaabbbbbbbbaaaaaaad","aaaaaaaaabbbbbbaaaaaaaaa","aabbbbaaaabbbbaaaabbbbaa","aabbbbaaaabbbbaaaabbbbaa","aaaaaaaabbbbbbbbaaaaaaaa","daaaaaaabbbbbbbbaaaaaaad",".dddddaaaaddddaaaaddddd.","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
-{"id":"bunporobo","name":"ブンポウロボ","area":"grammar","hp":4,"msg":"せつぞくの きそくを まもらせようとしてくる。","pal":{"d":"#14142A","a":"#33528C","b":"#7CA6E0","c":"#FF5A4A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbccbbbbccbbaad...","...daabbccbbbbccbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbccbbbbbaad...","....daabbbccccbbbaad....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..dabbaaaaaaaaaaaabbad..",".daabbaaaaaaaaaaaabbaad.",".daabbaaaaaaaaaaaabbaad.","..dabbaaaaaaaaaaaabbad..","..daaaaaaaaaaaaaaaaaad..","...ddaaaaaaaaaaaaaadd...",".....daaaaaddaaaaad.....","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
-{"id":"jokenryu","name":"ジョウケンリュウ","area":"grammar","hp":5,"msg":"じょうけんを みたさないと とおしてくれない。","pal":{"a":"#1E6E5E","b":"#37A88E","c":"#8FE0CC","d":"#F8D048"},"px":["....daad........daad....","...daaaad......daaaad...","...daaaad......daaaad...","..daaaaaaddddddaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaabbbbbbbbbbbbbbaaad.",".daabbbbbbbbbbbbbbbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbbbbbbbbbbbaad.",".daaabbbbbbbbbbbbbbaaad.",".daaabbbbbbbbbbbbbbaaad.","..daaabbbbbbbbbbbbaaad..","..daaaccccccccccccaaad..","...daacccccccccccacad...","...daaccaaccaaccaaccd...","...daaccaaccaaccaaccd...","...daacccccccccccccad...","....daacccccccccccad....","....daaaaaaaaaaaaaad....",".....ddaaaaaaaaaadd.....","......daaaaddaaaad......",".......daad..daad......."]},
-{"id":"machigai","name":"マチガイドクロ","area":"any","hp":4,"msg":"にどめの まちがいを まちかまえている。","pal":{"d":"#14142A","a":"#E8E4D8","b":"#20202E"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaaaaaaaaaaaaaaaaaad.","..daaaaaaaaaaaaaaaaaad..","..daaaaaaabbbbaaaaaaad..","...ddaaaaabbbbaaaaadd...",".....daaaaaaaaaaaaad....","....dddaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","...daaaaaaaaaaaaaad.....","...daaaaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","....dd..dd..dd..dd......","........................"]},
-{"id":"wasureme","name":"ワスレメダマ","area":"any","hp":3,"msg":"みつめていると おぼえたことを わすれそうになる。","pal":{"a":"#3A2E6E","b":"#6B58C4","c":"#FFFFFF","d":"#1A1020"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daabbbbccccccbbbbaadd.",".daabbbccccccccccbbbbaad",".daabbbccccccccccccbbaad","daabbbccccccccccccccbbba","daabbbcccccccddcccccbbbb","aabbbbccccccddddccccbbbb","aabbbbccccccddddccccbbbb","aabbbbcccccccddccccccbbb","aabbbbcccccccccccccccbbb","daabbbbcccccccccccccccbd","daabbbbccccccccccbbbaad.",".ddaabbbbccccccbbbbaad..","..daaaabbbbbbbbbbaaaad..","...ddaaabbbbbbbbaaadd...",".....daaddaaaaddaaad....","....ddaad.daaaddaad.dd..","...daaad..daaad.dd.daad.","..daaad....daad....daaad",".daaad.....daad.....daaa",".daad......daad......daa"]},
-{"id":"goukaku","name":"ゴウカクノツカイ","area":"boss","hp":10,"msg":"ごうかくの しるしを もって まちうけている。","pal":{"a":"#C8A030","b":"#F0D878","c":"#FFFFFF","d":"#3A2E10"},"px":[".......ddaaaaaadd.......","......daaaaaaaaaad......",".....ddaabbbbbbaadd.....","....daabbbbbbbbbbaad....","....daabbbbccbbbbaad....","...daabbbccccccbbbaad...","...daabbccddddccbbaad...","...daabbccddddccbbaad...","...daabbbccccccbbbaad...","....daabbbbccbbbbaad....",".....dabbbbbbbbbbad.....","...dddaabbbbbbbbaaddd...",".ddaaaaabbbbbbbbaaaaadd.","daaaaaabbbbbbbbbbaaaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad",".ddaaaabbbbbbbbbbaaaadd.","..daaaabbbbbbbbbbaaaad..","...ddaaaabbbbbbaaaadd...",".....daaaaddddaaaad.....","....ddaaad....daaadd....","...daaaaad....daaaaad...","...daaadd......ddaaad..."]},
-{"id":"ruigigoke","name":"ソックリゴケ","area":"vocab","hp":3,"msg":"にた いみの ことばに ばけて ふえていく。","pal":{"a":"#5E6B22","b":"#8EA83A","c":"#C8D46A","d":"#1E2210"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..",".ddaabbbbccccccbbbbaadd.","daabbbbccccccccccbbbbaad","daabbbbcddccccddcbbbbaad","aabbbbccddccccddcccbbbaa","aabbbbccccccccccccccbbaa","aabbbbccccccccccccccbbaa","aabbbbcccccccccccccbbbaa","daabbbbccccccccccbbbbaad","daabbbbccccccccccbbbbaad",".ddaabbbbccccccbbbbaadd.","...dabbbbccccccbbbbad...","...daabbbbbccbbbbbaad...",".ddaaabbbbbbbbbbbbaaadd.","daaaabbbbbbbbbbbbbbaaaad","daaaabbbbbbbbbbbbbbaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]},
-{"id":"katakanabachi","name":"カタカナバチ","area":"vocab","hp":4,"msg":"カタカナの ことばを あつめる はち。","pal":{"a":"#C8A02A","b":"#2A2418","c":"#9EC8E0","d":"#E85A2A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaaddd..","...daaddddaaaaddddaaaad.","...daaddddaaaaddddaaaad.","....daaaaaaaaaaaaaaddd..",".dd..ddaaaaaaaaaadd..dd.","dccdd.daaaaaaaaaad.ddccd","cccccd.daaaaaaaad.dccccc","ccccccddaaaaaaaaddcccccc","ccccccddaaaaaaaaddcccccc","cccccd.dbbbbbbbbd.dccccc","dccdd..dbbbbbbbbd..ddccd",".dd...daaaaaaaaaad...dd.",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....",".....dbbbbbbbbbbbbd.....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....","......dbbbbbbbbbbd......",".......daaaaaaaad.......","........daaaaaad........",".........dbbbbd.........","..........dbbd.........."]},
-{"id":"bushuhebi","name":"ブシュヘビ","area":"kanji","hp":4,"msg":"かんじの ぶひんに わかれて、また まきつく。","pal":{"a":"#2E6B4A","b":"#4FA86E","c":"#C8E8A0","d":"#F0D030"},"px":["...........ddaaaadd.....","..........daaaaaaaad....","..........daabbbbaad....",".........daabbbbbbaad...",".........daaddbbddaad...",".........daaddbbddaad...",".........daabbbbbbaad...","........daabbbbbbaad....",".......ddaabbbbbbaad....","......daabbbbbbaadd.....",".....ddaabbbbbbaad......","....daabbbbbbaadd.......","....daabbbbbbaad........","...daabbbbbbaad.........","...daabbbbbbaad.........","....daabbbbbbaad........","....daabbbbbbaad........",".....ddaabbbbbaaddd.....","......daabbbccccbbadd...",".......ddaabcccccbbaad..","........daabbccccbbaad..",".........ddaabbccccbbad.","..........daabbccccbbbd.","...........ddabbccccbd.."]},
-{"id":"jukugogani","name":"ジュクゴガニ","area":"kanji","hp":5,"msg":"ふたつの はさみで かんじを くみあわせる。","pal":{"a":"#A83A2A","b":"#E06A4A","c":"#F8C8A0","d":"#2A1810"},"px":["daad................daad","aaaaddd..........dddaaaa","aaabbbad........dabbbaaa","aabbbbaad......daabbbbaa","aabbbbaad......daabbbbaa","daabbaad........daabbaad","daaaaaad........daaaaaad",".ddaaad..dddddd..daaadd.","..daaad.daaaaaad.daaad..","...daaddaaaaaaaaddaad...","...daaaaabbbbbbaaaaad...","..daaaabbbbbbbbbbaaaad..",".ddaabbbddbbbbddbbbaadd.","daabbbbbddbbbbddbbbbbaad","daabbbbbbbbbbbbbbbbbbaad","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaaaaaaaaaaaaaaad...","..dddaaaaaaaaaaaaaaddd..",".daaaddaaaaddaaaaddaaad.",".daad..daad..daad..daad."]},
-{"id":"joshikurage","name":"ジョシクラゲ","area":"grammar","hp":3,"msg":"「は」と「が」の あいだを ただよっている。","pal":{"a":"#5A3A8E","b":"#8E6ACE","c":"#D8C8F0","d":"#F8D048"},"px":[".....ddaaaaaaaaaadd.....","...ddaaaaaaaaaaaaaadd...",".ddaaaabbbbbbbbbbaaaadd.","daaaabbbbbbbbbbbbbbaaaad","daabbbbccccccccccbbbbaad","aabbbcccccccccccccbbbbaa","aabbccddccccccddccbbbbaa","aabbccddccccccddccbbbbaa","aabbbcccccccccccccbbbbaa","daabbbbccccccccccbbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaabbbbbbbbbbaaad...","..dddaaabbbbbbbbaaaddd..",".daaddaaddaaaaddaaddaad.",".daaddaad.daaaddaaddaad.",".dbbddbbd..dbbbddd.dbbd.",".dbbddbbbd..dbbbd.dbbbd.","..ddbbddbbd.dbbbddbbdd..","..ddbbddbbd..dbbddbbdd..",".dbbdd.dbbd...dbbbddbbd.",".dbbdd.dbbbd...dbbddbbd.","..dbbbd.dbbbd...dbbbbd..","...dbbd..dbbd....dbbd..."]},
-{"id":"keigokishi","name":"テイネイキシ","area":"grammar","hp":5,"msg":"「です・ます」で いうまで みちを あけない。","pal":{"a":"#4A5470","b":"#8E9AB8","c":"#D8DEF0","d":"#C83A3A","e":"#F8D048"},"px":[".........dddddd.........","........dddddddd........","........dddddddd........",".......dddddddddd.......",".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daaccccccccccccaad...","...daaccccccccccccaad...","...daabbbbbbbbbbbbaad...","....daabbbbbbbbbbaad....",".....daaaaaaaaaaaad.....","...dddaaaaaaaaaaaaddd...",".ddaaaabbbeeeebbbaaaadd.","daaaabbbbbeeeebbbbbaaaad","daaaabbbbbeeeebbbbbaaaad","aaaabbbbbbbeebbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad","daaaaaddddddddddddaaaaad",".ddaad............daadd."]},
-{"id":"carelesskoumori","name":"ケアレスコウモリ","area":"any","hp":3,"msg":"わかったはずの もんだいを もちさる。","pal":{"d":"#14142A","a":"#3A2E4E","b":"#6E5A8E","c":"#F0C830"},"px":[".daad..............daad.",".daaad............daaad.",".daaadd..........ddaaad.",".daaaaad...dd...daaaaad.",".daaaaad..daad..daaaaad.","daaaaaaaddaaaaddaaaaaaad","daaaaaaaaaaaaaaaaaaaaaad","aaaaaaaaaaaaaaaaaaaaaaaa","aaabbaaaccaaaaccaaabbaaa","aabbbbbaccaaaaccaabbbbaa","aabbbbbaaaaaaaaaaabbbbaa","dabbbbbbaaaaaaaaabbbbbad",".dbbbbbbaaaaaaaaabbbbbd.","..dbbbbbaaaaaaaabbbbbd..","..dbbbbbaaaaaaaabbbbbd..","...ddbbaaaaaaaaaabbdd...",".....daaaaaaaaaaaad.....","......daaaaaaaaaad......","......daaaaaaaaaad......",".......daaaaaaaad.......",".......daaaddaaad.......",".......daad..daad.......","........dd....dd........","........................"]},
-{"id":"nemukegumo","name":"ネムケグモ","area":"any","hp":4,"msg":"よる おそくに あらわれて、あたまを ぼんやりさせる。","pal":{"a":"#2E2A3E","b":"#5A5470","c":"#C83A5A","d":"#8E88A8"},"px":["ddd..................ddd","dddd................dddd","ddddd..............ddddd",".ddddd..dd....dd..ddddd.","..ddddddddd..ddddddddd..","...dddddddddddddddddd...","....ddddddaaaadddddd....",".....ddddaaaaaadddd.....","...ddddaaaaaaaaaadddd...","..dddaaaaaaaaaaaaaaddd..",".ddddaaaabbbbbbaaaadddd.","dddaaaabbbbbbbbbbaaaaddd","dddaaaabccbbbbccbaaaaddd","ddaaaabbccbbbbccbbaaaadd","ddaaaabbbbbbbbbbbbaaaadd",".daaaabbbbbbbbbbbbaaaad.",".daaaabbbbbbbbbbbbaaaad.","..daaaabbbbbbbbbbaaaad..","..daaaabbbbbbbbbbaaaad..","...daaaaabbbbbbaaaaad...","...ddddaaaaaaaaaadddd...","..dddddddaaaaaaddddddd..",".ddddd..daaaaaad..ddddd.",".dddd....ddaadd....dddd."]},
-{"id":"moshinomaou","name":"タメシノマオウ","area":"boss","hp":12,"msg":"ほんばんと おなじ すがたで、ちからを うつしだす。","pal":{"a":"#4A1030","b":"#8E2050","c":"#E85A7A","d":"#F8D048"},"px":["daadd..............ddaad","aaaaad............daaaaa","aaaaadd..........ddaaaaa","daaaaaad........daaaaaad","daaaaaadd......ddaaaaaad",".ddaaaaaaddddddaaaaaadd.","...daaaaaaaaaaaaaaaad...","...daaaaaaaaaaaaaaaad...",".ddaabbbbbbbbbbbbbbaadd.","daabbbbbbbbbbbbbbbbbbaad","daabbbddbbbbbbbbddbbbaad","aabbbbddbbbbbbbbddbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad",".dabbbbccccccccccbbbbad.",".daabbbbbccccccbbbbbaad.","daaabbbbbbbbbbbbbbbbaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]}
+{"id":"kotonoha","name":"ことのはガ","en":"Wordwing","area":"vocab","hp":3,"msg":"ひらひらと ことばを まきちらしている。","pal":{"a":"#3E8E4A","b":"#6FCE6A","c":"#BFF07A","d":"#14240F"},"px":[".......daad..daad.......","......daaad..daaad......",".....ddaaad..daaadd.....","....daaaaaddddaaaaad....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daaaabbbbccbbbbaaaad..",".daaabbbbccccccbbbbaaad.",".daaabbbbccccccbbbbaaad.","daaabbbbccccccccbbbbaaad","daaabbbbccccccccbbbbaaad","aaaabbbbccccccccbbbbaaaa","aaaabbbbccddddccbbbbaaaa","daaabbbbccddddccbbbbaaad","daaabbbbccccccccbbbbaaad",".ddaabbbbccccccbbbbaadd.","..daabbbbccccccbbbbaad..","...ddaabbbbccbbbbaadd...","....daaaabbbbbbaaaad....",".....ddaaabbbbaaadd.....","......daaaddddaaad......",".......daad..daad.......","........dd....dd........","........................"]},
+{"id":"goiworm","name":"ゴイワーム","en":"Lexiworm","area":"vocab","hp":4,"msg":"ずかんの ページを かじって そだった。","pal":{"a":"#7A4E9E","b":"#B47FD8","c":"#E4C6F5","d":"#18102A"},"px":[".........ddbbbbdd.......","........dbbbbbbbbd......","........dbbccccbbd......",".......dbbccccccbbd.....",".......dbbccddccbbd.....",".......dbbccddccbbd.....",".......dbbccccccbbd.....","........dbbccccbbd......","........dbbbbbbbbd......",".........dbbbbbbd.......",".......ddaaaaaaaadd.....","......daaaaaaaaaaaad....",".....ddaaaabbbbaaaadd...","....daaaabbbbbbbbaaaad..","...ddaaaabbbbbbbbaaaadd.","..daaaabbbbbbbbbbbbaaaad","..daaaabbbbbbbbbbbbaaaad",".daaaabbbbbbbbbbbbbbaaaa",".daaaabbbbbbbbbbbbbbaaaa","..daaaabbbbbbbbbbbbaaaad","..daaaaaabbbbbbbbaaaaaad","...ddaaaaaabbbbaaaaaadd.",".....ddaaaaaaaaaaaadd...",".......ddaaaaaaaadd....."]},
+{"id":"fudeobake","name":"ふでおばけ","en":"Brushwraith","area":"kanji","hp":3,"msg":"すみを たらしながら ういている。","pal":{"d":"#14142A","a":"#8B5A2B","b":"#C89050","c":"#1C1C2E","e":"#F0E060"},"px":["..........daad..........",".........daaaad.........",".........daaaad.........","........daaaaaad........","........daabbaad........",".......daabbbbaad.......",".......daabbbbaad.......","......daabbbbbbaad......","......daabbbbbbaad......",".....daabbbbbbbbaad.....",".....daabbbbbbbbaad.....","....daaabbbbbbbbaaad....","....daaccccccccccaad....","...daccccccccccccccad...","...dcccceecccceeccccd...","...dcccceecccceeccccd...","...dccccccccccccccccd...","....dccccccccccccccd....","....dccccccccccccccd....",".....ddccccccccccdd.....","......dccccccccccd......",".......ddccccccdd.......","........dccccccd........",".........ddccdd........."]},
+{"id":"kanjigolem","name":"カンジゴーレム","en":"Glyph Golem","area":"kanji","hp":5,"msg":"からだが すべて へんと つくりで できている。","pal":{"a":"#5A6472","b":"#8C97A8","c":"#D2DAE6","d":"#E8603A"},"px":["...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daabbbbbbbbbbbbbbaad..",".daabbbbbbbbbbbbbbbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbbbbbbbbbbbaad.","..daabbbbbbbbbbbbbbaad..","...daaabbbbbbbbbbaaad...",".dddaaaabbbbbbbbaaaaddd.","daaaaaaabbbbbbbbaaaaaaad","aaaaaaaaabbbbbbaaaaaaaaa","aabbbbaaaabbbbaaaabbbbaa","aabbbbaaaabbbbaaaabbbbaa","aaaaaaaabbbbbbbbaaaaaaaa","daaaaaaabbbbbbbbaaaaaaad",".dddddaaaaddddaaaaddddd.","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
+{"id":"bunporobo","name":"ブンポウロボ","en":"Grammatron","area":"grammar","hp":4,"msg":"せつぞくの きそくを まもらせようとしてくる。","pal":{"d":"#14142A","a":"#33528C","b":"#7CA6E0","c":"#FF5A4A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbccbbbbccbbaad...","...daabbccbbbbccbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbccbbbbbaad...","....daabbbccccbbbaad....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..dabbaaaaaaaaaaaabbad..",".daabbaaaaaaaaaaaabbaad.",".daabbaaaaaaaaaaaabbaad.","..dabbaaaaaaaaaaaabbad..","..daaaaaaaaaaaaaaaaaad..","...ddaaaaaaaaaaaaaadd...",".....daaaaaddaaaaad.....","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
+{"id":"jokenryu","name":"ジョウケンリュウ","en":"Condragon","area":"grammar","hp":5,"msg":"じょうけんを みたさないと とおしてくれない。","pal":{"a":"#1E6E5E","b":"#37A88E","c":"#8FE0CC","d":"#F8D048"},"px":["....daad........daad....","...daaaad......daaaad...","...daaaad......daaaad...","..daaaaaaddddddaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaabbbbbbbbbbbbbbaaad.",".daabbbbbbbbbbbbbbbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbbbbbbbbbbbaad.",".daaabbbbbbbbbbbbbbaaad.",".daaabbbbbbbbbbbbbbaaad.","..daaabbbbbbbbbbbbaaad..","..daaaccccccccccccaaad..","...daacccccccccccacad...","...daaccaaccaaccaaccd...","...daaccaaccaaccaaccd...","...daacccccccccccccad...","....daacccccccccccad....","....daaaaaaaaaaaaaad....",".....ddaaaaaaaaaadd.....","......daaaaddaaaad......",".......daad..daad......."]},
+{"id":"machigai","name":"マチガイドクロ","en":"Blunderskull","area":"any","hp":4,"msg":"にどめの まちがいを まちかまえている。","pal":{"d":"#14142A","a":"#E8E4D8","b":"#20202E"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaaaaaaaaaaaaaaaaaad.","..daaaaaaaaaaaaaaaaaad..","..daaaaaaabbbbaaaaaaad..","...ddaaaaabbbbaaaaadd...",".....daaaaaaaaaaaaad....","....dddaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","...daaaaaaaaaaaaaad.....","...daaaaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","....dd..dd..dd..dd......","........................"]},
+{"id":"wasureme","name":"ワスレメダマ","en":"Forgeteye","area":"any","hp":3,"msg":"みつめていると おぼえたことを わすれそうになる。","pal":{"a":"#3A2E6E","b":"#6B58C4","c":"#FFFFFF","d":"#1A1020"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daabbbbccccccbbbbaadd.",".daabbbccccccccccbbbbaad",".daabbbccccccccccccbbaad","daabbbccccccccccccccbbba","daabbbcccccccddcccccbbbb","aabbbbccccccddddccccbbbb","aabbbbccccccddddccccbbbb","aabbbbcccccccddccccccbbb","aabbbbcccccccccccccccbbb","daabbbbcccccccccccccccbd","daabbbbccccccccccbbbaad.",".ddaabbbbccccccbbbbaad..","..daaaabbbbbbbbbbaaaad..","...ddaaabbbbbbbbaaadd...",".....daaddaaaaddaaad....","....ddaad.daaaddaad.dd..","...daaad..daaad.dd.daad.","..daaad....daad....daaad",".daaad.....daad.....daaa",".daad......daad......daa"]},
+{"id":"goukaku","name":"ゴウカクノツカイ","en":"Herald of Passing","area":"boss","hp":10,"msg":"ごうかくの しるしを もって まちうけている。","pal":{"a":"#C8A030","b":"#F0D878","c":"#FFFFFF","d":"#3A2E10"},"px":[".......ddaaaaaadd.......","......daaaaaaaaaad......",".....ddaabbbbbbaadd.....","....daabbbbbbbbbbaad....","....daabbbbccbbbbaad....","...daabbbccccccbbbaad...","...daabbccddddccbbaad...","...daabbccddddccbbaad...","...daabbbccccccbbbaad...","....daabbbbccbbbbaad....",".....dabbbbbbbbbbad.....","...dddaabbbbbbbbaaddd...",".ddaaaaabbbbbbbbaaaaadd.","daaaaaabbbbbbbbbbaaaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad",".ddaaaabbbbbbbbbbaaaadd.","..daaaabbbbbbbbbbaaaad..","...ddaaaabbbbbbaaaadd...",".....daaaaddddaaaad.....","....ddaaad....daaadd....","...daaaaad....daaaaad...","...daaadd......ddaaad..."]},
+{"id":"ruigigoke","name":"ソックリゴケ","en":"Mimicmoss","area":"vocab","hp":3,"msg":"にた いみの ことばに ばけて ふえていく。","pal":{"a":"#5E6B22","b":"#8EA83A","c":"#C8D46A","d":"#1E2210"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..",".ddaabbbbccccccbbbbaadd.","daabbbbccccccccccbbbbaad","daabbbbcddccccddcbbbbaad","aabbbbccddccccddcccbbbaa","aabbbbccccccccccccccbbaa","aabbbbccccccccccccccbbaa","aabbbbcccccccccccccbbbaa","daabbbbccccccccccbbbbaad","daabbbbccccccccccbbbbaad",".ddaabbbbccccccbbbbaadd.","...dabbbbccccccbbbbad...","...daabbbbbccbbbbbaad...",".ddaaabbbbbbbbbbbbaaadd.","daaaabbbbbbbbbbbbbbaaaad","daaaabbbbbbbbbbbbbbaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]},
+{"id":"katakanabachi","name":"カタカナバチ","en":"Katakanabee","area":"vocab","hp":4,"msg":"カタカナの ことばを あつめる はち。","pal":{"a":"#C8A02A","b":"#2A2418","c":"#9EC8E0","d":"#E85A2A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaaddd..","...daaddddaaaaddddaaaad.","...daaddddaaaaddddaaaad.","....daaaaaaaaaaaaaaddd..",".dd..ddaaaaaaaaaadd..dd.","dccdd.daaaaaaaaaad.ddccd","cccccd.daaaaaaaad.dccccc","ccccccddaaaaaaaaddcccccc","ccccccddaaaaaaaaddcccccc","cccccd.dbbbbbbbbd.dccccc","dccdd..dbbbbbbbbd..ddccd",".dd...daaaaaaaaaad...dd.",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....",".....dbbbbbbbbbbbbd.....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....","......dbbbbbbbbbbd......",".......daaaaaaaad.......","........daaaaaad........",".........dbbbbd.........","..........dbbd.........."]},
+{"id":"bushuhebi","name":"ブシュヘビ","en":"Radiconda","area":"kanji","hp":4,"msg":"かんじの ぶひんに わかれて、また まきつく。","pal":{"a":"#2E6B4A","b":"#4FA86E","c":"#C8E8A0","d":"#F0D030"},"px":["...........ddaaaadd.....","..........daaaaaaaad....","..........daabbbbaad....",".........daabbbbbbaad...",".........daaddbbddaad...",".........daaddbbddaad...",".........daabbbbbbaad...","........daabbbbbbaad....",".......ddaabbbbbbaad....","......daabbbbbbaadd.....",".....ddaabbbbbbaad......","....daabbbbbbaadd.......","....daabbbbbbaad........","...daabbbbbbaad.........","...daabbbbbbaad.........","....daabbbbbbaad........","....daabbbbbbaad........",".....ddaabbbbbaaddd.....","......daabbbccccbbadd...",".......ddaabcccccbbaad..","........daabbccccbbaad..",".........ddaabbccccbbad.","..........daabbccccbbbd.","...........ddabbccccbd.."]},
+{"id":"jukugogani","name":"ジュクゴガニ","en":"Combocrab","area":"kanji","hp":5,"msg":"ふたつの はさみで かんじを くみあわせる。","pal":{"a":"#A83A2A","b":"#E06A4A","c":"#F8C8A0","d":"#2A1810"},"px":["daad................daad","aaaaddd..........dddaaaa","aaabbbad........dabbbaaa","aabbbbaad......daabbbbaa","aabbbbaad......daabbbbaa","daabbaad........daabbaad","daaaaaad........daaaaaad",".ddaaad..dddddd..daaadd.","..daaad.daaaaaad.daaad..","...daaddaaaaaaaaddaad...","...daaaaabbbbbbaaaaad...","..daaaabbbbbbbbbbaaaad..",".ddaabbbddbbbbddbbbaadd.","daabbbbbddbbbbddbbbbbaad","daabbbbbbbbbbbbbbbbbbaad","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaaaaaaaaaaaaaaad...","..dddaaaaaaaaaaaaaaddd..",".daaaddaaaaddaaaaddaaad.",".daad..daad..daad..daad."]},
+{"id":"joshikurage","name":"ジョシクラゲ","en":"Partijelly","area":"grammar","hp":3,"msg":"「は」と「が」の あいだを ただよっている。","pal":{"a":"#5A3A8E","b":"#8E6ACE","c":"#D8C8F0","d":"#F8D048"},"px":[".....ddaaaaaaaaaadd.....","...ddaaaaaaaaaaaaaadd...",".ddaaaabbbbbbbbbbaaaadd.","daaaabbbbbbbbbbbbbbaaaad","daabbbbccccccccccbbbbaad","aabbbcccccccccccccbbbbaa","aabbccddccccccddccbbbbaa","aabbccddccccccddccbbbbaa","aabbbcccccccccccccbbbbaa","daabbbbccccccccccbbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaabbbbbbbbbbaaad...","..dddaaabbbbbbbbaaaddd..",".daaddaaddaaaaddaaddaad.",".daaddaad.daaaddaaddaad.",".dbbddbbd..dbbbddd.dbbd.",".dbbddbbbd..dbbbd.dbbbd.","..ddbbddbbd.dbbbddbbdd..","..ddbbddbbd..dbbddbbdd..",".dbbdd.dbbd...dbbbddbbd.",".dbbdd.dbbbd...dbbddbbd.","..dbbbd.dbbbd...dbbbbd..","...dbbd..dbbd....dbbd..."]},
+{"id":"keigokishi","name":"テイネイキシ","en":"Sir Courteous","area":"grammar","hp":5,"msg":"「です・ます」で いうまで みちを あけない。","pal":{"a":"#4A5470","b":"#8E9AB8","c":"#D8DEF0","d":"#C83A3A","e":"#F8D048"},"px":[".........dddddd.........","........dddddddd........","........dddddddd........",".......dddddddddd.......",".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daaccccccccccccaad...","...daaccccccccccccaad...","...daabbbbbbbbbbbbaad...","....daabbbbbbbbbbaad....",".....daaaaaaaaaaaad.....","...dddaaaaaaaaaaaaddd...",".ddaaaabbbeeeebbbaaaadd.","daaaabbbbbeeeebbbbbaaaad","daaaabbbbbeeeebbbbbaaaad","aaaabbbbbbbeebbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad","daaaaaddddddddddddaaaaad",".ddaad............daadd."]},
+{"id":"carelesskoumori","name":"ケアレスコウモリ","en":"Slipupbat","area":"any","hp":3,"msg":"わかったはずの もんだいを もちさる。","pal":{"d":"#14142A","a":"#3A2E4E","b":"#6E5A8E","c":"#F0C830"},"px":[".daad..............daad.",".daaad............daaad.",".daaadd..........ddaaad.",".daaaaad...dd...daaaaad.",".daaaaad..daad..daaaaad.","daaaaaaaddaaaaddaaaaaaad","daaaaaaaaaaaaaaaaaaaaaad","aaaaaaaaaaaaaaaaaaaaaaaa","aaabbaaaccaaaaccaaabbaaa","aabbbbbaccaaaaccaabbbbaa","aabbbbbaaaaaaaaaaabbbbaa","dabbbbbbaaaaaaaaabbbbbad",".dbbbbbbaaaaaaaaabbbbbd.","..dbbbbbaaaaaaaabbbbbd..","..dbbbbbaaaaaaaabbbbbd..","...ddbbaaaaaaaaaabbdd...",".....daaaaaaaaaaaad.....","......daaaaaaaaaad......","......daaaaaaaaaad......",".......daaaaaaaad.......",".......daaaddaaad.......",".......daad..daad.......","........dd....dd........","........................"]},
+{"id":"nemukegumo","name":"ネムケグモ","en":"Snoozepider","area":"any","hp":4,"msg":"よる おそくに あらわれて、あたまを ぼんやりさせる。","pal":{"a":"#2E2A3E","b":"#5A5470","c":"#C83A5A","d":"#8E88A8"},"px":["ddd..................ddd","dddd................dddd","ddddd..............ddddd",".ddddd..dd....dd..ddddd.","..ddddddddd..ddddddddd..","...dddddddddddddddddd...","....ddddddaaaadddddd....",".....ddddaaaaaadddd.....","...ddddaaaaaaaaaadddd...","..dddaaaaaaaaaaaaaaddd..",".ddddaaaabbbbbbaaaadddd.","dddaaaabbbbbbbbbbaaaaddd","dddaaaabccbbbbccbaaaaddd","ddaaaabbccbbbbccbbaaaadd","ddaaaabbbbbbbbbbbbaaaadd",".daaaabbbbbbbbbbbbaaaad.",".daaaabbbbbbbbbbbbaaaad.","..daaaabbbbbbbbbbaaaad..","..daaaabbbbbbbbbbaaaad..","...daaaaabbbbbbaaaaad...","...ddddaaaaaaaaaadddd...","..dddddddaaaaaaddddddd..",".ddddd..daaaaaad..ddddd.",".dddd....ddaadd....dddd."]},
+{"id":"moshinomaou","name":"タメシノマオウ","en":"Archfiend of Trials","area":"boss","hp":12,"msg":"ほんばんと おなじ すがたで、ちからを うつしだす。","pal":{"a":"#4A1030","b":"#8E2050","c":"#E85A7A","d":"#F8D048"},"px":["daadd..............ddaad","aaaaad............daaaaa","aaaaadd..........ddaaaaa","daaaaaad........daaaaaad","daaaaaadd......ddaaaaaad",".ddaaaaaaddddddaaaaaadd.","...daaaaaaaaaaaaaaaad...","...daaaaaaaaaaaaaaaad...",".ddaabbbbbbbbbbbbbbaadd.","daabbbbbbbbbbbbbbbbbbaad","daabbbddbbbbbbbbddbbbaad","aabbbbddbbbbbbbbddbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad",".dabbbbccccccccccbbbbad.",".daabbbbbccccccbbbbbaad.","daaabbbbbbbbbbbbbbbbaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]}
 ];
 const HEROES=[
-{"id":"hero_m","name":"おとこ","label":"おとこの ゆうしゃ","pal":{"G":"#B8860B","K":"#4A3424","N":"#9AA6C8","S":"#D9A87C","a":"#17325C","b":"#2F5A9E","c":"#6E9FE0","d":"#14142A","e":"#1A2340","g":"#F8D048","k":"#2A1E14","m":"#9A6A4A","n":"#EDF2FF","s":"#F2C9A0","w":"#FFFFFF"},"px":["..............dGgd......ddd.....",".............dGggGd....dnnNd....","............daaggaad...dnnNd....","..........ddaccccbbadd.dnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbbbbbbbbbaddnnNd....",".........dGGggGGGGggGGddnnNd....",".........dabSssssssSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSssssssSbaddnnNd....",".........daaSssmmssSaaddnnNd....","........ddddssssssssddddnnNd....",".......dcccaaaSSSSaaacccnnNdd...",".......dcccabbbbbbbbacGGGGGGGd..","......dggggggcGGGGcbasgggggggd..","......dgbbbbgcGggGcbasssKKKdd...","......dgbbGbgcGggGcbasssKKKd....","......dgbGgGgcGGGGcbasssKKKd....","......dgbbGbgcbbbbcbadddKKKd....","......dgbbbbgbbbbbbbad.dGGGd....","......dgbbbbgGGggGGGGd.dGGGd....",".......dgbbbgbbdabbad...ddd.....",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."],"px2":["..............dGgd..............",".............dGggGd.............","............daaggaad............","..........ddaccccbbadd..........",".........dabbccccbbbbad.........",".........dabbccccbbbbad.........",".........dabbbbbbbbbbad.........",".........dGGggGGGGggGGd.........",".........dabSssssssSbad.........",".........dabSewssewSbad.........",".........dabSewssewSbad.........",".........dabSssssssSbad.........",".........daaSssmmssSaad..d......","........ddddssssssssdddddGd.....",".......dcccaaaSSSSaaacccdGdddddd",".......dcccabbbbbbbbassssGnnnnnn","......dggggggcGGGGcbassssGnnnnnn","......dgbbbbgcGggGcbassssGNNNNNN","......dgbbGbgcGggGcbaddddGdddddd","......dgbGgGgcGGGGcbad..dGd.....","......dgbbGbgcbbbbcbad...d......","......dgbbbbgbbbbbbbad..........","......dgbbbbgGGggGGGGd..........",".......dgbbbgbbdabbad...........",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."]},
-{"id":"hero_f","name":"おんな","label":"おんなの ゆうしゃ","pal":{"G":"#B8860B","H":"#C89A50","K":"#4A3424","N":"#9AA6C8","S":"#D9A87C","a":"#5E1830","b":"#A8304A","c":"#D9647E","d":"#14142A","e":"#1A2340","g":"#F8D048","h":"#7A4A1E","k":"#2A1E14","m":"#9A6A4A","n":"#EDF2FF","s":"#F2C9A0","w":"#FFFFFF"},"px":["..............dGgd......ddd.....",".............dGggGd....dnnNd....","............daaggaad...dnnNd....","..........ddaccccbbadd.dnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbbbbbbbbbaddnnNd....",".........dGGggGGGGggGGddnnNd....","........dhabhHHHHHHhbahdnnNd....","........dHabSewssewSbaHdnnNd....","........dHabSewssewSbaHdnnNd....","........dHabSssssssSbaHdnnNd....","........dHaaSssmmssSaaHdnnNd....","........dHddssssssssddHdnnNd....",".......dcccaaaSSSSaaacccnnNdd...",".......dcccabbbbbbbbacGGGGGGGd..","......dggggggcGGGGcbasgggggggd..","......dgbbbbgcGggGcbasssKKKdd...","......dgbbGbgcGggGcbasssKKKd....","......dgbGgGgcGGGGcbasssKKKd....","......dgbbGbgcbbbbcbadddKKKd....","......dgbbbbgbbbbbbbad.dGGGd....","......dgbbbbgGGggGGGGaddGGGd....",".......dgbbbgbbbbbbbbad.ddd.....",".......dgbbbgbbbbbbbbad.........","........dgbgGGGGGGGGGad.........",".........dggabbdabbadd..........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."],"px2":["..............dGgd..............",".............dGggGd.............","............daaggaad............","..........ddaccccbbadd..........",".........dabbccccbbbbad.........",".........dabbccccbbbbad.........",".........dabbbbbbbbbbad.........",".........dGGggGGGGggGGd.........","........dhabhHHHHHHhbahd........","........dHabSewssewSbaHd........","........dHabSewssewSbaHd........","........dHabSssssssSbaHd........","........dHaaSssmmssSaaHd.d......","........dHddssssssssddHddGd.....",".......dcccaaaSSSSaaacccdGdddddd",".......dcccabbbbbbbbassssGnnnnnn","......dggggggcGGGGcbassssGnnnnnn","......dgbbbbgcGggGcbassssGNNNNNN","......dgbbGbgcGggGcbaddddGdddddd","......dgbGgGgcGGGGcbad..dGd.....","......dgbbGbgcbbbbcbad...d......","......dgbbbbgbbbbbbbad..........","......dgbbbbgGGggGGGGad.........",".......dgbbbgbbbbbbbbad.........",".......dgbbbgbbbbbbbbad.........","........dgbgGGGGGGGGGad.........",".........dggabbdabbadd..........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."]}
+{"id":"hero_m","name":"おとこ","en":"Male","label":"おとこの ゆうしゃ","pal":{"G":"#B8860B","K":"#4A3424","N":"#9AA6C8","S":"#D9A87C","a":"#17325C","b":"#2F5A9E","c":"#6E9FE0","d":"#14142A","e":"#1A2340","g":"#F8D048","k":"#2A1E14","m":"#9A6A4A","n":"#EDF2FF","s":"#F2C9A0","w":"#FFFFFF"},"px":["..............dGgd......ddd.....",".............dGggGd....dnnNd....","............daaggaad...dnnNd....","..........ddaccccbbadd.dnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbbbbbbbbbaddnnNd....",".........dGGggGGGGggGGddnnNd....",".........dabSssssssSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSssssssSbaddnnNd....",".........daaSssmmssSaaddnnNd....","........ddddssssssssddddnnNd....",".......dcccaaaSSSSaaacccnnNdd...",".......dcccabbbbbbbbacGGGGGGGd..","......dggggggcGGGGcbasgggggggd..","......dgbbbbgcGggGcbasssKKKdd...","......dgbbGbgcGggGcbasssKKKd....","......dgbGgGgcGGGGcbasssKKKd....","......dgbbGbgcbbbbcbadddKKKd....","......dgbbbbgbbbbbbbad.dGGGd....","......dgbbbbgGGggGGGGd.dGGGd....",".......dgbbbgbbdabbad...ddd.....",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."],"px2":["..............dGgd..............",".............dGggGd.............","............daaggaad............","..........ddaccccbbadd..........",".........dabbccccbbbbad.........",".........dabbccccbbbbad.........",".........dabbbbbbbbbbad.........",".........dGGggGGGGggGGd.........",".........dabSssssssSbad.........",".........dabSewssewSbad.........",".........dabSewssewSbad.........",".........dabSssssssSbad.........",".........daaSssmmssSaad..d......","........ddddssssssssdddddGd.....",".......dcccaaaSSSSaaacccdGdddddd",".......dcccabbbbbbbbassssGnnnnnn","......dggggggcGGGGcbassssGnnnnnn","......dgbbbbgcGggGcbassssGNNNNNN","......dgbbGbgcGggGcbaddddGdddddd","......dgbGgGgcGGGGcbad..dGd.....","......dgbbGbgcbbbbcbad...d......","......dgbbbbgbbbbbbbad..........","......dgbbbbgGGggGGGGd..........",".......dgbbbgbbdabbad...........",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."]},
+{"id":"hero_f","name":"おんな","en":"Female","label":"おんなの ゆうしゃ","pal":{"G":"#B8860B","H":"#C89A50","K":"#4A3424","N":"#9AA6C8","S":"#D9A87C","a":"#5E1830","b":"#A8304A","c":"#D9647E","d":"#14142A","e":"#1A2340","g":"#F8D048","h":"#7A4A1E","k":"#2A1E14","m":"#9A6A4A","n":"#EDF2FF","s":"#F2C9A0","w":"#FFFFFF"},"px":["..............dGgd......ddd.....",".............dGggGd....dnnNd....","............daaggaad...dnnNd....","..........ddaccccbbadd.dnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbbbbbbbbbaddnnNd....",".........dGGggGGGGggGGddnnNd....","........dhabhHHHHHHhbahdnnNd....","........dHabSewssewSbaHdnnNd....","........dHabSewssewSbaHdnnNd....","........dHabSssssssSbaHdnnNd....","........dHaaSssmmssSaaHdnnNd....","........dHddssssssssddHdnnNd....",".......dcccaaaSSSSaaacccnnNdd...",".......dcccabbbbbbbbacGGGGGGGd..","......dggggggcGGGGcbasgggggggd..","......dgbbbbgcGggGcbasssKKKdd...","......dgbbGbgcGggGcbasssKKKd....","......dgbGgGgcGGGGcbasssKKKd....","......dgbbGbgcbbbbcbadddKKKd....","......dgbbbbgbbbbbbbad.dGGGd....","......dgbbbbgGGggGGGGaddGGGd....",".......dgbbbgbbbbbbbbad.ddd.....",".......dgbbbgbbbbbbbbad.........","........dgbgGGGGGGGGGad.........",".........dggabbdabbadd..........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."],"px2":["..............dGgd..............",".............dGggGd.............","............daaggaad............","..........ddaccccbbadd..........",".........dabbccccbbbbad.........",".........dabbccccbbbbad.........",".........dabbbbbbbbbbad.........",".........dGGggGGGGggGGd.........","........dhabhHHHHHHhbahd........","........dHabSewssewSbaHd........","........dHabSewssewSbaHd........","........dHabSssssssSbaHd........","........dHaaSssmmssSaaHd.d......","........dHddssssssssddHddGd.....",".......dcccaaaSSSSaaacccdGdddddd",".......dcccabbbbbbbbassssGnnnnnn","......dggggggcGGGGcbassssGnnnnnn","......dgbbbbgcGggGcbassssGNNNNNN","......dgbbGbgcGggGcbaddddGdddddd","......dgbGgGgcGGGGcbad..dGd.....","......dgbbGbgcbbbbcbad...d......","......dgbbbbgbbbbbbbad..........","......dgbbbbgGGggGGGGad.........",".......dgbbbgbbbbbbbbad.........",".......dgbbbgbbbbbbbbad.........","........dgbgGGGGGGGGGad.........",".........dggabbdabbadd..........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."]}
 ];
 const CHAPTERS=[
 {"id":"kana-a","sec":"kana","name":"ひらがな","en":"Hiragana","boss":"machigai","ids":["n:あ","n:い","n:う","n:え","n:お","n:か","n:き","n:く","n:け","n:こ","n:さ","n:し","n:す","n:せ","n:そ","n:た","n:ち","n:つ","n:て","n:と","n:な","n:に","n:ぬ","n:ね","n:の","n:は","n:ひ","n:ふ","n:へ","n:ほ","n:ま","n:み","n:む","n:め","n:も","n:や","n:ゆ","n:よ","n:ら","n:り","n:る","n:れ","n:ろ","n:わ","n:を","n:ん","n:が","n:ぎ","n:ぐ","n:げ","n:ご","n:ざ","n:じ","n:ず","n:ぜ","n:ぞ","n:だ","n:ぢ","n:づ","n:で","n:ど","n:ば","n:び","n:ぶ","n:べ","n:ぼ","n:ぱ","n:ぴ","n:ぷ","n:ぺ","n:ぽ"]},
@@ -1800,11 +1803,39 @@ const BY_SEC={kana:[],vocab:[],kanji:[],grammar:[]};
 ITEMS.forEach(i=>BY_SEC[i.sec].push(i));
 const SEC={kana:'かなの いずみ',vocab:'ことばの もり',kanji:'かんじの いせき',grammar:'ぶんぽうの とう'};
 const SEC_SHORT={kana:'かな',vocab:'ことば',kanji:'かんじ',grammar:'ぶんぽう'};
+// 区分の英語。地名なので雰囲気は残しつつ、やさしい語だけで
 const SEC_EN={kana:'Kana Spring',vocab:'Word Forest',kanji:'Kanji Ruins',grammar:'Grammar Tower'};
 // かなは JLPT の出題範囲ではなく その手前の準備。点数の見積もりからは外す
 const JLPT_SECS=['vocab','kanji','grammar'];
 // UIに添える英語。出し分けは body のクラスでまとめて行う（静的なナビにも効かせるため）
-const gl = t => `<span class="gl">${esc(t)}</span>`;
+/* 英語は「出す／消す」の2択にしない。
+   英語版から始めた人が、そのまま日本語版に地続きで移れるようにする。
+   ずっと全文に英語が付いていると、日本語を読まないまま進めてしまうし、
+   画面が英語版と日本語版でまったく同じままでも飽きる。
+   そこで、同じ画面のまま、覚えた分だけ英語を引いていく。
+   引く順は「短いラベル → みじかい説明 → 長い解説」。
+   何百回も見るラベル（こたえ／まほう／つよさ）はすぐ覚えるが、
+   長い解説は最後まで英語が要る。 */
+const GL_S=22, GL_M=60;
+const glCls = t => { const n=String(t).length; return n<=GL_S?'gl gl-s':(n<=GL_M?'gl gl-m':'gl gl-l'); };
+const gl = t => `<span class="${glCls(t)}">${esc(t)}</span>`;
+// 3=ぜんぶ英語 / 2=短いラベルを外す / 1=長い解説だけ英語 / 0=日本語版
+function uiStage(){
+  if(!S.uiEn) return 0;
+  if(chapClearedCount()/CHAPTERS.length >= 0.5) return 1;
+  if(stats('kana').rate >= KANA_DONE) return 2;
+  return 3;
+}
+// alert/confirm は HTML が使えないので、日本語と英語を改行で重ねる
+const N5NL='\n\n';
+// メッセージ窓の文。1行ずつ 日本語→英語 の順に積む。
+// type() は英語オフのとき .gl の中身を送らないので、これ1本で両方まかなえる。
+// 引数は [日本語, 英語] の配列か、英語の要らない行なら文字列。
+const bi = rows => rows.filter(Boolean)
+  .map(r => typeof r==='string' ? esc(r) : esc(r[0])+(r[1]?gl(r[1]):''))
+  .join('\n');
+// 敵の名前。英語版では英語名で出す
+const mEn = m => m.en||m.name;
 
 /* ===== 状態 ===== */
 const INTERVALS=[0,1,2,4,9,20,45], MAX_LV=6;
@@ -2001,15 +2032,16 @@ const chapClearedCount = () => CHAPTERS.filter(chapCleared).length;
    「連続を守る」「少し強くなる」「見た目が変わる」の3方向だけ用意する。 */
 const SHOP=[
   {id:'charm',   price:50,  max:9,  name:'まもりの ふだ',     en:'Streak Charm',
-   desc:'1にち やすんでも「れんぞく」が きえない。やすんだ ぶんだけ つかう。'},
+   desc:'1にち やすんでも「れんぞく」が きえない。やすんだ ぶんだけ つかう。',
+  descEn:'Keeps your streak alive for a day you miss. One charm per missed day.'},
   {id:'hpStone', price:120, max:12, name:'いのちの いし',     en:'Life Stone',
-   desc:'さいだいＨＰが 5 ふえる。'},
+   desc:'さいだいＨＰが 5 ふえる。', descEn:'Max HP +5.'},
   {id:'mpStone', price:90,  max:8,  name:'こころの いし',     en:'Spirit Stone',
-   desc:'さいだいＭＰが 1 ふえる。スキャンが おおく つかえる。'},
+   desc:'さいだいＭＰが 1 ふえる。スキャンが おおく つかえる。', descEn:'Max MP +1. You can use Scan more often.'},
   {id:'robe_g',  price:400, max:1,  name:'きんの ころも',     en:'Golden Robe',
-   desc:'ゆうしゃの ふくが きんいろに なる。'},
+   desc:'ゆうしゃの ふくが きんいろに なる。', descEn:'Your hero wears gold.'},
   {id:'robe_v',  price:400, max:1,  name:'むらさきの ころも', en:'Violet Robe',
-   desc:'ゆうしゃの ふくが むらさきに なる。'}
+   desc:'ゆうしゃの ふくが むらさきに なる。', descEn:'Your hero wears violet.'}
 ];
 // 唱えても何も起きない呪文は最初から押させない（ＭＰの無駄うちを防ぐ）
 const spellOff = sp => S.mp<sp.mp || (sp.id==='heal' && S.hp>=S.maxHp);
@@ -2128,11 +2160,12 @@ function type(el,text,done,noCursor){
   // ふりがな(<rt>)まで1文字ずつ出すとちらつくので、ルビは親文字と同時に出す。
   el.innerHTML=text;
   const nodes=[]; const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
-  const hideEn=document.body.classList.contains('no-en');
+
   let nd; while((nd=walk.nextNode())){
     if(nd.parentNode && nd.parentNode.nodeName==='RT') continue;
     // 英語を消している間は、見えない文字を送って無言の間を作らない
-    if(hideEn && nd.parentElement && nd.parentElement.closest('.gl')) continue;
+    const glEl=nd.parentElement && nd.parentElement.closest('.gl');
+    if(glEl && getComputedStyle(glEl).display==='none') continue;
     // 聴解の説明のような「読ませるより先に見せたい」ものは一度に出す
     if(nd.parentElement && nd.parentElement.closest('.no-type')) continue;
     nodes.push({node:nd,full:nd.nodeValue});
@@ -2387,7 +2420,10 @@ function go(r){
 }
 function render(){
   rollDay();
-  document.body.classList.toggle('no-en',!S.uiEn);
+  const ust=uiStage();
+  document.body.classList.toggle('no-en',ust===0);
+  document.body.classList.toggle('en-2',ust===2);
+  document.body.classList.toggle('en-1',ust===1);
   // タイトル画面ではステータスと下部メニューを隠す
   const t = route==='title'||route==='newgame';
   $('#hud').classList.toggle('hide',t);
@@ -2490,17 +2526,17 @@ function pbar(rate){
 function paintHud(){
   const d=daysLeft();
   $('#hud').innerHTML=`<div class="st">
-    <span class="st-l">レベル</span>
+    <span class="st-l">レベル${gl('Level')}</span>
     <span class="st-row"><span class="st-n">${S.lv}</span>
-      <span class="st-l">つぎまで</span><span class="st-n">${expToNext(S.lv)-S.exp}</span></span>
+      <span class="st-l">つぎまで${gl('To next')}</span><span class="st-n">${expToNext(S.lv)-S.exp}</span></span>
     <span class="st-l">ＨＰ</span>
     <span class="st-row">${pips(S.hp,S.maxHp,'var(--hp)')}<span class="st-n">${S.hp}/${S.maxHp}</span></span>
     <span class="st-l">ＭＰ</span>
     <span class="st-row">${pips(S.mp,S.maxMp,'var(--mp)',6)}<span class="st-n">${S.mp}/${S.maxMp}</span>
       <span class="st-l">Ｇ</span><span class="st-n">${S.gold}</span></span>
-    <span class="st-l">しけんまで</span>
+    <span class="st-l">しけんまで${gl('To the exam')}</span>
     <span class="st-row"><span class="st-n">${d==null?'—':(d<0?'おわり':d+'にち')}</span>
-      <span class="st-l">れんぞく</span><span class="st-n">${S.streak}にち</span></span>
+      <span class="st-l">れんぞく${gl('Streak')}</span><span class="st-n">${S.streak}にち</span></span>
   </div>`;
 }
 
@@ -2562,12 +2598,14 @@ function vField(){
     ${pbar(cs.rate)}
     <div class="note">おぼえた ${cs.done} / ${cs.n}　${
       won?'この ステージは クリアずみ'
-        :open?'ステージの ぬしに いどめます'
-             :`ぬしが 出て くるまで あと ${Math.max(1,Math.ceil(cs.n*CHAP_OPEN)-cs.done)}こ`}</div>
+      :open?'ステージの ぬしに いどめます'
+      :`ぬしが 出て くるまで あと ${Math.max(1,Math.ceil(cs.n*CHAP_OPEN)-cs.done)}こ`}${
+      gl(`Learned ${cs.done} / ${cs.n} · `+(won?'Stage cleared':open?'You can face the boss'
+        :`${Math.max(1,Math.ceil(cs.n*CHAP_OPEN)-cs.done)} more to unlock the boss`))}</div>
     <div class="cmds" style="margin-top:7px">
       <button class="cmd" data-chap="${esc(ch.id)}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>この ステージを れんしゅう${gl('Practice this stage')}</span></button>
       <button class="cmd" data-chapboss="${esc(ch.id)}" ${(!open||S.hp<=0)?'disabled':''}><span class="cur">▶</span><span>ステージの ぬしに いどむ${gl('Challenge the stage boss')}
-        <span class="note">20もん・たおせば クリア</span></span></button>
+        <span class="note">20もん・たおせば クリア${gl('20 questions - beat it to clear the stage')}</span></span></button>
       <button class="cmd" data-go2="stages"><span class="cur">▶</span><span>ステージ いちらん（${chapClearedCount()} / ${CHAPTERS.length} クリア）${gl('All stages')}</span></button>
     </div>
   </div>
@@ -2577,28 +2615,33 @@ function vField(){
       ${['kana','vocab','kanji','grammar'].map(sec=>{
         const s=stats(sec);
         return `<button class="cmd" data-dun="${sec}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>${SEC[sec]}${gl(SEC_EN[sec])}
-          <span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}</span></span></button>`;
+          <span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}${gl(`Review ${s.due} · New ${s.fresh}`)}</span></span></button>`;
       }).join('')}
       <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（ぜんぶの ばしょを まわる）${gl("Today's journey - every area")}</span></button>
       ${TTS.ready?`<button class="cmd" data-listen="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ちょうかいの どうくつ${gl('Listening Cave - answer by ear')}
-        <span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}</span></span></button>`:''}
+        <span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}${gl('Answer by ear only'+(S.listenN?` · ${Math.round(S.listenOk/S.listenN*100)}% so far`:''))}</span></span></button>`:''}
       <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
-        <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}</span></span></button>
+        <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}${gl('A 30-question test'+(S.best?` · best ${S.best}%`:''))}</span></span></button>
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
       <button class="cmd" data-go2="shop"><span class="cur">▶</span><span>どうぐやに いく${gl('Shop')}
-        <span class="note">もっている ゴールド ${S.gold}${S.charm?` ・ まもりのふだ ${S.charm}`:''}</span></span></button>
+        <span class="note">もっている ゴールド ${S.gold}${S.charm?` ・ まもりのふだ ${S.charm}`:''}${gl(`You have ${S.gold} gold`+(S.charm?` · ${S.charm} streak charms`:''))}</span></span></button>
     </div>
   </div>
   <div class="win tight"><div class="note">
-    ぜんぶで ${st.done} / ${st.n} こ おぼえました（${(st.rate*100).toFixed(0)}％）<br>
-    ${db?'ぼうけんのしょは クラウドに のこして います':'ぼうけんのしょは この たんまつに のこして います'}
+      ぜんぶで ${st.done} / ${st.n} こ おぼえました（${(st.rate*100).toFixed(0)}％）${gl(`Learned ${st.done} of ${st.n} in total (${(st.rate*100).toFixed(0)}%)`)}<br>
+      ${db?`ぼうけんのしょは クラウドに のこして います${gl('Your save is kept in the cloud')}`
+          :`ぼうけんのしょは この たんまつに のこして います${gl('Your save is kept on this device')}`}
   </div></div>`;
   const m=S.hp<=0
-    ? 'ぜんめつ して しまった…\nやどやで やすめば、すぐに たびを つづけられる。'
+    ? bi([['ぜんめつ して しまった…','You were wiped out...'],
+          ['やどやで やすめば、すぐに たびを つづけられる。','Rest at the inn and you can travel again.']])
     : cleared
-      ? `きょうの ぶん ${done} / ${goal}\nきょうの ノルマは たっせい した！\nまだ すすんでも かまわない。`
-      : `きょうの ぶん ${done} / ${goal}\nふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`;
-  type($('#fmsg'),esc(m),null,true);
+    ? bi([[`きょうの ぶん ${done} / ${goal}`, `Today: ${done} / ${goal}`],
+          ['きょうの ノルマは たっせい した！',"You reached today's goal!"],
+          ['まだ すすんでも かまわない。','You may keep going.']])
+    : bi([[`きょうの ぶん ${done} / ${goal}`, `Today: ${done} / ${goal}`],
+          [`ふくしゅう ${qt.review} ・ あたらしい ${qt.fresh}`, `Review ${qt.review} · New ${qt.fresh}`]]);
+  type($('#fmsg'),m,null,true);
 }
 
 /* ===== せんとう ===== */
@@ -2627,11 +2670,13 @@ function makeFoes(sec,boss,mon,monMax){
   return out;
 }
 // 「AとAとB」では読みにくいので、同じ相手はまとめて数える
-function foesName(fs){
+function foesName(fs,en){
   const order=[], cnt={};
-  fs.forEach(f=>{ if(!cnt[f.m.name]){ cnt[f.m.name]=0; order.push(f.m.name); } cnt[f.m.name]++; });
-  return order.map(n=>cnt[n]>1?`${n} ${cnt[n]}たい`:n).join('と ');
+  fs.forEach(f=>{ const k=en?mEn(f.m):f.m.name; if(!cnt[k]){ cnt[k]=0; order.push(k); } cnt[k]++; });
+  return order.map(n=>cnt[n]>1?(en?`${n} x${cnt[n]}`:`${n} ${cnt[n]}たい`):n).join(en?' and ':'と ');
 }
+// 「〜が あらわれた！」の1行を日英で
+const foesAppear = fs => [`${foesName(fs)}が あらわれた！`, `${foesName(fs,1)} draws near!`];
 
 // 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
 // どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
@@ -2643,12 +2688,12 @@ function beginBattle(items,opts){
      foes,tgt:0,killed:0,levelUps:[]};
   route='battle';
   document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current','false'));
-  drawBattle(opts.intro||`${foesName(foes)}が あらわれた！`);
+  drawBattle(opts.intro||bi([foesAppear(foes)]));
 }
 function startBattle(sec,n,boss,mode){
   const limit=n||Math.max(5,Math.min(20,quota().total||10));
   const items=buildQueue(sec||null,limit);
-  if(!items.length){ alert('いま、いどめる もんだいが ありません。'); return; }
+  if(!items.length){ alert('いま、いどめる もんだいが ありません。'+N5NL+'There are no questions to answer right now.'); return; }
   beginBattle(items,{sec,boss,mode});
 }
 // ステージの中だけを回す練習
@@ -2660,7 +2705,7 @@ function startChapPractice(id){
   const weak=pool.filter(i=>!isDue(i.id)&&!isNew(i.id)&&rec(i.id).lv<MAX_LV)
                  .sort((a,b)=>rec(a.id).lv-rec(b.id).lv);
   const items=shuffle(due.concat(fresh,weak).slice(0,12));
-  if(!items.length){ alert('この ステージは もう かんぺきです。'); return; }
+  if(!items.length){ alert('この ステージは もう かんぺきです。'+N5NL+'You have already mastered this stage.'); return; }
   beginBattle(items,{sec:ch.sec});
 }
 // ステージの ぬし。20問ぶんの体力を持たせ、倒しきれたらクリア
@@ -2672,7 +2717,10 @@ function startChapBoss(id){
   const items=shuffle(pool.slice()).slice(0,20);
   const mon=SPRITES[ch.boss]||MONSTERS[0];
   beginBattle(items,{sec:ch.sec,boss:true,chap:ch.id,mon,monMax:18,
-    intro:`ステージ ${chapNo(ch)}の ぬし\n${mon.name}が 立ちふさがった！`});
+    intro:bi([
+      [`ステージ ${chapNo(ch)}の ぬし`, `Stage ${chapNo(ch)} boss`],
+      [`${mon.name}が 立ちふさがった！`, `${mEn(mon)} blocks your way!`]
+    ])});
 }
 // 舞台の中に出す自分のHP/MP。上のステータスが隠れても戦況が読めるようにする
 function stageHp(){
@@ -2699,10 +2747,11 @@ function drawBattle(intro){
   <div class="stage" id="stage">
     <div class="stage-hp" id="stageHp">${stageHp()}</div>
     <div class="foes" id="foes">${foesHtml()}</div>
-    <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}</div>
+    <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}${
+      gl((B.chap?'Boss: ':'')+mEn(foe().m)+(aliveFoes().length>1?` and ${aliveFoes().length-1} more`:''))}</div>
     <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),3)}</span>
   </div>
-  <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?'　れんげき '+B.combo:''}</span>
+  <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?`　れんげき ${B.combo}${gl(`${B.combo} in a row`)}`:''}</span>
     <div class="msg ruby-on" id="bmsg"></div>
   </div>
   <div class="win"><span class="win-t">こたえ${gl('Answer')}</span>
@@ -2783,14 +2832,17 @@ function answer(n){
   btns.forEach((b,i)=>{ b.disabled=true;
     if(Q.opts[i].ok) b.classList.add('ok'); else if(i===n) b.classList.add('ng'); });
   const r=grade(it.id,ok);
-  let gainExp=0, log='';
+  let gainExp=0, log=[];
   if(ok){
     B.ok++; B.combo++; B.maxCombo=Math.max(B.maxCombo,B.combo);
     const crit=B.combo>=3, dmg=crit?2:1;
     const t=foe();
     t.hp=Math.max(0,t.hp-dmg);
     gainExp=12+Math.min(18,(B.combo-1)*3)+(r.lv===MAX_LV?25:0);
-    log=(crit?'かいしんの いちげき！\n':'せいかい！\n')+`${t.m.name}に ${dmg*8}の ダメージ！`;
+    log=[
+      crit?['かいしんの いちげき！','A critical hit!']:['せいかい！','Correct!'],
+      [`${t.m.name}に ${dmg*8}の ダメージ！`, `${mEn(t.m)} takes ${dmg*8} damage!`]
+    ];
     heroSwing();
     // 敵の反応は剣が届いてから。先に敵が痛がると、順番が逆に見える。
     // 正解かどうかは選択肢の色で即座に返しているので、ここを遅らせても手応えは落ちない
@@ -2808,7 +2860,11 @@ function answer(n){
     B.ng++; B.combo=0; B.wrong.push(it.id);
     const dmg=B.boss?4:3;
     S.hp=Math.max(0,S.hp-dmg); gainExp=3;
-    log=`ミス！\n${foe().m.name}の こうげき！\n${dmg}の ダメージを うけた！`;
+    log=[
+      ['ミス！','Wrong.'],
+      [`${foe().m.name}の こうげき！`, `${mEn(foe().m)} attacks!`],
+      [`${dmg}の ダメージを うけた！`, `You take ${dmg} damage!`]
+    ];
     $('#stage').classList.add('flash'); $('#heroSp')?.classList.add('hurt');
     popDmg(String(dmg),true); SFX.miss();
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
@@ -2837,12 +2893,13 @@ function answer(n){
   { const sh=$('#stageHp'); if(sh) sh.innerHTML=stageHp(); }
   const fallen=foe(), dead=fallen.hp<=0, wipe=S.hp<=0;
   $('#bmsg').innerHTML='';
-  type($('#bmsg'),esc(log)+`\n<span class="q">けいけんち ${gainExp}を てに いれた。</span>`);
+  type($('#bmsg'),bi(log)+`\n<span class="q">${esc(`けいけんち ${gainExp}を てに いれた。`)}${gl(`You gain ${gainExp} experience.`)}</span>`);
   $('#after').innerHTML=`
     <div class="win"><span class="win-t">まなび${gl('Learn')}</span><div class="learn ruby-on">${learnHtml(it)}</div></div>
     <div class="win tight"><div class="cmds">
       <button class="cmd" data-next=""><span class="cur">▶</span><span>${
-        wipe?'…':(dead?`${esc(fallen.m.name)}を たおした！`:(B.i+1>=B.items.length?'たたかいを おえる':'つぎの もんだいへ'))
+        wipe?'…':(dead?`${esc(fallen.m.name)}を たおした！${gl(`You defeated the ${mEn(fallen.m)}!`)}`
+          :(B.i+1>=B.items.length?`たたかいを おえる${gl('Finish the battle')}`:`つぎの もんだいへ${gl('Next question')}`))
       }</span></button>
     </div></div>`;
   // こたえた後は魔法を閉じる。答えが見えている状態でスキャンを撃っても
@@ -2860,34 +2917,34 @@ function answer(n){
 function learnHtml(it){
   let h='';
   if(it.sec==='kana'){
-    h=`<dl><dt>かな</dt><dd><b>${esc(it.w)}</b>　<span class="rj">${esc(it.romaji)}</span></dd>
-       <dt>れい</dt><dd><b>${esc(it.ex)}</b>　<span class="rj">${esc(it.exr)}</span><br><span class="en">${esc(it.en)}</span></dd></dl>`;
+    h=`<dl><dt>かな${gl('Kana')}</dt><dd><b>${esc(it.w)}</b>　<span class="rj">${esc(it.romaji)}</span></dd>
+       <dt>れい${gl('Example')}</dt><dd><b>${esc(it.ex)}</b>　<span class="rj">${esc(it.exr)}</span><br><span class="en">${esc(it.en)}</span></dd></dl>`;
     if(TTS.ready) h+=`<div class="ex">${esc(it.ex)}${sayBtn(it.ex)}</div>`;
   }else if(it.sec==='kanji'){
-    h=`<dl><dt>かんじ</dt><dd><b>${esc(it.w)}</b></dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd>
-       <dt>よみ</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}</dd></dl>`;
+    h=`<dl><dt>かんじ${gl('Kanji')}</dt><dd><b>${esc(it.w)}</b></dd>
+       <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd>
+       <dt>よみ${gl('Readings')}</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}${gl('on (Chinese-style) / kun (Japanese-style)')}</dd></dl>`;
     if(it.words.length) h+=`<div class="ex">${it.words.map(j=>
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
   }else if(it.sec==='vocab'){
-    h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${S.romaji?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
+    h=`<dl><dt>ことば${gl('Word')}</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${S.romaji?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
+       <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
     if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
   }else{
-    h=`<dl><dt>かたち</dt><dd><b>${esc(it.w)}</b></dd>
-       <dt>つなぎ</dt><dd>${rb(it.conn)}</dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
+    h=`<dl><dt>かたち${gl('Pattern')}</dt><dd><b>${esc(it.w)}</b></dd>
+       <dt>つなぎ${gl('Attaches to')}</dt><dd>${rb(it.conn)}</dd>
+       <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
     if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
     if(it.note) h+=`<div class="en">${rb(it.note)}</div>`;
   }
-  if(sample) h+=`<div><button class="cmd" data-ask="${esc(it.id)}"><span class="cur">▶</span><span>けんじゃに きく</span></button><div id="ai"></div></div>`;
+  if(sample) h+=`<div><button class="cmd" data-ask="${esc(it.id)}"><span class="cur">▶</span><span>けんじゃに きく${gl('Ask the sage')}</span></button><div id="ai"></div></div>`;
   return h;
 }
 async function askAI(id){
   const it=BY_ID[id], box=$('#ai'); if(!box) return;
   const b=$('[data-ask]'); if(b) b.disabled=true;
-  box.innerHTML=`<div class="ai">…けんじゃは かんがえて いる…</div>`;
+  box.innerHTML=`<div class="ai">…けんじゃは かんがえて いる…${gl('The sage is thinking...')}</div>`;
   const ctx=it.sec==='grammar'
     ?`文型「${it.w}」／接続:${bare(it.conn)}／意味:${bare(it.mean)}／例:${bare(it.ex)}／注意:${bare(it.note)}`
     :it.sec==='kanji'
@@ -2902,7 +2959,7 @@ async function askAI(id){
       {modelTier:'quick'});
     box.innerHTML=`<div class="ai">${esc(res.text)}</div>`;
   }catch(e){
-    box.innerHTML=`<div class="ai err">けんじゃは こたえられなかった（${esc((e&&e.code)||'error')}）。</div>`;
+    box.innerHTML=`<div class="ai err">けんじゃは こたえられなかった（${esc((e&&e.code)||'error')}）。${gl('The sage could not answer.')}</div>`;
     if(b) b.disabled=false;
   }
 }
@@ -2926,7 +2983,10 @@ function nextStep(){
     // 隊列を全部たおした。次の一団が現れる
     B.foes=makeFoes(B.sec,B.boss); B.tgt=0;
     B.i++;
-    return drawBattle(`${got}ゴールドを てに いれた！\n${foesName(B.foes)}が あらわれた！`);
+    return drawBattle(bi([
+      [`${got}ゴールドを てに いれた！`, `You get ${got} gold.`],
+      foesAppear(B.foes)
+    ]));
   }
   // まだ残っている相手がいる。狙いを次へ送る
   aimNext();
@@ -2943,10 +3003,15 @@ function vWipe(){
   </div>
   <div class="win"><span class="win-t">ぜんめつ${gl('Wiped out')}</span><div class="msg" id="wmsg"></div></div>
   <div class="win tight"><div class="cmds">
-    <button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）</span></button>
-    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる</span></button>
+    <button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>
+    <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back to adventure')}</span></button>
   </div></div>`;
-  type($('#wmsg'),`ちからつきて しまった…\nだが、おぼえた ことは きえない。\nけいけんち ${B.exp}と ${B.gold}ゴールドは てもとに のこった。`);
+  type($('#wmsg'),bi([
+    ['ちからつきて しまった…','You have fallen...'],
+    ['だが、おぼえた ことは きえない。','But what you learned is not lost.'],
+    [`けいけんち ${B.exp}と ${B.gold}ゴールドは てもとに のこった。`,
+     `You keep ${B.exp} experience and ${B.gold} gold.`]
+  ]));
 }
 function vAfter(){
   route='after';
@@ -2962,20 +3027,29 @@ function vAfter(){
       S.chap[ch.id]={cleared:1,best:Math.max(prev.best||0,acc)};
       if(first){ S.gold+=150; }
       chapMsg=first
-        ? `\nステージ ${chapNo(ch)}「${ch.name}」を クリアした！\n150ゴールドを うけとった！`
-        : `\nステージ ${chapNo(ch)}を もう いちど クリアした！`;
+        ? '\n'+bi([
+            [`ステージ ${chapNo(ch)}「${ch.name}」を クリアした！`, `Stage ${chapNo(ch)} cleared!`],
+            ['150ゴールドを うけとった！','You receive 150 gold!']
+          ])
+        : '\n'+bi([[`ステージ ${chapNo(ch)}を もう いちど クリアした！`, `Stage ${chapNo(ch)} cleared again!`]]);
     }else{
-      chapMsg=`\n${ch.name}の ぬしは たおせなかった…\nもういちど いどめます。`;
+      chapMsg='\n'+bi([
+        [`${ch.name}の ぬしは たおせなかった…`,'You could not defeat the boss...'],
+        ['もういちど いどめます。','You can try again.']
+      ]);
     }
   }
   persist();
-  const lvMsg=B.levelUps.length?`\nレベルが ${B.levelUps[B.levelUps.length-1]}に あがった！\nさいだいＨＰが ${B.levelUps.length*4} ふえた！`:'';
+  const lvMsg=B.levelUps.length?'\n'+bi([
+    [`レベルが ${B.levelUps[B.levelUps.length-1]}に あがった！`, `Your level rose to ${B.levelUps[B.levelUps.length-1]}!`],
+    [`さいだいＨＰが ${B.levelUps.length*4} ふえた！`, `Max HP +${B.levelUps.length*4}!`]
+  ]):'';
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">たたかいの けっか${gl('Result')}</span><div class="msg" id="amsg"></div></div>
   <div class="win tight"><div class="st">
-    <span class="st-l">せいかいりつ</span><span class="st-row"><span class="st-n">${acc}％</span></span>
-    <span class="st-l">たおした かず</span><span class="st-row"><span class="st-n">${B.killed}たい</span></span>
-    <span class="st-l">さいだい れんげき</span><span class="st-row"><span class="st-n">${B.maxCombo}</span></span>
+    <span class="st-l">せいかいりつ${gl('Accuracy')}</span><span class="st-row"><span class="st-n">${acc}％</span></span>
+    <span class="st-l">たおした かず${gl('Enemies defeated')}</span><span class="st-row"><span class="st-n">${B.killed}たい</span></span>
+    <span class="st-l">さいだい れんげき${gl('Longest streak')}</span><span class="st-row"><span class="st-n">${B.maxCombo}</span></span>
   </div></div>
   ${B.wrong.length?`<div class="win"><span class="win-t">とりこぼし ${B.wrong.length}こ${gl('Missed')}</span>
     <div class="entries ruby-on">${B.wrong.map(id=>{const it=BY_ID[id],r=rec(id);
@@ -2987,13 +3061,24 @@ function vAfter(){
     <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back to adventure')}</span></button>
   </div></div>`;
   const extra=
-    (B.romajiOff?`\nかなを おぼえたので、ローマ字を けしました。\nせっていで もどせます。`:'')+
-    (B.bonus?`\nきょうの ノルマ たっせい！ ${B.bonus}ゴールドの ごほうび！`:'')+
-    (B.markHit?`\n${B.markHit}にち れんぞくの しるしを てに いれた！ ${B.markHit*10}ゴールド！`:'')+
+    (B.romajiOff?'\n'+bi([
+      ['かなを おぼえたので、ローマ字を けしました。','You know the kana now, so romaji is off.'],
+      ['せっていで もどせます。','You can turn it back on in Settings.']
+    ]):'')+
+    (B.bonus?'\n'+bi([[`きょうの ノルマ たっせい！ ${B.bonus}ゴールドの ごほうび！`,
+      `Daily goal reached! ${B.bonus} gold bonus!`]]):'')+
+    (B.markHit?'\n'+bi([[`${B.markHit}にち れんぞくの しるしを てに いれた！ ${B.markHit*10}ゴールド！`,
+      `${B.markHit}-day streak badge earned! ${B.markHit*10} gold!`]]):'')+
     chapMsg;
   paintHud();   // ステージのごほうびなどは戦闘の外で入るので、ここで数字を出し直す
-  const head=B.killed?`${B.killed}たいを たおした！`:'たたかいを おえた。';
-  type($('#amsg'),`${head}\nけいけんち ${B.exp}を てに いれた！\n${B.gold}ゴールドを てに いれた！${esc(lvMsg)}${esc(extra)}`);
+  const head=B.killed
+    ? [`${B.killed}たいを たおした！`, `You defeated ${B.killed} ${B.killed>1?'enemies':'enemy'}!`]
+    : ['たたかいを おえた。','The battle is over.'];
+  type($('#amsg'),bi([
+    head,
+    [`けいけんち ${B.exp}を てに いれた！`, `You gain ${B.exp} experience!`],
+    [`${B.gold}ゴールドを てに いれた！`, `You get ${B.gold} gold!`]
+  ])+lvMsg+extra);
   if(B.levelUps.length) SFX.up(); else SFX.win();
 }
 
@@ -3002,7 +3087,7 @@ function vStages(){
   const cur=currentChapter();
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">ステージ いちらん${gl('All stages')}</span>
-    <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア</div>
+    <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア${gl(`${chapClearedCount()} of ${CHAPTERS.length} stages cleared`)}</div>
     <div style="margin-top:8px">${CHAPTERS.map((c,i)=>{
       const cs=chapStats(c), done=chapCleared(c), now=c.id===cur.id;
       // 行ごと押せるようにして、クリアずみの章にも戻れるようにする
@@ -3014,8 +3099,9 @@ function vStages(){
     }).join('')}</div>
   </div>
   <div class="win tight"><div class="note">
-    ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
-    どの ステージも おして れんしゅう できます。
+      ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
+      どの ステージも おして れんしゅう できます。
+      ${gl('Stages unlock in order. New items come from your current stage first. You can tap any stage to practise it.')}
     ${gl('New items are drawn from your current stage first.')}
   </div></div>
   <div class="win tight"><div class="cmds">
@@ -3027,17 +3113,18 @@ function vStages(){
 function vShop(){
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">どうぐや${gl('Shop')}</span>
-    <div class="note">もっている ゴールド <span class="st-n">${S.gold}</span></div>
+    <div class="note">もっている ゴールド <span class="st-n">${S.gold}</span>${gl(`You have ${S.gold} gold`)}</div>
     <div style="margin-top:8px">${SHOP.map(g=>{
       const have=owned(g.id), full=have>=g.max, poor=S.gold<g.price;
       const isRobe=g.id.indexOf('robe_')===0, worn=isRobe&&S.robe===g.id;
-      let label='かう', act=`data-buy="${esc(g.id)}"`, dis=(full||poor);
-      if(isRobe&&have){ label=worn?'きて いる':'きる'; act=`data-wear="${esc(g.id)}"`; dis=worn; }
-      else if(full) label='じゅうぶん';
-      else if(poor) label='たりない';
+      let label=`かう${gl('Buy')}`, act=`data-buy="${esc(g.id)}"`, dis=(full||poor);
+      if(isRobe&&have){ label=worn?`きて いる${gl('Worn')}`:`きる${gl('Wear')}`; act=`data-wear="${esc(g.id)}"`; dis=worn; }
+      else if(full) label=`じゅうぶん${gl('Max')}`;
+      else if(poor) label=`たりない${gl('Not enough gold')}`;
       return `<div class="good">
         <span><span class="gn">${esc(g.name)}</span>${gl(g.en)}
-          <span class="gd">${esc(g.desc)}${have?`　（もっている ${have}${g.max>1?' / '+g.max:''}）`:''}</span></span>
+        <span class="gd">${esc(g.desc)}${have?`　（もっている ${have}${g.max>1?' / '+g.max:''}）`:''}${
+          gl((g.descEn||'')+(have?`  (you have ${have}${g.max>1?' / '+g.max:''})`:''))}</span></span>
         <span style="display:grid; gap:4px; justify-items:end">
           <span class="gp">${g.price} Ｇ</span>
           <button ${act} ${dis?'disabled':''}>${label}</button>
@@ -3045,7 +3132,7 @@ function vShop(){
       </div>`;
     }).join('')}
     ${S.robe?`<div class="good"><span><span class="gn">もとの ふくに もどす</span>${gl('Back to the default outfit')}</span>
-      <span><button data-wear="">もどす</button></span></div>`:''}
+      <span><button data-wear="">もどす${gl('Back to the default outfit')}</button></span></div>`:''}
     </div>
   </div>
   <div class="win tight"><div class="cmds">
@@ -3106,13 +3193,13 @@ function vBook(){
   <div class="tabs">${['kana','vocab','kanji','grammar'].map(k=>
     `<button data-bs="${k}" aria-pressed="${k===bookSec}">${SEC_SHORT[k]} ${BY_SEC[k].length}</button>`).join('')}</div>
   <div class="win"><span class="win-t">おぼえた ぐあい${gl('Progress')}</span>
-    <div class="note">${s.done} / ${s.n} こ おぼえました（★4いじょう）</div>
+    <div class="note">${s.done} / ${s.n} こ おぼえました（★4いじょう）${gl(`${s.done} of ${s.n} learned (4 stars or more)`)}</div>
     ${bookSec==='kana'
       ? `<div class="ktitle" style="margin-top:4px">ひらがな${gl('Hiragana')}</div>${kanaChart(false)}
          <div class="ktitle">カタカナ${gl('Katakana')}</div>${kanaChart(true)}`
       : `<div class="grid">${tiles.map(i=>`<span class="tile s${rec(i.id).lv}" title="${esc(i.w)}"></span>`).join('')}</div>`}
-    <div class="leg">${[[0,'まだ'],[1,'であった'],[2,'★2'],[3,'★3'],[4,'★4'],[5,'★5'],[6,'かんぺき']]
-      .map(([n,t])=>`<span><span class="tile s${n}"></span>${t}</span>`).join('')}</div>
+    <div class="leg">${[[0,'まだ','New'],[1,'であった','Seen'],[2,'★2'],[3,'★3'],[4,'★4'],[5,'★5'],[6,'かんぺき','Done']]
+      .map(([n,t,en])=>`<span><span class="tile s${n}"></span>${esc(t)}${en?gl(en):''}</span>`).join('')}</div>
   </div>
   <div class="win"><span class="win-t">にがてな もの${gl('Weak points')}</span>
     <div class="entries ruby-on">${listed.slice(0,60).map(i=>{const r=rec(i.id);
@@ -3120,14 +3207,14 @@ function vBook(){
         <span><span class="w">${esc(i.w)}</span>${i.read?` <span class="r">${esc(i.read)}${S.romaji&&i.sec!=='kana'?' / '+esc(toRomaji(i.read)):''}</span>`:''}
         <br><span class="m">${rb(i.mean)}</span></span>
         <span class="lv">★${r.lv}${r.seen?`<br>${r.seen}かい`:''}</span></div>`;}).join('')}</div>
-    <div class="note" style="margin-top:8px">おぼえが あさい ものから 60こ。まだの ものは うしろ。</div>
+    <div class="note" style="margin-top:8px">おぼえが あさい ものから 60こ。まだの ものは うしろ。${gl('The 60 you know least well, weakest first. Items you have not met yet come last.')}</div>
   </div>
   <div class="win"><span class="win-t">モンスターずかん${gl('Monsters')}</span>
     <div class="zroster">${MONSTERS.map(m=>{
       const c=S.defeated[m.id]||0;
       return `<div class="zcard ${c?'seen':''}">${monHtml(m,3)}
         <span class="zn">${c?esc(m.name):'？？？'}</span>
-        <span class="zc">${c?'たおした '+c:'まだ'}</span>
+        <span class="zc">${c?'たおした '+c:'まだ'}${gl(c?`Defeated ${c}`:'Not met yet')}</span>
         ${c?`<span class="zd">${esc(m.msg)}</span>`:''}</div>`;}).join('')}</div>
   </div>`;
 }
@@ -3151,18 +3238,18 @@ function vStatus(){
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">${S.name?esc(S.name)+'の つよさ':'つよさ'}${gl('Status')}</span>
     <div class="st">
-      <span class="st-l">レベル</span><span class="st-row"><span class="st-n">${S.lv}</span></span>
+      <span class="st-l">レベル${gl('Level')}</span><span class="st-row"><span class="st-n">${S.lv}</span></span>
       <span class="st-l">ＨＰ</span><span class="st-row"><span class="st-n">${S.hp} / ${S.maxHp}</span></span>
       <span class="st-l">ＭＰ</span><span class="st-row"><span class="st-n">${S.mp} / ${S.maxMp}</span></span>
-      <span class="st-l">けいけんち</span><span class="st-row"><span class="st-n">${S.exp}</span><span class="st-l">つぎまで ${expToNext(S.lv)-S.exp}</span></span>
-      <span class="st-l">ゴールド</span><span class="st-row"><span class="st-n">${S.gold}</span></span>
-      <span class="st-l">れんぞく</span><span class="st-row"><span class="st-n">${S.streak} にち</span>${S.charm?`<span class="st-l">まもりのふだ ${S.charm}</span>`:''}</span>
-      <span class="st-l">ステージ</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${CHAPTERS.length}</span><span class="st-l">クリア</span></span>
-      <span class="st-l">たおした かず</span><span class="st-row"><span class="st-n">${Object.values(S.defeated).reduce((a,b)=>a+b,0)}</span></span>
+      <span class="st-l">けいけんち${gl('Experience')}</span><span class="st-row"><span class="st-n">${S.exp}</span><span class="st-l">つぎまで ${expToNext(S.lv)-S.exp}</span></span>
+      <span class="st-l">ゴールド${gl('Gold')}</span><span class="st-row"><span class="st-n">${S.gold}</span></span>
+      <span class="st-l">れんぞく${gl('Streak')}</span><span class="st-row"><span class="st-n">${S.streak} にち</span>${S.charm?`<span class="st-l">まもりのふだ ${S.charm}</span>`:''}</span>
+      <span class="st-l">ステージ${gl('Stages')}</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${CHAPTERS.length}</span><span class="st-l">クリア</span></span>
+      <span class="st-l">たおした かず${gl('Enemies defeated')}</span><span class="st-row"><span class="st-n">${Object.values(S.defeated).reduce((a,b)=>a+b,0)}</span></span>
     </div>
   </div>
   <div class="win"><span class="win-t">れんぞくの しるし${gl('Streak badges')}</span>
-    <div class="note">まいにち つづけると しるしが つきます。${MARKS.filter(n=>S.marks[n]).length} / ${MARKS.length}</div>
+    <div class="note">まいにち つづけると しるしが つきます。${MARKS.filter(n=>S.marks[n]).length} / ${MARKS.length}${gl(`Keep a daily streak to earn badges. ${MARKS.filter(n=>S.marks[n]).length} of ${MARKS.length}`)}</div>
     <div class="marks">${MARKS.map(n=>`<span class="mk ${S.marks[n]?'on':''}">${n}にち</span>`).join('')}</div>
   </div>
   <div class="win"><span class="win-t">ぶんやべつの おぼえた ぐあい${gl('Progress by area')}</span>
@@ -3170,15 +3257,15 @@ function vStatus(){
       const s=stats(sec), p=(s.rate*100);
       return `<div class="meter"><span class="lab">${SEC_SHORT[sec]}</span>
         ${pips(p,100,'var(--exp)',14)}<span class="v">${p.toFixed(0)}％</span></div>`;}).join('')}
-      <div class="meter"><span class="lab">ぜんたい</span>${pips(st.rate*100,100,'var(--gold)',14)}
+      <div class="meter"><span class="lab">ぜんたい${gl('All')}</span>${pips(st.rate*100,100,'var(--gold)',14)}
         <span class="v">${(st.rate*100).toFixed(0)}％</span></div>
     </div>
   </div>
   <div class="win"><span class="win-t">Ｎ５の てんすう（めやす）${gl('Estimated JLPT N5 score')}</span>
     <div class="meters">
-      <div class="meter"><span class="lab">①ちしき</span>${pips(est,N5_EXAM.s1.max,est>=N5_EXAM.s1.base?'var(--exp)':'var(--hp)',14)}
+      <div class="meter"><span class="lab">①ちしき${gl('1 Knowledge & reading')}</span>${pips(est,N5_EXAM.s1.max,est>=N5_EXAM.s1.base?'var(--exp)':'var(--hp)',14)}
         <span class="v">${est} / ${N5_EXAM.s1.max}</span></div>
-      <div class="meter"><span class="lab">②ちょうかい</span>${
+      <div class="meter"><span class="lab">②ちょうかい${gl('2 Listening')}</span>${
         est2==null?pips(0,N5_EXAM.s2.max,'var(--dim)',14)
                   :pips(est2,N5_EXAM.s2.max,est2>=N5_EXAM.s2.base?'var(--exp)':'var(--hp)',14)}
         <span class="v">${est2==null?'—':est2} / ${N5_EXAM.s2.max}</span></div>
@@ -3189,17 +3276,25 @@ function vStatus(){
       ごうけい 180てんで、80てん いじょう とれば ごうかくです。<br>
       ①の めやすは、ことば・かんじ・ぶんぽうの ${jl.n}この おぼえた ぐあいから けいさんした ものです（かなは Ｎ５の しけんに 出ないので ふくみません）。
       ②の めやすは「ちょうかいの どうくつ」の せいかいりつ（${S.listenN}もん）から けいさんします。
-      ${est>=N5_EXAM.s1.base?'いまの ペースなら ①の きじゅんてんは こえて います。':'まず ①の きじゅんてん 38てんを めざしましょう。'}
+      ${gl(`Section 1 (language knowledge and reading) is out of 120, and you need at least 38. `
+        +`Section 2 (listening) is out of 60, with a minimum of 19. `
+        +`The total is 180 and you pass with 80 or more. `
+        +`The section 1 estimate comes from how well you know the ${jl.n} words, kanji and grammar points here (kana are not tested in N5). `
+        +`The section 2 estimate comes from your accuracy in the Listening Cave (${S.listenN} questions).`)}
+      ${est>=N5_EXAM.s1.base?`いまの ペースなら ①の きじゅんてんは こえて います。${gl('At this pace you are above the section 1 minimum.')}`
+        :`まず ①の きじゅんてん 38てんを めざしましょう。${gl('Aim for the section 1 minimum of 38 first.')}`}
     </div>
   </div>
   <div class="win"><span class="win-t">しけんまで${gl('Days to the exam')}</span>
-    <div class="msg" style="min-height:0">${d==null?'しけんの ひが きまって いません。':
-      d<0?'しけんの ひを すぎて います。せっていで なおして ください。':
-      `のこり ${d}にち。\nきょうの ノルマを こなせば、しけんの 2しゅうかん まえに ぜんぶ 1かい まわれます。`}</div>
+    <div class="msg" style="min-height:0">${d==null?`しけんの ひが きまって いません。${gl('No exam date set yet.')}`:
+      d<0?`しけんの ひを すぎて います。せっていで なおして ください。${gl('The exam date has passed. Please change it in Settings.')}`:
+      bi([[`のこり ${d}にち。`,`${d} days left.`],
+          ['きょうの ノルマを こなせば、しけんの 2しゅうかん まえに ぜんぶ 1かい まわれます。',
+           'If you hit your daily goal, you will cover everything once, two weeks before the exam.']])}</div>
   </div>
   <div class="win tight"><div class="note">
-    ${TTS.ready?'「ちょうかいの どうくつ」で、おとだけの もんだいが れんしゅう できます。ただし ほんばんの ちょうかいは もっと ながい かいわを ききます。'
-               :'この きかいには にほんごの こえが ないので、ちょうかいの れんしゅうは できません。'}
+      ${TTS.ready?`「ちょうかいの どうくつ」で、おとだけの もんだいが れんしゅう できます。ただし ほんばんの ちょうかいは もっと ながい かいわを ききます。${gl('You can practise sound-only questions in the Listening Cave. The real listening test uses longer conversations.')}`
+        :`この きかいには にほんごの こえが ないので、ちょうかいの れんしゅうは できません。${gl('This device has no Japanese voice, so listening practice is not available.')}`}
   </div></div>`;
 }
 
@@ -3225,9 +3320,12 @@ function vConf(){
   <div class="win"><span class="win-t">たすけは すこしずつ へります${gl('Support fades as you learn')}</span>
     <div class="note">
       ほんばんの しけんは ぜんぶ にほんごです。だから たすけは ずっとは 出しません。<br>
-      ・ローマ字 … かなを おぼえたら きえます<br>
-      ・えいご … ★4に なったら、おしたときだけ 出ます<br>
-      ・ふりがな … その かんじが ★4に なったら きえます<br>
+      ・ローマ字 … かなを おぼえたら きえます${gl('Romaji: disappears once you know the kana')}<br>
+      ・えいご … ★4に なったら、おしたときだけ 出ます${gl('English: at 4 stars it hides behind a tap')}<br>
+      ・ふりがな … その かんじが ★4に なったら きえます${gl('Furigana: disappears once that kanji reaches 4 stars')}<br>
+      ・がめんの えいご … かなを おぼえたら みじかい ことばから きえます${
+        gl('Screen English: short labels go first once you know the kana, then the rest as you clear stages. Long explanations stay in English to the end, so you move from the English version to the Japanese version without ever being stuck.')}<br>
+      <span class="st-l">いまの だんかい${gl('Current step')} ${uiStage()} / 3</span>
       ${gl('The real exam is all Japanese, so the crutches fade item by item as you learn each one.')}
     </div>
   </div>
@@ -3237,16 +3335,17 @@ function vConf(){
       ここに ある ことば・かんじ・ぶんぽうは、ＪＬＰＴ Ｎ５の しゅつだいはんいを もとに えらんだ ものです。
       いみ・れいぶん・もんだいは すべて この アプリの ために かきおろした もので、
       いちはんの きょうざいの ほんぶんは いっさい つかって いません。
+      ${gl('The words, kanji and grammar here follow the JLPT N5 range. Every meaning, example and question was written for this app; no text from published study books is used.')}
     </div>
   </div>
-  <div class="win"><span class="win-t">ぼうけんのしょ ${SLOT}</span>
-    <div class="fld"><label for="f-rename">なまえ（8もじまで）</label>
+  <div class="win"><span class="win-t">ぼうけんのしょ ${SLOT}${gl('Save file '+SLOT)}</span>
+    <div class="fld"><label for="f-rename">なまえ（8もじまで）${gl('Your name (up to 8 characters)')}</label>
       <input type="text" id="f-rename" maxlength="8" value="${esc(S.name||'')}" autocomplete="off"></div>
     <div class="cmds">
-      <button class="cmd" data-go2="title"><span class="cur">▶</span><span>ぼうけんのしょを えらびなおす</span></button>
-      <button class="cmd" data-reset=""><span class="cur">▶</span><span>この ぼうけんのしょを けす</span></button>
+      <button class="cmd" data-go2="title"><span class="cur">▶</span><span>ぼうけんのしょを えらびなおす${gl('Choose another save file')}</span></button>
+      <button class="cmd" data-reset=""><span class="cur">▶</span><span>この ぼうけんのしょを けす${gl('Delete this save file')}</span></button>
     </div>
-    <div class="note" style="margin-top:8px">けしても、ほかの ぼうけんのしょには えいきょう しません。</div>
+    <div class="note" style="margin-top:8px">けしても、ほかの ぼうけんのしょには えいきょう しません。${gl('Deleting this one does not affect the others.')}</div>
   </div>`;
 }
 
@@ -3288,7 +3387,7 @@ document.addEventListener('click',e=>{
   }
   if(t.hasAttribute('data-newgo')){
     const v=($('#f-name')?.value||'').trim();
-    if(!v){ alert('なまえを いれて ください。'); $('#f-name')?.focus(); return; }
+    if(!v){ alert('なまえを いれて ください。'+N5NL+'Please enter a name.'); $('#f-name')?.focus(); return; }
     if(S.knowsKana===null){ alert('ひらがなが よめるか、えらんで ください。\nPlease answer the hiragana question.'); return; }
     S.name=v;
     if(S.knowsKana){
@@ -3327,7 +3426,8 @@ document.addEventListener('click',e=>{
     const items=B.wrong.map(i=>BY_ID[i]).filter(Boolean);
     if(!items.length) return go('field');
     return beginBattle(items,{sec:B.sec,mode:B.mode,
-      mon:pick(MONSTERS.filter(m=>m.area==='any')),intro:'にげた ものたちが たちふさがった！'});
+    mon:pick(MONSTERS.filter(m=>m.area==='any')),
+    intro:bi([['にげた ものたちが たちふさがった！','The ones you ran from block your way!']])});
   }
   if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
   if(d.ask) return askAI(d.ask);
@@ -3339,7 +3439,8 @@ document.addEventListener('click',e=>{
     persist(); SFX.sel(); return render();
   }
   if(t.hasAttribute('data-reset')){
-    if(confirm(`ぼうけんのしょ ${SLOT}${S.name?'（'+S.name+'）':''} を けします。よろしいですか？`)){
+    if(confirm(`ぼうけんのしょ ${SLOT}${S.name?'（'+S.name+'）':''} を けします。よろしいですか？`
+      +N5NL+`Delete save file ${SLOT}? This cannot be undone.`)){
       try{ localStorage.removeItem(KEY(SLOT)); }catch(e){}
       if(db) db.doc('progress/slot'+SLOT).delete().catch(()=>{});
       S=normalize(null); go('title');

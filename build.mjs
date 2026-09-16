@@ -257,12 +257,15 @@ MONSTERS.forEach(m => {
   checkSprite('monster', m);
   if (!AREAS.has(m.area)) errs.push(`monster[${m.id}] 不明な area: ${m.area}`);
   if (!(m.hp > 0)) errs.push(`monster[${m.id}] hp が不正`);
+  // 英語版では戦闘ログに英語名が出る。抜けると英語だけ空欄になる
+  if (!m.en) errs.push(`monster[${m.id}] 英語名 en が必要`);
   checkRuby(`monster[${m.id}] 名前`, m.name);
   checkRuby(`monster[${m.id}] 説明`, m.msg);
 });
 HEROES.forEach(h => {
   checkSprite('hero', h);
   if (!h.name || !h.label) errs.push(`hero[${h.id}] name / label が必要`);
+  if (!h.en) errs.push(`hero[${h.id}] 英語名 en が必要`);
   if (!h.px2) errs.push(`hero[${h.id}] 攻撃ポーズ px2 がない`);
   checkRuby(`hero[${h.id}] 名前`, h.name);
   checkRuby(`hero[${h.id}] 説明`, h.label);

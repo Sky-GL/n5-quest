@@ -14,7 +14,7 @@
 //   n/N 剣身(明/影)   P/p マント(影/明)   h/H 髪(影/明・女のみ)
 export const HEROES = [
   {
-    id: 'hero_m', name: 'おとこ', label: 'おとこの ゆうしゃ',
+    id: 'hero_m', name: 'おとこ', en: 'Male', label: 'おとこの ゆうしゃ',
     pal: {
       G: '#B8860B',   // 金の影
       K: '#4A3424',   // ブーツの明
@@ -102,7 +102,7 @@ export const HEROES = [
     ]
   },
   {
-    id: 'hero_f', name: 'おんな', label: 'おんなの ゆうしゃ',
+    id: 'hero_f', name: 'おんな', en: 'Female', label: 'おんなの ゆうしゃ',
     pal: {
       G: '#B8860B',   // 金の影
       H: '#C89A50',   // 髪

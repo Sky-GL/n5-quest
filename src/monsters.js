@@ -3,7 +3,7 @@
 // area: どのダンジョンに出るか（vocab / kanji / grammar / any / boss）
 export const MONSTERS = [
   {
-    id: 'kotonoha', name: 'ことのはガ', area: 'vocab', hp: 3,
+    id: 'kotonoha', name: 'ことのはガ', en: 'Wordwing', area: 'vocab', hp: 3,
     msg: 'ひらひらと ことばを まきちらしている。',
     pal: { a: '#3E8E4A', b: '#6FCE6A', c: '#BFF07A', d: '#14240F' },
     px: [
@@ -34,7 +34,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'goiworm', name: 'ゴイワーム', area: 'vocab', hp: 4,
+    id: 'goiworm', name: 'ゴイワーム', en: 'Lexiworm', area: 'vocab', hp: 4,
     msg: 'ずかんの ページを かじって そだった。',
     pal: { a: '#7A4E9E', b: '#B47FD8', c: '#E4C6F5', d: '#18102A' },
     px: [
@@ -65,7 +65,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'fudeobake', name: 'ふでおばけ', area: 'kanji', hp: 3,
+    id: 'fudeobake', name: 'ふでおばけ', en: 'Brushwraith', area: 'kanji', hp: 3,
     msg: 'すみを たらしながら ういている。',
     pal: { d: '#14142A', a: '#8B5A2B', b: '#C89050', c: '#1C1C2E', e: '#F0E060' },
     px: [
@@ -96,7 +96,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'kanjigolem', name: 'カンジゴーレム', area: 'kanji', hp: 5,
+    id: 'kanjigolem', name: 'カンジゴーレム', en: 'Glyph Golem', area: 'kanji', hp: 5,
     msg: 'からだが すべて へんと つくりで できている。',
     pal: { a: '#5A6472', b: '#8C97A8', c: '#D2DAE6', d: '#E8603A' },
     px: [
@@ -127,7 +127,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'bunporobo', name: 'ブンポウロボ', area: 'grammar', hp: 4,
+    id: 'bunporobo', name: 'ブンポウロボ', en: 'Grammatron', area: 'grammar', hp: 4,
     msg: 'せつぞくの きそくを まもらせようとしてくる。',
     pal: { d: '#14142A', a: '#33528C', b: '#7CA6E0', c: '#FF5A4A' },
     px: [
@@ -158,7 +158,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'jokenryu', name: 'ジョウケンリュウ', area: 'grammar', hp: 5,
+    id: 'jokenryu', name: 'ジョウケンリュウ', en: 'Condragon', area: 'grammar', hp: 5,
     msg: 'じょうけんを みたさないと とおしてくれない。',
     pal: { a: '#1E6E5E', b: '#37A88E', c: '#8FE0CC', d: '#F8D048' },
     px: [
@@ -189,7 +189,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'machigai', name: 'マチガイドクロ', area: 'any', hp: 4,
+    id: 'machigai', name: 'マチガイドクロ', en: 'Blunderskull', area: 'any', hp: 4,
     msg: 'にどめの まちがいを まちかまえている。',
     pal: { d: '#14142A', a: '#E8E4D8', b: '#20202E' },
     px: [
@@ -220,7 +220,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'wasureme', name: 'ワスレメダマ', area: 'any', hp: 3,
+    id: 'wasureme', name: 'ワスレメダマ', en: 'Forgeteye', area: 'any', hp: 3,
     msg: 'みつめていると おぼえたことを わすれそうになる。',
     pal: { a: '#3A2E6E', b: '#6B58C4', c: '#FFFFFF', d: '#1A1020' },
     px: [
@@ -251,7 +251,7 @@ export const MONSTERS = [
   ]
   },
   {
-    id: 'goukaku', name: 'ゴウカクノツカイ', area: 'boss', hp: 10,
+    id: 'goukaku', name: 'ゴウカクノツカイ', en: 'Herald of Passing', area: 'boss', hp: 10,
     msg: 'ごうかくの しるしを もって まちうけている。',
     pal: { a: '#C8A030', b: '#F0D878', c: '#FFFFFF', d: '#3A2E10' },
     px: [
