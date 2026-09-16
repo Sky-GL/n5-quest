@@ -209,10 +209,30 @@ req(grammar, 'grammar', 6);
 // かな: 見出しはかな1字、ローマ字は変換器と突き合わせる。
 // ここで検算しておけば、変換器を直したときに壊れた箇所がビルドで分かる
 const KANA_ONE = /^[ぁ-ゖァ-ヺ]$/;
+/* 表に出すローマ字は、文の中の発音とは分けて決める。
+   を・ぢ・づ は 文の中では お・じ・ず と同じ音なので toRomaji は o/ji/zu を返す。
+   だが表の見出しまで同じにすると「この おとの かなは？」で
+   「o」に お と を の2つが当てはまってしまい、答えられない問題ができる。
+   入門の表がどこも wo/di/du と書くのは、字を見分けさせるためでもある。 */
+const KANA_LABEL = { 'を': 'wo', 'ぢ': 'di', 'づ': 'du' };
+/* 同じ文字種の中でローマ字が重なってはいけない。
+   重なると「この おとの かなは？」の正解が2つになる。
+   ひらがなとカタカナの間は、出題のときに文字種で分けているので重なってよい。 */
+{
+  const seen = {};
+  kana.forEach(r => {
+    const kata = /[ァ-ヺ]/.test(r[0]) ? 'kata' : 'hira';
+    const key = kata + ':' + r[1];
+    if (seen[key]) errs.push(`かなのローマ字が重なっている: ${seen[key]} と ${r[0]} がどちらも ${r[1]}`);
+    seen[key] = r[0];
+  });
+}
 kana.forEach((r, i) => {
   const w = `kana[${i}] ${r[0]}`;
   if (!KANA_ONE.test(r[0])) errs.push(`${w} 見出しがかな1字ではない`);
-  if (toRomaji(r[0]) !== r[1]) errs.push(`${w} ローマ字が変換結果と違う: ${r[1]}（変換は ${toRomaji(r[0])}）`);
+  // 表に出す見出しのローマ字は、文を読むときの発音とは別に決める（KANA_LABEL）
+  const want = KANA_LABEL[r[0]] || toRomaji(r[0]);
+  if (want !== r[1]) errs.push(`${w} ローマ字が違う: ${r[1]}（${KANA_LABEL[r[0]] ? '表の見出しは' : '変換は'} ${want}）`);
   if (!KANA_ONLY.test(r[2])) errs.push(`${w} 例語がかなだけではない: ${r[2]}`);
   if (toRomaji(r[2]) !== r[3]) errs.push(`${w} 例語のローマ字が違う: ${r[3]}（変換は ${toRomaji(r[2])}）`);
   if (!/^[ -~]+$/.test(r[4])) errs.push(`${w} 英語が半角英字ではない: ${r[4]}`);
