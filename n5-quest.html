@@ -312,11 +312,16 @@ rt{
   font-size:clamp(38px,12.5vw,60px); letter-spacing:.1em; line-height:1.25;
   /* 金のロゴを金の紋章に重ねると埋もれるので、字は青、縁を金にして抜く。
      ドット絵なので縁取りは stroke ではなく影を8方向に重ねて作る */
-  color:#59A6FF;
+  color:#17A2FF;
+  /* 縁を太くすると細い字が金に食われて青が残らない。0.05emまで。
+     px固定にすると、弧で端だけ大きくした字の縁の比率がそろわないのでemで置く。
+     青の発光を後ろに敷いて、暗い背景でも色が立つようにする */
   text-shadow:
-    -3px 0 0 #E8B84B, 3px 0 0 #E8B84B, 0 -3px 0 #E8B84B, 0 3px 0 #E8B84B,
-    -3px -3px 0 #E8B84B, 3px -3px 0 #E8B84B, -3px 3px 0 #E8B84B, 3px 3px 0 #E8B84B,
-    5px 6px 0 #000, 0 0 14px rgba(0,0,0,.9);
+    -.05em 0 0 #E8B84B, .05em 0 0 #E8B84B, 0 -.05em 0 #E8B84B, 0 .05em 0 #E8B84B,
+    -.05em -.05em 0 #E8B84B, .05em -.05em 0 #E8B84B,
+    -.05em .05em 0 #E8B84B, .05em .05em 0 #E8B84B,
+    .11em .13em 0 #000, 0 0 .34em rgba(30,170,255,.75), 0 0 .62em rgba(30,170,255,.35),
+    0 0 .3em rgba(0,0,0,.9);
 }
 .title-sub{
   display:inline-block; margin-top:20px; padding:11px 10px 0; font-size:12.5px;
