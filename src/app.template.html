@@ -279,6 +279,13 @@ button.kc{padding:0; font-family:inherit; color:inherit; cursor:pointer}
 .tg{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1E1E3C; font-size:14.5px}
 .tg:last-child{border-bottom:none}
 .tg b{color:var(--gold); font-weight:normal; font-size:13.5px}
+/* 声の名前は長い。横に並べるとラベルが1文字ずつ折れるので、縦に積む */
+.vrow{display:block}
+.vpick{display:flex; gap:6px; align-items:center; margin-top:6px}
+.vpick select{
+  flex:1 1 auto; min-width:0; font-family:inherit; font-size:13px; padding:5px 6px;
+  color:var(--fg); background:var(--win-2); border:var(--px) solid #3A3A6E; border-radius:4px;
+}
 
 /* ---- タイトル画面 ---- */
 /* 紋章。タイトル文字の後ろに敷く。
@@ -392,6 +399,9 @@ button.kc{padding:0; font-family:inherit; color:inherit; cursor:pointer}
 .gl{display:block; font-size:10.5px; color:#7F87AB; letter-spacing:.02em; line-height:1.5}
 .cmd .gl{margin-top:1px}
 .cmd .note{display:block; margin-top:1px}
+/* 選択肢に添えるローマ字と英語。えらぶ文より一段弱く、行を分ける */
+.osub{display:block; margin-top:2px}
+.osub .rj,.osub .en{display:block; font-size:12.5px; line-height:1.6}
 .win-t .gl{display:inline; font-size:10px; color:#6E76A0; margin-left:6px}
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
@@ -639,7 +649,7 @@ const expToNext = lv => 100 + (lv-1)*60;
 const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
-  course:'n5', examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, romajiFaded:0, fadeRuby:true, sound:true, speech:true, hero:'hero_m',
+  course:'n5', examDate:'2026-12-06', newPerDay:12, voice:'', showEn:true, uiEn:true, romaji:false, romajiFaded:0, fadeRuby:true, sound:true, speech:true, hero:'hero_m',
   name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
   chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', knowsKana:null, updatedAt:0
 };
@@ -940,17 +950,38 @@ const SFX={
 /* ===== 読み上げ（聴解） =====
    Web Speech API は端末によって日本語の声が無いことがある。
    声が見つかったときだけ聴解の機能を出し、無い端末では黙って隠す。 */
-const TTS={ready:false, voice:null};
+const TTS={ready:false, list:[]};
+/* 声の選びかた。
+   もとは localService（端末に入っている声）を優先していた。遅延が無くオフラインでも
+   鳴るという理由だが、Windows ではそれが旧世代の SAPI 音声で、いちばん機械らしく
+   聞こえるものを選んでしまっていた。
+   評判のよい声（Edge の Online Natural、Android の Google 日本語、
+   Apple の Enhanced/Premium）は どれも localService:false なので、
+   ローカルを優先すると ことごとく弾かれる。
+   端末に何が入っているかはこちらで決められないので、名前で見分けて
+   良いとされているものから順に取り、最後は本人が設定で選べるようにする。 */
+const VOICE_RANK=[
+  /natural|neural/i,               // Microsoft ... Online (Natural)。いま いちばん自然
+  /google/i,                       // Android Chrome の Google 日本語
+  /premium|enhanced/i,             // Apple の追加ダウンロード版
+  /kyoko|otoya|nanami|keita/i      // 素の Apple / Microsoft の日本語話者
+];
+const voiceScore = v => {
+  const n=(v.name||'')+' '+(v.voiceURI||'');
+  for(let i=0;i<VOICE_RANK.length;i++) if(VOICE_RANK[i].test(n)) return i;
+  return VOICE_RANK.length;
+};
 function pickVoice(){
   try{
     const vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
-    const ja=vs.filter(v=>/^ja(-|_|$)/i.test(v.lang||''));
-    if(!ja.length) return false;
-    // ローカルの声のほうが遅延がなく、オフラインでも鳴る
-    TTS.voice=ja.find(v=>v.localService)||ja[0];
-    TTS.ready=true; return true;
+    TTS.list=vs.filter(v=>/^ja(-|_|$)/i.test(v.lang||''))
+               .sort((a,b)=>voiceScore(a)-voiceScore(b)||a.name.localeCompare(b.name));
+    TTS.ready=TTS.list.length>0;
+    return TTS.ready;
   }catch(e){ return false; }
 }
+// 本人が選んだ声。選んでいなければ いちばん良いとされるもの
+const curVoice = () => (S.voice&&TTS.list.find(v=>v.name===S.voice))||TTS.list[0]||null;
 function initTTS(){
   if(!('speechSynthesis' in window)) return;
   pickVoice();
@@ -969,7 +1000,8 @@ function speak(text,slow,onEnd){
     speechSynthesis.cancel();
     clearTimeout(sayTimer);
     const u=new SpeechSynthesisUtterance(String(text));
-    u.voice=TTS.voice; u.lang=(TTS.voice&&TTS.voice.lang)||'ja-JP';
+    const v=curVoice();
+    u.voice=v; u.lang=(v&&v.lang)||'ja-JP';
     u.rate=slow?0.7:0.92; u.pitch=1;
     if(onEnd) u.onend=onEnd;
     // cancel 直後の speak は Chrome で無視されることがあるので、少し置いてから鳴らす
@@ -1225,6 +1257,24 @@ function kanaQ(item,force){
   return {label:'この かなの おとは？',labelEn:'What sound is this kana?',
     main:W(item.w,''),item,opts:optsOf(item.romaji,kanaNear(item,pool).map(x=>x.romaji),true),ruby:false};
 }
+/* かいわの選択肢に添える補助。
+   日本語の文だけを4つ並べても、かなが読めない人には どれも同じ形にしか見えない。
+   ローマ字を添えて「音として読める」ようにする。
+   聞き取りのときは英語も出す。何の音だったか分からないまま4択を出しても、
+   選ぶ手がかりが どこにも無い。
+   英語から日本語を選ぶ問題では英語を添えない（答えそのものになる）。 */
+function phraseSub(withEn){
+  return v => {
+    const it=BY_SEC.phrase.find(x=>x.w===v);
+    let h='';
+    if(rjOn()) h+=`<span class="rj">${esc(sentRomaji(v))}</span>`;
+    if(withEn&&S.showEn&&it) h+=`<span class="en">${esc(it.en)}</span>`;
+    return h?`<span class="osub">${h}</span>`:'';
+  };
+}
+// 問いに出す文。ローマ字を下に敷いて、声に出せるようにする
+const phraseMain = t => `<span class="qword">${esc(t)}</span>`
+  +(rjOn()?`<div class="rj exrj">${esc(sentRomaji(t))}</div>`:'');
 /* かいわの文の出し方。
    ここは「文法を当てる」ところではないので、問い方を3つに絞る。
    いみを選ぶ → 英語から文を選ぶ → 聞いて選ぶ。
@@ -1236,11 +1286,13 @@ function phraseQ(item,force){
   if(TTS.ready) t.push('p_listen');
   const kind=force||(rec(item.id).lv<=1?'p_en':pick(t));
   if(kind==='p_jp') return {label:'この いみの ぶんは？',labelEn:'Which phrase means this?',
-    main:W(item.en,'',false,true),item,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+    main:W(item.en,'',false,true),item,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false,
+    sub:phraseSub(false)};
   if(kind==='p_listen') return {label:'きこえた ぶんは？',labelEn:'Which phrase did you hear?',
-    main:earHtml(),item,say:item.w,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+    main:earHtml(),item,say:item.w,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false,
+    sub:phraseSub(true)};
   return {label:'この ぶんの いみは？',labelEn:'What does this phrase mean?',
-    main:W(item.w,''),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
+    main:phraseMain(item.w),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
 }
 function makeQ(item,mode){
   // モードの判定を先に置く。かなを先に見てしまうと、聴解モードでも
@@ -1547,7 +1599,9 @@ function foesName(fs,en){
   return order.map(n=>cnt[n]>1?(en?`${n} x${cnt[n]}`:`${n} ${cnt[n]}たい`):n).join(en?' and ':'と ');
 }
 // 「〜が あらわれた！」の1行を日英で
-const foesAppear = fs => [`${foesName(fs)}が あらわれた！`, `${foesName(fs,1)} draws near!`];
+// 2体以上なら draw。1体のときだけ draws
+const foesAppear = fs => [`${foesName(fs)}が あらわれた！`,
+  `${foesName(fs,1)} draw${fs.length>1?'':'s'} near!`];
 
 // 戦闘の始まりは1か所にまとめる。ふつうの探索・ステージ練習・ステージのぬし、
 // どれも「問題の束」と「敵」が違うだけなので、ここに寄せて枝分かれを減らす
@@ -1627,7 +1681,7 @@ function drawBattle(intro){
   </div>
   <div class="win"><span class="win-t">こたえ${gl('Answer')}</span>
     <div class="cmds" id="cmds">
-      ${Q.opts.map((o,n)=>`<button class="cmd" data-a="${n}"><span class="cur">▶</span><span>${Q.ruby?rb(o.v):esc(o.v)}</span></button>`).join('')}
+      ${Q.opts.map((o,n)=>`<button class="cmd" data-a="${n}"><span class="cur">▶</span><span>${Q.ruby?rb(o.v):esc(o.v)}${Q.sub?Q.sub(o.v):''}</span></button>`).join('')}
     </div>
   </div>
   <div class="win tight"><span class="win-t">まほう${gl('Magic')}</span>
@@ -2196,6 +2250,16 @@ function vConf(){
     </span></div>
     <div class="tg"><span>ローマ字も みせる${gl('Show romaji under the kana')}</span><button data-tg="romaji"><b>${S.romaji?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>おぼえた かんじの ふりがなを けす${gl('Hide furigana on kanji you have learned')}</span><button data-tg="fadeRuby"><b>${S.fadeRuby?'オン':'オフ'}</b></button></div>
+    ${/* よみあげが オフだと speak() が何もしないので、ためしても無音になる。
+          声をえらぶのは「聞いて比べる」ためなので、オンのときだけ出す */
+      TTS.ready&&S.speech&&TTS.list.length>1?`<div class="tg vrow"><span>こえを えらぶ${gl('Voice')}</span><span class="vpick">
+      <select id="f-voice">${TTS.list.map(v=>
+        `<option value="${esc(v.name)}"${v.name===(curVoice()||{}).name?' selected':''}>${esc(v.name)}</option>`).join('')}</select>
+      ${sayBtn('こんにちは。にほんごの れんしゅうを しましょう。')}
+    </span></div>
+    <div class="note" style="padding:6px 0 2px">きかいっぽく きこえるときは、ほかの こえを ためして ください。
+      この アプリは たんまつに はいって いる こえを つかいます。${
+      gl('If the voice sounds robotic, try another one. The app uses the voices installed on your device. Edge on Windows and Chrome on Android offer much better Japanese voices, and on iPhone you can download an enhanced Kyoko under Settings > Accessibility > Spoken Content > Voices.')}</div>`:''}
     ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
       `<div class="tg"><span>よみあげ${gl('Speech')}</span><b style="color:var(--dim)">この きかいでは つかえません</b></div>`}
     <div class="tg"><span>こうかおん${gl('Sound')}</span><button data-tg="sound"><b>${S.sound?'オン':'オフ'}</b></button></div>
@@ -2344,6 +2408,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='f-date'){ S.examDate=e.target.value; persist(); paintHud(); }
   if(e.target.id==='f-new'){ S.newPerDay=Math.max(3,Math.min(40,+e.target.value||12)); persist(); }
   if(e.target.id==='f-rename'){ S.name=e.target.value.trim().slice(0,8); persist(); }
+  if(e.target.id==='f-voice'){ S.voice=e.target.value; persist(); speak('こんにちは'); }
 });
 document.addEventListener('keydown',e=>{
   if(route!=='battle') return;
