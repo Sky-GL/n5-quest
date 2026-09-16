@@ -2322,6 +2322,21 @@ function pickVoice(){
 }
 // 本人が選んだ声。選んでいなければ いちばん良いとされるもの
 const curVoice = () => (S.voice&&TTS.list.find(v=>v.name===S.voice))||TTS.list[0]||null;
+/* こえの入れかたは 端末で まったく違う。
+   全部まとめて出すと、自分に関係のない手順まで読むことになるので、
+   いま使っている端末のぶんだけ出す。 */
+function voiceHelp(){
+  const ua=navigator.userAgent;
+  if(isIOS(ua,navigator.platform,navigator.maxTouchPoints)) return [
+    'きかいっぽく きこえるときは、「せってい」→「アクセシビリティ」→「読み上げコンテンツ」→「声」→「日本語」で、Kyoko の よい ほうを ダウンロードして ください。',
+    'Sounds robotic? On iPhone or iPad: Settings > Accessibility > Spoken Content > Voices > Japanese, then download the enhanced Kyoko. It appears in the list above once installed.'];
+  if(/Android/i.test(ua)) return [
+    'きかいっぽく きこえるときは、「設定」→「ユーザー補助」→「読み上げ」で Google の 音声合成を えらび、日本語の データを 入れて ください。',
+    'Sounds robotic? On Android: Settings > Accessibility > Text-to-speech output > Google Text-to-speech, then install the Japanese voice data. Chrome then offers the Google Japanese voice.'];
+  return [
+    'きかいっぽく きこえるときは、Microsoft Edge で ひらいて みて ください。ずっと しぜんな こえが つかえます。',
+    'Sounds robotic? On Windows, open this page in Microsoft Edge: it offers the Nanami and Keita natural voices, which are far better than the built-in ones. They need a network connection.'];
+}
 function initTTS(){
   if(!('speechSynthesis' in window)) return;
   pickVoice();
@@ -2334,6 +2349,20 @@ function initTTS(){
   }catch(e){}
 }
 let sayTimer=null;
+/* iOS（iPhone・iPad）は、最初の1回だけ「利用者の操作の中で speak() を呼ぶ」ことを
+   求める。こちらは cancel との競合を避けるために 70ms 置いてから鳴らしているので、
+   そのままだと操作の流れが切れて、iPhone ではいつまでも無音になる。
+   最初のタップのその場で、音量0の発話を一度だけ通して解錠しておく。
+   iOS以外では何も起きない（すぐ終わる空の発話が1つ流れるだけ）。 */
+let ttsUnlocked=false;
+function unlockTTS(){
+  if(ttsUnlocked||!('speechSynthesis' in window)) return;
+  ttsUnlocked=true;
+  try{
+    const u=new SpeechSynthesisUtterance(' ');
+    u.volume=0; speechSynthesis.speak(u);
+  }catch(e){}
+}
 function speak(text,slow,onEnd){
   if(!TTS.ready||!S.speech||!text) { onEnd&&onEnd(); return false; }
   try{
@@ -3597,9 +3626,7 @@ function vConf(){
         `<option value="${esc(v.name)}"${v.name===(curVoice()||{}).name?' selected':''}>${esc(v.name)}</option>`).join('')}</select>
       ${sayBtn('こんにちは。にほんごの れんしゅうを しましょう。')}
     </span></div>
-    <div class="note" style="padding:6px 0 2px">きかいっぽく きこえるときは、ほかの こえを ためして ください。
-      この アプリは たんまつに はいって いる こえを つかいます。${
-      gl('If the voice sounds robotic, try another one. The app uses the voices installed on your device. Edge on Windows and Chrome on Android offer much better Japanese voices, and on iPhone you can download an enhanced Kyoko under Settings > Accessibility > Spoken Content > Voices.')}</div>`:''}
+    <div class="note" style="padding:6px 0 2px">${((h)=>h[0]+gl(h[1]))(voiceHelp())}</div>`:''}
     ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
       `<div class="tg"><span>よみあげ${gl('Speech')}</span><b style="color:var(--dim)">この きかいでは つかえません</b></div>`}
     <div class="tg"><span>こうかおん${gl('Sound')}</span><button data-tg="sound"><b>${S.sound?'オン':'オフ'}</b></button></div>
@@ -3641,6 +3668,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
+  unlockTTS();   // 操作の流れの中で呼ぶ必要がある。いちばん外で、条件を付けずに
   const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-course],[data-uien],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
