@@ -334,6 +334,15 @@ rt{
 .nav button .gl{font-size:9.5px; color:#6E76A0}
 .msg .gl{display:block; font-size:12px; color:#8A92B6; line-height:1.6}
 .no-en .gl{display:none !important}
+/* ---- ホーム画面への案内 ---- */
+.hint{border-color:var(--gold)}
+.hint .hb{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:start}
+.hint .hi{font-size:26px; line-height:1.1; color:var(--gold)}
+.hint .ht{font-size:14.5px; line-height:1.9}
+.hint .share{
+  display:inline-grid; place-items:center; width:19px; height:19px; vertical-align:-4px;
+  border:var(--px) solid var(--gold); border-radius:4px; color:var(--gold); font-size:12px; line-height:1;
+}
 /* ローマ字。かなを覚えきる前の人のための補助なので、かなより一段弱く見せる */
 .rj{color:#8A92B6; font-size:.86em; letter-spacing:.04em}
 .qword .rj{font-size:.62em}
@@ -570,6 +579,25 @@ function stats(sec){
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
   return {n:pool.length,done,due,fresh,dist,rate:sum/(pool.length*MAX_LV)};
 }
+/* ===== ホーム画面への案内 =====
+   iOSのSafariには「7日さわらないとスクリプトの保存領域を消す」規則がある。
+   ふつうにブラウザで開いているだけだと、1週間あけた人の進捗が飛びうる。
+   ホーム画面のアプリとして開いていれば対象外になるので、そこだけ案内する。
+   Androidにこの規則は無いので出さない。 */
+function isIOS(ua,platform,touch){
+  // iPadOS 13以降は自分を Mac と名乗るので、タッチの数で見分ける
+  return /iPad|iPhone|iPod/.test(ua) || (platform==='MacIntel' && touch>1);
+}
+const HOME_KEY='n5quest:nohome';
+function isStandalone(){
+  return window.navigator.standalone===true ||
+         !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+}
+function needHomeHint(){
+  if(lsGet(HOME_KEY)) return false;
+  return isIOS(navigator.userAgent,navigator.platform,navigator.maxTouchPoints) && !isStandalone();
+}
+
 /* ===== 章（ステージ） =====
    996項目を一本道で見せると、1週間やっても「ぜんたい 3％」にしかならない。
    12の章に切って、8日前後で1つ終わる区切りを作る。 */
@@ -1076,6 +1104,19 @@ function vField(){
   const cleared=goal>0 && S.doneToday>=goal;
   const ch=currentChapter(), cs=chapStats(ch), open=cs.rate>=CHAP_OPEN, won=chapCleared(ch);
   $('#view').innerHTML=`
+  ${needHomeHint()?`<div class="win hint"><span class="win-t">だいじな おしらせ${gl('Please read')}</span>
+    <div class="hb">
+      <span class="hi">▲</span>
+      <span class="ht">ホームがめんに ついかして ください。${gl('Please add this to your Home Screen.')}
+        <span class="note">iPhoneでは、1しゅうかん ひらかないと きろくが きえる ことが あります。
+          したの <span class="share">↑</span> を おして「ホーム画面に追加」を えらぶと、きえません。
+          ${gl('On iPhone your progress can be erased after 7 days. Tap Share, then Add to Home Screen.')}</span>
+      </span>
+    </div>
+    <div class="cmds" style="margin-top:6px">
+      <button class="cmd" data-nohome=""><span class="cur">▶</span><span>わかった${gl('Got it')}</span></button>
+    </div>
+  </div>`:''}
   <div class="win"><span class="win-t">${S.name?esc(S.name)+'の もくひょう':'きょうの もくひょう'}${gl("Today's goal")}</span>
     <div class="msg" id="fmsg"></div>
   </div>
@@ -1720,7 +1761,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-kanaq],[data-chap],[data-chapboss],[data-buy],[data-wear]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -1734,6 +1775,7 @@ document.addEventListener('click',e=>{
     }
     return;
   }
+  if(t.hasAttribute('data-nohome')){ lsSet(HOME_KEY,'1'); SFX.sel(); return render(); }
   if(t.hasAttribute('data-kanaq')){
     S.knowsKana=(d.kanaq==='1'); SFX.sel();
     S.name=($('#f-name')?.value||'').trim();   // 入力中のなまえを持ち越す
