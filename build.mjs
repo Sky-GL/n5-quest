@@ -20,6 +20,7 @@ for (const s of VOCAB_FILES) {
 const { KANA_A } = await import(new URL('./src/kana-a.js', import.meta.url));
 const { KANA_B } = await import(new URL('./src/kana-b.js', import.meta.url));
 const { toRomaji } = await import(new URL('./src/romaji.js', import.meta.url));
+const { buildConfuseMap, CONFUSE_GROUPS } = await import(new URL('./src/confuse.js', import.meta.url));
 const { KANJI_A } = await import(new URL('./src/kanji-a.js', import.meta.url));
 const { KANJI_B } = await import(new URL('./src/kanji-b.js', import.meta.url));
 const { GRAMMAR_A } = await import(new URL('./src/grammar-a.js', import.meta.url));
@@ -137,7 +138,7 @@ const req = (arr, name, n) => arr.forEach((r, i) => {
 });
 req(kana, 'kana', 5);
 req(vocab, 'vocab', 6);
-req(kanji, 'kanji', 5);
+req(kanji, 'kanji', 6);
 req(grammar, 'grammar', 6);
 
 // かな: 見出しはかな1字、ローマ字は変換器と突き合わせる。
@@ -151,6 +152,17 @@ kana.forEach((r, i) => {
   if (toRomaji(r[2]) !== r[3]) errs.push(`${w} 例語のローマ字が違う: ${r[3]}（変換は ${toRomaji(r[2])}）`);
   if (!/^[ -~]+$/.test(r[4])) errs.push(`${w} 英語が半角英字ではない: ${r[4]}`);
 });
+
+// 紛らわしいかなの表。書いた字がデータに無いと、誤答が作れず黙って効かなくなる
+const KANA_HAVE = new Set(kana.map(r => r[0]));
+const CONFUSE_MAP = buildConfuseMap(KANA_HAVE);
+{
+  // 手で書いた組は1字も取りこぼさない（誤字はここで落とす）
+  const miss = [...new Set([...CONFUSE_GROUPS.join('')].filter(c => !KANA_HAVE.has(c)))];
+  if (miss.length) errs.push(`confuse.js の表にデータへ無いかながある: ${miss.join('')}`);
+  const orphan = Object.keys(CONFUSE_MAP).filter(c => !KANA_HAVE.has(c));
+  if (orphan.length) errs.push(`紛らわしい表に、データに無い字が残っている: ${orphan.join('')}`);
+}
 
 // 語彙: 品詞・意味・例文はそのまま画面に出るのでルビが要る
 vocab.forEach((r, i) => {
@@ -202,8 +214,11 @@ kanji.forEach((r, i) => {
   const w = `kanji[${i}] ${r[0]}`;
   if (r[0].length !== 1 || !KANJI_CH.test(r[0])) errs.push(`${w} 見出しが漢字1字ではない`);
   checkRuby(w + ' 字義', r[3]);
-  if (!Array.isArray(r[4]) || !r[4].length) { errs.push(`${w} 例語がない`); return; }
-  r[4].forEach((j, k) => {
+  // 字義の英語。ここが無いと、日本語がまったく初めての人は
+  // 「この かんじの いみは？」の選択肢が読めても意味が取れない
+  if (!/^[ -~]+$/.test(r[4])) errs.push(`${w} 字義の英語が半角英字ではない: ${r[4]}`);
+  if (!Array.isArray(r[5]) || !r[5].length) { errs.push(`${w} 例語がない`); return; }
+  r[5].forEach((j, k) => {
     if (!Array.isArray(j) || j.length !== 4 || j.some(x => !String(x).trim())) { errs.push(`${w} 例語[${k}] のフィールドが不備`); return; }
     checkRuby(`${w} 例語「${j[0]}」意味`, j[2]);
     if (!KANA_ONLY.test(j[1])) errs.push(`${w} 例語「${j[0]}」の読みがかなではない: ${j[1]}`);
@@ -301,7 +316,7 @@ if (errs.length) {
   process.exit(1);
 }
 
-const kanjiWords = kanji.reduce((s, k) => s + k[4].length, 0);
+const kanjiWords = kanji.reduce((s, k) => s + k[5].length, 0);
 const tpl = fs.readFileSync(path.join(src, 'app.template.html'), 'utf8');
 // 1項目1行で出力する。git差分が読め、分割して扱えるようにするため。
 const NL = String.fromCharCode(10);
@@ -323,7 +338,8 @@ const dataJs =
   'const MONSTERS=[' + NL + rows(MONSTERS) + NL + '];' + NL +
   'const HEROES=[' + NL + rows(HEROES) + NL + '];' + NL +
   'const CHAPTERS=[' + NL + rows(CHAPTERS) + NL + '];' + NL +
-  'const CREST=' + JSON.stringify(CREST) + ';';
+  'const CREST=' + JSON.stringify(CREST) + ';' + NL +
+  'const CONFUSE=' + JSON.stringify(CONFUSE_MAP) + ';';
 const inject = '<script>' + dataJs + '</script>';
 const html = tpl.replace('<script id="__DATA__"></script>', inject);
 if (html === tpl) { console.error('データ差し込み位置が見つかりません'); process.exit(1); }

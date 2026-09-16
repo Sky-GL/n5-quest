@@ -222,6 +222,27 @@ rt{
 .tile.s4{background:#3E9E58; border-color:#5FD86A}
 .tile.s5{background:#5FD86A; border-color:#9CF0A4}
 .tile.s6{background:var(--gold); border-color:#FFF0A0}
+/* ---- 50音表 ---- */
+/* 覚えた字が表の中で埋まっていく。ID順のフラットな格子だと、
+   学習者が「あかさたな のどこにいるか」を掴めない */
+.kchart{display:grid; grid-template-columns:repeat(5,1fr); gap:3px; margin:6px 0 4px}
+.kc{
+  aspect-ratio:1; display:grid; place-items:center; align-content:center;
+  border-radius:3px; background:var(--win-2); border:1px solid #2A2A52;
+}
+.kc b{font-weight:normal; font-size:clamp(14px,4.6vw,19px); line-height:1.1}
+.kc i{font-style:normal; font-size:clamp(8px,2.6vw,11px); color:var(--dim); line-height:1.3}
+.kc.s1{background:#2E2E58; border-color:#3A3A6E}
+.kc.s2{background:#3C5A8E; border-color:#4C86E8}
+.kc.s3{background:#4C86E8; border-color:#78A8F0}
+.kc.s4{background:#3E9E58; border-color:#5FD86A}
+.kc.s5{background:#5FD86A; border-color:#9CF0A4}
+.kc.s6{background:var(--gold); border-color:#FFF0A0}
+.kc.s3 i,.kc.s4 i{color:#E4E9FA}
+.kc.s5 b,.kc.s5 i,.kc.s6 b,.kc.s6 i{color:#0F0F1E}
+.kc.gap{background:transparent; border-color:transparent}
+.kc.none{opacity:.25}
+.ktitle{font-size:12.5px; color:var(--dim); margin-top:10px}
 .leg{display:flex; gap:11px; flex-wrap:wrap; font-size:11.5px; color:var(--dim)}
 .leg span{display:flex; align-items:center; gap:4px}
 .leg .tile{width:11px; aspect-ratio:auto; height:11px}
@@ -1446,109 +1467,109 @@ const DATA={
 ["お元気ですか","おげんきですか","かんどうし","あいての ぐあいを きく ことば","how are you?","おひさしぶりです。【おげんきですか】。"]
 ],
 "kanji":[
-["一","イチ・イツ","ひと(つ)","ひとつ・はじめ",[["一つ","ひとつ","ものが ひとつ","one (thing)"],["一人","ひとり","ひと が ひとり／ひとりきり","one person; alone"]]],
-["二","ニ","ふた(つ)","ふたつ",[["二つ","ふたつ","ものが ふたつ","two (things)"],["二人","ふたり","ひとが ふたり","two people"]]],
-["三","サン","み(っつ)","みっつ",[["三つ","みっつ","ものが みっつ","three (things)"],["三月","さんがつ","いちねんの 3ばんめの つき","March"]]],
-["四","シ","よ(っつ)・よん","よっつ",[["四つ","よっつ","ものが よっつ","four (things)"],["四月","しがつ","いちねんの 4ばんめの つき","April"]]],
-["五","ゴ","いつ(つ)","いつつ",[["五つ","いつつ","ものが いつつ","five (things)"],["五分","ごふん","5ふんかん","five minutes"]]],
-["六","ロク","む(っつ)","むっつ",[["六つ","むっつ","ものが むっつ","six (things)"],["六時","ろくじ","6じ","six o'clock"]]],
-["七","シチ","なな(つ)","ななつ",[["七つ","ななつ","ものが ななつ","seven (things)"],["七月","しちがつ","いちねんの 7ばんめの つき","July"]]],
-["八","ハチ","やっ(つ)","やっつ",[["八つ","やっつ","ものが やっつ","eight (things)"],["八日","ようか","つきの 8ばんめの ひ／8にちかん","the 8th; eight days"]]],
-["九","キュウ・ク","ここの(つ)","ここのつ",[["九つ","ここのつ","ものが ここのつ","nine (things)"],["九月","くがつ","いちねんの 9ばんめの つき","September"]]],
-["十","ジュウ","とお","とお",[["十日","とおか","つきの 10ばんめの ひ／10にちかん","the 10th; ten days"],["十分","じゅっぷん","10ぷんかん","ten minutes"]]],
-["百","ヒャク","もも","ひゃく",[["百","ひゃく","100","hundred"],["三百","さんびゃく","300","three hundred"]]],
-["千","セン","ち","せん",[["千","せん","1000","thousand"],["千円","せんえん","1000えん","1000 yen"]]],
-["万","マン・バン","よろず","まん・とても おおい",[["一万","いちまん","10000","ten thousand"],["十万","じゅうまん","100000","hundred thousand"]]],
-["円","エン","まる(い)","まるい・にほんの おかね",[["円","えん","にほんの おかねの たんい","yen"],["百円","ひゃくえん","100えん","100 yen"]]],
-["時","ジ","とき","とき・じかん",[["時間","じかん","とき・じかんの ながさ","time; hour"],["何時","なんじ","なんじですか の なんじ","what time"]]],
-["年","ネン","とし","とし・1ねん",[["今年","ことし","この とし","this year"],["来年","らいねん","つぎの とし","next year"]]],
-["月","ゲツ・ガツ","つき","つき・1かげつ",[["今月","こんげつ","この つき","this month"],["月","つき","そらに でる つき","moon"]]],
-["日","ニチ・ジツ","ひ・か","ひ・たいよう",[["日本","にほん","わたしたちの くに","Japan"],["毎日","まいにち","まい あさから よるまで、ずっと","every day"]]],
-["上","ジョウ","うえ・あ(がる)","うえ",[["上","うえ","たかい ほう","above; on top"],["上手","じょうず","うまい こと","good at; skillful"]]],
-["下","カ・ゲ","した・さ(がる)","した",[["下","した","ひくい ほう","below; under"],["下手","へた","うまく ない こと","bad at; unskillful"]]],
-["右","ウ・ユウ","みぎ","みぎ",[["右","みぎ","みぎの ほう","right"],["右手","みぎて","みぎの て","right hand"]]],
-["左","サ","ひだり","ひだり",[["左","ひだり","ひだりの ほう","left"],["左手","ひだりて","ひだりの て","left hand"]]],
-["中","チュウ","なか","なか・まんなか",[["中","なか","うちがわ","inside; middle"],["中学校","ちゅうがっこう","12さいから 15さいまでの がっこう","junior high school"]]],
-["北","ホク","きた","きた",[["北","きた","きたの ほう","north"],["北口","きたぐち","えきの きたがわの でいりぐち","north exit"]]],
-["南","ナン","みなみ","みなみ",[["南","みなみ","みなみの ほう","south"],["南口","みなみぐち","えきの みなみがわの でいりぐち","south exit"]]],
-["東","トウ","ひがし","ひがし",[["東","ひがし","ひがしの ほう","east"],["東口","ひがしぐち","えきの ひがしがわの でいりぐち","east exit"]]],
-["西","セイ・サイ","にし","にし",[["西","にし","にしの ほう","west"],["西口","にしぐち","えきの にしがわの でいりぐち","west exit"]]],
-["人","ジン・ニン","ひと","ひと",[["人","ひと","にんげん","person"],["外国人","がいこくじん","ほかの くにの ひと","foreigner"]]],
-["今","コン","いま","いま",[["今","いま","この とき","now"],["今日","きょう","この ひ","today"]]],
-["休","キュウ","やす(む)","やすむ",[["休む","やすむ","しごとや べんきょうを とめて ゆっくりする","to rest; to take a day off"],["お休みなさい","おやすみなさい","ねる まえの あいさつ","good night"]]],
-["会","カイ","あ(う)","あう・あつまり",[["会う","あう","ひとと かおを あわせる","to meet"],["会社","かいしゃ","しごとを する ところ","company"]]],
-["何","カ","なに・なん","なに",[["何","なに","わからない ものを きく ことば","what"],["何人","なんにん","ひとの かず を きく ことば","how many people"]]],
-["先","セン","さき","さき・まえ",[["先生","せんせい","おしえて くれる ひと","teacher"],["先月","せんげつ","まえの つき","last month"]]],
-["入","ニュウ","はい(る)・い(れる)","はいる",[["入る","はいる","そとから なかへ いく","to enter"],["入口","いりぐち","はいる ところ","entrance"]]],
-["出","シュツ","で(る)・だ(す)","でる",[["出る","でる","なかから そとへ いく","to go out; to leave"],["出口","でぐち","そとへ でる ところ","exit"]]],
-["分","ブン・フン","わ(かる)・わ(ける)","わける・ふん",[["分かる","わかる","いみが あたまに はいる","to understand"],["三十分","さんじゅっぷん","30ぷんかん","thirty minutes"]]],
-["前","ゼン","まえ","まえ",[["前","まえ","まえの ほう・まえの とき","front; before"],["名前","なまえ","ひとや ものの よびかた","name"]]],
-["午","ゴ","うま","ひるの まんなか",[["午前","ごぜん","あさから ひるまで","morning; a.m."],["午後","ごご","ひるから よるまで","afternoon; p.m."]]],
-["半","ハン","なか(ば)","はんぶん",[["半分","はんぶん","ふたつに わけた ひとつ","half"],["半日","はんにち","いちにちの はんぶん","half a day"]]],
-["友","ユウ","とも","ともだち",[["友だち","ともだち","なかの いい ひと","friend"],["友人","ゆうじん","ともだちの かたい いいかた","friend (formal)"]]],
-["口","コウ","くち","くち",[["口","くち","たべたり はなしたり する ところ","mouth"],["人口","じんこう","その ばしょに すむ ひとの かず","population"]]],
-["古","コ","ふる(い)","ふるい",[["古い","ふるい","あたらしく ない","old (things)"],["中古","ちゅうこ","だれかが つかった あとの もの","secondhand"]]],
-["名","メイ","な","なまえ",[["有名","ゆうめい","おおくの ひとが しって いる こと","famous"],["名字","みょうじ","かぞくの なまえ","family name"]]],
-["国","コク","くに","くに",[["国","くに","にほんや アメリカの ような ところ","country"],["外国","がいこく","ほかの くに","foreign country"]]],
-["土","ド・ト","つち","つち",[["土","つち","じめんの つち","soil; earth"],["土曜日","どようび","きんようびの つぎの ひ","Saturday"]]],
-["外","ガイ","そと","そと",[["外","そと","いえの そとがわ","outside"],["外国語","がいこくご","ほかの くにの ことば","foreign language"]]],
-["多","タ","おお(い)","おおい",[["多い","おおい","かずが たくさん ある","many; numerous"],["多分","たぶん","きっと そうだろう と おもう とき","probably; maybe"]]],
-["大","ダイ・タイ","おお(きい)","おおきい",[["大きい","おおきい","サイズが おおきい","big; large"],["大人","おとな","20さい ぐらいより うえの ひと","adult"]]],
-["天","テン","あま","そら・てん",[["天気","てんき","はれ・くもり・あめ の ようす","weather"],["天ぷら","てんぷら","ころもを つけて あげた にほんの りょうり","tempura"]]],
-["女","ジョ","おんな","おんな",[["女","おんな","おんなの ひと","woman"],["女の子","おんなのこ","ちいさい おんなの こども","girl"]]],
-["子","シ・ス","こ","こども",[["子ども","こども","ちいさい ひと","child"],["男の子","おとこのこ","ちいさい おとこの こども","boy"]]],
-["学","ガク","まな(ぶ)","まなぶ",[["学生","がくせい","がっこうで べんきょうする ひと","student"],["大学","だいがく","こうこうの つぎの がっこう","university"]]],
-["安","アン","やす(い)","やすい・おだやか",[["安い","やすい","ねだんが ひくい","cheap"],["安心","あんしん","しんぱいが なくなる こと","relief; peace of mind"]]],
-["小","ショウ","ちい(さい)・こ","ちいさい",[["小さい","ちいさい","サイズが ちいさい","small"],["小学校","しょうがっこう","6さいから 12さいまでの がっこう","elementary school"]]],
-["少","ショウ","すく(ない)・すこ(し)","すこし",[["少し","すこし","ちょっと だけ","a little"],["少ない","すくない","かずが あまり ない","few; not many"]]],
-["山","サン","やま","やま",[["山","やま","たかく もりあがった ところ","mountain"],["火山","かざん","ひを ふく やま","volcano"]]],
-["川","セン","かわ","かわ",[["川","かわ","みずが ながれる ところ","river"],["小川","おがわ","ちいさい かわ","stream; brook"]]],
-["店","テン","みせ","みせ",[["店","みせ","ものを うる ところ","shop; store"],["店員","てんいん","みせで はたらく ひと","shop clerk"]]],
-["後","ゴ・コウ","うし(ろ)・あと","うしろ・あと",[["後ろ","うしろ","せなかの ほう","behind; back"],["後で","あとで","すこし じかんが たってから","later"]]],
-["手","シュ","て","て",[["手","て","うでの さきの ぶぶん","hand"],["手紙","てがみ","ひとに かいて おくる もの","letter"]]],
-["新","シン","あたら(しい)","あたらしい",[["新しい","あたらしい","ふるく ない","new"],["新聞","しんぶん","まいにちの ニュースが のって いる かみ","newspaper"]]],
-["書","ショ","か(く)","かく",[["書く","かく","じを かみに のこす","to write"],["辞書","じしょ","ことばの いみを しらべる ほん","dictionary"]]],
-["木","モク・ボク","き","き",[["木","き","はが ある たかい しょくぶつ","tree; wood"],["木曜日","もくようび","すいようびの つぎの ひ","Thursday"]]],
-["本","ホン","もと","ほん・もと",[["本","ほん","よむ ための もの","book"],["日本語","にほんご","にほんの ことば","Japanese language"]]],
-["来","ライ","く(る)","くる",[["来る","くる","こちらへ ちかづく","to come"],["来週","らいしゅう","つぎの しゅう","next week"]]],
-["校","コウ","","がっこう",[["学校","がっこう","べんきょうを する ところ","school"],["高校","こうこう","ちゅうがっこうの つぎの がっこう","high school"]]],
-["母","ボ","はは","はは",[["母","はは","じぶんの おかあさん","(my) mother"],["お母さん","おかあさん","ひとの おかあさん／よびかけ","mother"]]],
-["毎","マイ","ごと","まいかい・いつも",[["毎朝","まいあさ","あさは いつも","every morning"],["毎年","まいとし","としは いつも","every year"]]],
-["気","キ・ケ","","きもち・くうき",[["元気","げんき","からだと こころが つよい こと","healthy; lively"],["病気","びょうき","からだの ぐあいが わるい こと","illness"]]],
-["水","スイ","みず","みず",[["水","みず","のむ つめたい えきたい","water"],["水曜日","すいようび","かようびの つぎの ひ","Wednesday"]]],
-["火","カ","ひ","ひ",[["火","ひ","もえて あかるい もの","fire"],["火曜日","かようび","げつようびの つぎの ひ","Tuesday"]]],
-["父","フ","ちち","ちち",[["父","ちち","じぶんの おとうさん","(my) father"],["お父さん","おとうさん","ひとの おとうさん／よびかけ","father"]]],
-["生","セイ・ショウ","い(きる)・う(まれる)","いきる・うまれる",[["生まれる","うまれる","この よに でて くる","to be born"],["生きる","いきる","いのちが ある","to live"]]],
-["男","ダン・ナン","おとこ","おとこ",[["男","おとこ","おとこの ひと","man"],["男の人","おとこのひと","おとなの おとこ","man (adult)"]]],
-["白","ハク","しろ(い)","しろい",[["白い","しろい","ゆきの ような いろ","white"],["面白い","おもしろい","たのしい・きょうみが ある","interesting; funny"]]],
-["目","モク","め","め",[["目","め","ものを みる ところ","eye"],["三番目","さんばんめ","3つめ","the third"]]],
-["社","シャ","やしろ","かいしゃ・やしろ",[["社長","しゃちょう","かいしゃの いちばん うえの ひと","company president"],["神社","じんじゃ","にほんの かみさまの ところ","Shinto shrine"]]],
-["空","クウ","そら・あ(く)","そら・から",[["空","そら","あたまの うえに ひろがる ところ","sky"],["空港","くうこう","ひこうきが でる ところ","airport"]]],
-["立","リツ","た(つ)","たつ",[["立つ","たつ","あしで まっすぐ なる","to stand"],["立てる","たてる","まっすぐに おく","to stand (something) up"]]],
-["耳","ジ","みみ","みみ",[["耳","みみ","おとを きく ところ","ear"]]],
-["聞","ブン","き(く)","きく",[["聞く","きく","みみで おとや はなしを うける","to listen; to ask"],["聞こえる","きこえる","おとが みみに はいって くる","to be audible"]]],
-["花","カ","はな","はな",[["花","はな","きれいな いろの しょくぶつ","flower"],["花見","はなみ","さくらを みに いく こと","cherry blossom viewing"]]],
-["行","コウ","い(く)","いく",[["行く","いく","むこうへ すすむ","to go"],["旅行","りょこう","とおくへ あそびに いく こと","trip; travel"]]],
-["見","ケン","み(る)","みる",[["見る","みる","めで とらえる","to see; to watch"],["見せる","みせる","あいてに みえるように する","to show"]]],
-["言","ゲン","い(う)","いう",[["言う","いう","くちで ことばを だす","to say"],["言葉","ことば","はなしたり かいたり する もの","word; language"]]],
-["話","ワ","はな(す)","はなす",[["話す","はなす","ことばで つたえる","to speak"],["会話","かいわ","ふたりで はなす こと","conversation"]]],
-["語","ゴ","かた(る)","ことば",[["英語","えいご","イギリスや アメリカの ことば","English"],["単語","たんご","ひとつ ひとつの ことば","word; vocabulary item"]]],
-["読","ドク","よ(む)","よむ",[["読む","よむ","もじを みて いみを とる","to read"],["読書","どくしょ","ほんを よむ こと","reading (books)"]]],
-["買","バイ","か(う)","かう",[["買う","かう","おかねを だして てに いれる","to buy"],["買い物","かいもの","ものを かいに いく こと","shopping"]]],
-["足","ソク","あし・た(りる)","あし・たりる",[["足","あし","あるく ための からだの ぶぶん","foot; leg"],["足りる","たりる","かずや りょうが じゅうぶん ある","to be enough"]]],
-["車","シャ","くるま","くるま",[["車","くるま","タイヤで はしる のりもの","car"],["電車","でんしゃ","でんきで はしる のりもの","train"]]],
-["週","シュウ","","1しゅうかん",[["今週","こんしゅう","この しゅう","this week"],["先週","せんしゅう","まえの しゅう","last week"]]],
-["道","ドウ","みち","みち",[["道","みち","ひとや くるまが とおる ところ","road; way"]]],
-["金","キン","かね","おかね・きん",[["お金","おかね","ものを かう ときに つかう もの","money"],["金曜日","きんようび","もくようびの つぎの ひ","Friday"]]],
-["長","チョウ","なが(い)","ながい",[["長い","ながい","ながさが ある","long"],["部長","ぶちょう","かいしゃの ぶの いちばん うえの ひと","department head"]]],
-["間","カン","あいだ","あいだ",[["間","あいだ","ふたつの ものの なか","between; interval"],["一週間","いっしゅうかん","7かかん","one week"]]],
-["雨","ウ","あめ","あめ",[["雨","あめ","そらから おちて くる みず","rain"],["大雨","おおあめ","つよく ふる あめ","heavy rain"]]],
-["電","デン","","でんき",[["電気","でんき","あかりや きかいを うごかす ちから","electricity; light"],["電話","でんわ","はなれた ひとと はなす どうぐ","telephone"]]],
-["食","ショク","た(べる)","たべる",[["食べる","たべる","くちに いれて おなかに おさめる","to eat"],["食べ物","たべもの","たべる もの","food"]]],
-["飲","イン","の(む)","のむ",[["飲む","のむ","みずや おちゃを くちから いれる","to drink"],["飲み物","のみもの","のむ もの","drink"]]],
-["駅","エキ","","でんしゃの とまる ところ",[["駅","えき","でんしゃに のる ところ","station"],["駅前","えきまえ","えきの まえの ばしょ","in front of the station"]]],
-["高","コウ","たか(い)","たかい",[["高い","たかい","せが たかい／ねだんが たかい","tall; expensive"]]],
-["魚","ギョ","さかな","さかな",[["魚","さかな","みずの なかを およぐ いきもの","fish"],["金魚","きんぎょ","あかい ちいさい かんしょうよう の さかな","goldfish"]]]
+["一","イチ・イツ","ひと(つ)","ひとつ・はじめ","one; first",[["一つ","ひとつ","ものが ひとつ","one (thing)"],["一人","ひとり","ひと が ひとり／ひとりきり","one person; alone"]]],
+["二","ニ","ふた(つ)","ふたつ","two",[["二つ","ふたつ","ものが ふたつ","two (things)"],["二人","ふたり","ひとが ふたり","two people"]]],
+["三","サン","み(っつ)","みっつ","three",[["三つ","みっつ","ものが みっつ","three (things)"],["三月","さんがつ","いちねんの 3ばんめの つき","March"]]],
+["四","シ","よ(っつ)・よん","よっつ","four",[["四つ","よっつ","ものが よっつ","four (things)"],["四月","しがつ","いちねんの 4ばんめの つき","April"]]],
+["五","ゴ","いつ(つ)","いつつ","five",[["五つ","いつつ","ものが いつつ","five (things)"],["五分","ごふん","5ふんかん","five minutes"]]],
+["六","ロク","む(っつ)","むっつ","six",[["六つ","むっつ","ものが むっつ","six (things)"],["六時","ろくじ","6じ","six o'clock"]]],
+["七","シチ","なな(つ)","ななつ","seven",[["七つ","ななつ","ものが ななつ","seven (things)"],["七月","しちがつ","いちねんの 7ばんめの つき","July"]]],
+["八","ハチ","やっ(つ)","やっつ","eight",[["八つ","やっつ","ものが やっつ","eight (things)"],["八日","ようか","つきの 8ばんめの ひ／8にちかん","the 8th; eight days"]]],
+["九","キュウ・ク","ここの(つ)","ここのつ","nine",[["九つ","ここのつ","ものが ここのつ","nine (things)"],["九月","くがつ","いちねんの 9ばんめの つき","September"]]],
+["十","ジュウ","とお","とお","ten",[["十日","とおか","つきの 10ばんめの ひ／10にちかん","the 10th; ten days"],["十分","じゅっぷん","10ぷんかん","ten minutes"]]],
+["百","ヒャク","もも","ひゃく","hundred",[["百","ひゃく","100","hundred"],["三百","さんびゃく","300","three hundred"]]],
+["千","セン","ち","せん","thousand",[["千","せん","1000","thousand"],["千円","せんえん","1000えん","1000 yen"]]],
+["万","マン・バン","よろず","まん・とても おおい","ten thousand; very many",[["一万","いちまん","10000","ten thousand"],["十万","じゅうまん","100000","hundred thousand"]]],
+["円","エン","まる(い)","まるい・にほんの おかね","round; yen",[["円","えん","にほんの おかねの たんい","yen"],["百円","ひゃくえん","100えん","100 yen"]]],
+["時","ジ","とき","とき・じかん","time; hour",[["時間","じかん","とき・じかんの ながさ","time; hour"],["何時","なんじ","なんじですか の なんじ","what time"]]],
+["年","ネン","とし","とし・1ねん","year",[["今年","ことし","この とし","this year"],["来年","らいねん","つぎの とし","next year"]]],
+["月","ゲツ・ガツ","つき","つき・1かげつ","moon; month",[["今月","こんげつ","この つき","this month"],["月","つき","そらに でる つき","moon"]]],
+["日","ニチ・ジツ","ひ・か","ひ・たいよう","day; sun",[["日本","にほん","わたしたちの くに","Japan"],["毎日","まいにち","まい あさから よるまで、ずっと","every day"]]],
+["上","ジョウ","うえ・あ(がる)","うえ","above; up",[["上","うえ","たかい ほう","above; on top"],["上手","じょうず","うまい こと","good at; skillful"]]],
+["下","カ・ゲ","した・さ(がる)","した","below; down",[["下","した","ひくい ほう","below; under"],["下手","へた","うまく ない こと","bad at; unskillful"]]],
+["右","ウ・ユウ","みぎ","みぎ","right",[["右","みぎ","みぎの ほう","right"],["右手","みぎて","みぎの て","right hand"]]],
+["左","サ","ひだり","ひだり","left",[["左","ひだり","ひだりの ほう","left"],["左手","ひだりて","ひだりの て","left hand"]]],
+["中","チュウ","なか","なか・まんなか","inside; middle",[["中","なか","うちがわ","inside; middle"],["中学校","ちゅうがっこう","12さいから 15さいまでの がっこう","junior high school"]]],
+["北","ホク","きた","きた","north",[["北","きた","きたの ほう","north"],["北口","きたぐち","えきの きたがわの でいりぐち","north exit"]]],
+["南","ナン","みなみ","みなみ","south",[["南","みなみ","みなみの ほう","south"],["南口","みなみぐち","えきの みなみがわの でいりぐち","south exit"]]],
+["東","トウ","ひがし","ひがし","east",[["東","ひがし","ひがしの ほう","east"],["東口","ひがしぐち","えきの ひがしがわの でいりぐち","east exit"]]],
+["西","セイ・サイ","にし","にし","west",[["西","にし","にしの ほう","west"],["西口","にしぐち","えきの にしがわの でいりぐち","west exit"]]],
+["人","ジン・ニン","ひと","ひと","person",[["人","ひと","にんげん","person"],["外国人","がいこくじん","ほかの くにの ひと","foreigner"]]],
+["今","コン","いま","いま","now",[["今","いま","この とき","now"],["今日","きょう","この ひ","today"]]],
+["休","キュウ","やす(む)","やすむ","to rest",[["休む","やすむ","しごとや べんきょうを とめて ゆっくりする","to rest; to take a day off"],["お休みなさい","おやすみなさい","ねる まえの あいさつ","good night"]]],
+["会","カイ","あ(う)","あう・あつまり","to meet; gathering",[["会う","あう","ひとと かおを あわせる","to meet"],["会社","かいしゃ","しごとを する ところ","company"]]],
+["何","カ","なに・なん","なに","what",[["何","なに","わからない ものを きく ことば","what"],["何人","なんにん","ひとの かず を きく ことば","how many people"]]],
+["先","セン","さき","さき・まえ","ahead; previous",[["先生","せんせい","おしえて くれる ひと","teacher"],["先月","せんげつ","まえの つき","last month"]]],
+["入","ニュウ","はい(る)・い(れる)","はいる","to enter",[["入る","はいる","そとから なかへ いく","to enter"],["入口","いりぐち","はいる ところ","entrance"]]],
+["出","シュツ","で(る)・だ(す)","でる","to go out",[["出る","でる","なかから そとへ いく","to go out; to leave"],["出口","でぐち","そとへ でる ところ","exit"]]],
+["分","ブン・フン","わ(かる)・わ(ける)","わける・ふん","to divide; minute",[["分かる","わかる","いみが あたまに はいる","to understand"],["三十分","さんじゅっぷん","30ぷんかん","thirty minutes"]]],
+["前","ゼン","まえ","まえ","before; front",[["前","まえ","まえの ほう・まえの とき","front; before"],["名前","なまえ","ひとや ものの よびかた","name"]]],
+["午","ゴ","うま","ひるの まんなか","noon",[["午前","ごぜん","あさから ひるまで","morning; a.m."],["午後","ごご","ひるから よるまで","afternoon; p.m."]]],
+["半","ハン","なか(ば)","はんぶん","half",[["半分","はんぶん","ふたつに わけた ひとつ","half"],["半日","はんにち","いちにちの はんぶん","half a day"]]],
+["友","ユウ","とも","ともだち","friend",[["友だち","ともだち","なかの いい ひと","friend"],["友人","ゆうじん","ともだちの かたい いいかた","friend (formal)"]]],
+["口","コウ","くち","くち","mouth",[["口","くち","たべたり はなしたり する ところ","mouth"],["人口","じんこう","その ばしょに すむ ひとの かず","population"]]],
+["古","コ","ふる(い)","ふるい","old",[["古い","ふるい","あたらしく ない","old (things)"],["中古","ちゅうこ","だれかが つかった あとの もの","secondhand"]]],
+["名","メイ","な","なまえ","name",[["有名","ゆうめい","おおくの ひとが しって いる こと","famous"],["名字","みょうじ","かぞくの なまえ","family name"]]],
+["国","コク","くに","くに","country",[["国","くに","にほんや アメリカの ような ところ","country"],["外国","がいこく","ほかの くに","foreign country"]]],
+["土","ド・ト","つち","つち","soil; earth",[["土","つち","じめんの つち","soil; earth"],["土曜日","どようび","きんようびの つぎの ひ","Saturday"]]],
+["外","ガイ","そと","そと","outside",[["外","そと","いえの そとがわ","outside"],["外国語","がいこくご","ほかの くにの ことば","foreign language"]]],
+["多","タ","おお(い)","おおい","many",[["多い","おおい","かずが たくさん ある","many; numerous"],["多分","たぶん","きっと そうだろう と おもう とき","probably; maybe"]]],
+["大","ダイ・タイ","おお(きい)","おおきい","big",[["大きい","おおきい","サイズが おおきい","big; large"],["大人","おとな","20さい ぐらいより うえの ひと","adult"]]],
+["天","テン","あま","そら・てん","sky; heaven",[["天気","てんき","はれ・くもり・あめ の ようす","weather"],["天ぷら","てんぷら","ころもを つけて あげた にほんの りょうり","tempura"]]],
+["女","ジョ","おんな","おんな","woman",[["女","おんな","おんなの ひと","woman"],["女の子","おんなのこ","ちいさい おんなの こども","girl"]]],
+["子","シ・ス","こ","こども","child",[["子ども","こども","ちいさい ひと","child"],["男の子","おとこのこ","ちいさい おとこの こども","boy"]]],
+["学","ガク","まな(ぶ)","まなぶ","to learn",[["学生","がくせい","がっこうで べんきょうする ひと","student"],["大学","だいがく","こうこうの つぎの がっこう","university"]]],
+["安","アン","やす(い)","やすい・おだやか","cheap; calm",[["安い","やすい","ねだんが ひくい","cheap"],["安心","あんしん","しんぱいが なくなる こと","relief; peace of mind"]]],
+["小","ショウ","ちい(さい)・こ","ちいさい","small",[["小さい","ちいさい","サイズが ちいさい","small"],["小学校","しょうがっこう","6さいから 12さいまでの がっこう","elementary school"]]],
+["少","ショウ","すく(ない)・すこ(し)","すこし","few; a little",[["少し","すこし","ちょっと だけ","a little"],["少ない","すくない","かずが あまり ない","few; not many"]]],
+["山","サン","やま","やま","mountain",[["山","やま","たかく もりあがった ところ","mountain"],["火山","かざん","ひを ふく やま","volcano"]]],
+["川","セン","かわ","かわ","river",[["川","かわ","みずが ながれる ところ","river"],["小川","おがわ","ちいさい かわ","stream; brook"]]],
+["店","テン","みせ","みせ","shop",[["店","みせ","ものを うる ところ","shop; store"],["店員","てんいん","みせで はたらく ひと","shop clerk"]]],
+["後","ゴ・コウ","うし(ろ)・あと","うしろ・あと","behind; after",[["後ろ","うしろ","せなかの ほう","behind; back"],["後で","あとで","すこし じかんが たってから","later"]]],
+["手","シュ","て","て","hand",[["手","て","うでの さきの ぶぶん","hand"],["手紙","てがみ","ひとに かいて おくる もの","letter"]]],
+["新","シン","あたら(しい)","あたらしい","new",[["新しい","あたらしい","ふるく ない","new"],["新聞","しんぶん","まいにちの ニュースが のって いる かみ","newspaper"]]],
+["書","ショ","か(く)","かく","to write",[["書く","かく","じを かみに のこす","to write"],["辞書","じしょ","ことばの いみを しらべる ほん","dictionary"]]],
+["木","モク・ボク","き","き","tree; wood",[["木","き","はが ある たかい しょくぶつ","tree; wood"],["木曜日","もくようび","すいようびの つぎの ひ","Thursday"]]],
+["本","ホン","もと","ほん・もと","book; origin",[["本","ほん","よむ ための もの","book"],["日本語","にほんご","にほんの ことば","Japanese language"]]],
+["来","ライ","く(る)","くる","to come",[["来る","くる","こちらへ ちかづく","to come"],["来週","らいしゅう","つぎの しゅう","next week"]]],
+["校","コウ","","がっこう","school",[["学校","がっこう","べんきょうを する ところ","school"],["高校","こうこう","ちゅうがっこうの つぎの がっこう","high school"]]],
+["母","ボ","はは","はは","mother",[["母","はは","じぶんの おかあさん","(my) mother"],["お母さん","おかあさん","ひとの おかあさん／よびかけ","mother"]]],
+["毎","マイ","ごと","まいかい・いつも","every time",[["毎朝","まいあさ","あさは いつも","every morning"],["毎年","まいとし","としは いつも","every year"]]],
+["気","キ・ケ","","きもち・くうき","spirit; air",[["元気","げんき","からだと こころが つよい こと","healthy; lively"],["病気","びょうき","からだの ぐあいが わるい こと","illness"]]],
+["水","スイ","みず","みず","water",[["水","みず","のむ つめたい えきたい","water"],["水曜日","すいようび","かようびの つぎの ひ","Wednesday"]]],
+["火","カ","ひ","ひ","fire",[["火","ひ","もえて あかるい もの","fire"],["火曜日","かようび","げつようびの つぎの ひ","Tuesday"]]],
+["父","フ","ちち","ちち","father",[["父","ちち","じぶんの おとうさん","(my) father"],["お父さん","おとうさん","ひとの おとうさん／よびかけ","father"]]],
+["生","セイ・ショウ","い(きる)・う(まれる)","いきる・うまれる","to live; to be born",[["生まれる","うまれる","この よに でて くる","to be born"],["生きる","いきる","いのちが ある","to live"]]],
+["男","ダン・ナン","おとこ","おとこ","man",[["男","おとこ","おとこの ひと","man"],["男の人","おとこのひと","おとなの おとこ","man (adult)"]]],
+["白","ハク","しろ(い)","しろい","white",[["白い","しろい","ゆきの ような いろ","white"],["面白い","おもしろい","たのしい・きょうみが ある","interesting; funny"]]],
+["目","モク","め","め","eye",[["目","め","ものを みる ところ","eye"],["三番目","さんばんめ","3つめ","the third"]]],
+["社","シャ","やしろ","かいしゃ・やしろ","company; shrine",[["社長","しゃちょう","かいしゃの いちばん うえの ひと","company president"],["神社","じんじゃ","にほんの かみさまの ところ","Shinto shrine"]]],
+["空","クウ","そら・あ(く)","そら・から","sky; empty",[["空","そら","あたまの うえに ひろがる ところ","sky"],["空港","くうこう","ひこうきが でる ところ","airport"]]],
+["立","リツ","た(つ)","たつ","to stand",[["立つ","たつ","あしで まっすぐ なる","to stand"],["立てる","たてる","まっすぐに おく","to stand (something) up"]]],
+["耳","ジ","みみ","みみ","ear",[["耳","みみ","おとを きく ところ","ear"]]],
+["聞","ブン","き(く)","きく","to hear; to ask",[["聞く","きく","みみで おとや はなしを うける","to listen; to ask"],["聞こえる","きこえる","おとが みみに はいって くる","to be audible"]]],
+["花","カ","はな","はな","flower",[["花","はな","きれいな いろの しょくぶつ","flower"],["花見","はなみ","さくらを みに いく こと","cherry blossom viewing"]]],
+["行","コウ","い(く)","いく","to go",[["行く","いく","むこうへ すすむ","to go"],["旅行","りょこう","とおくへ あそびに いく こと","trip; travel"]]],
+["見","ケン","み(る)","みる","to see",[["見る","みる","めで とらえる","to see; to watch"],["見せる","みせる","あいてに みえるように する","to show"]]],
+["言","ゲン","い(う)","いう","to say",[["言う","いう","くちで ことばを だす","to say"],["言葉","ことば","はなしたり かいたり する もの","word; language"]]],
+["話","ワ","はな(す)","はなす","to speak",[["話す","はなす","ことばで つたえる","to speak"],["会話","かいわ","ふたりで はなす こと","conversation"]]],
+["語","ゴ","かた(る)","ことば","word; language",[["英語","えいご","イギリスや アメリカの ことば","English"],["単語","たんご","ひとつ ひとつの ことば","word; vocabulary item"]]],
+["読","ドク","よ(む)","よむ","to read",[["読む","よむ","もじを みて いみを とる","to read"],["読書","どくしょ","ほんを よむ こと","reading (books)"]]],
+["買","バイ","か(う)","かう","to buy",[["買う","かう","おかねを だして てに いれる","to buy"],["買い物","かいもの","ものを かいに いく こと","shopping"]]],
+["足","ソク","あし・た(りる)","あし・たりる","foot; to suffice",[["足","あし","あるく ための からだの ぶぶん","foot; leg"],["足りる","たりる","かずや りょうが じゅうぶん ある","to be enough"]]],
+["車","シャ","くるま","くるま","car",[["車","くるま","タイヤで はしる のりもの","car"],["電車","でんしゃ","でんきで はしる のりもの","train"]]],
+["週","シュウ","","1しゅうかん","week",[["今週","こんしゅう","この しゅう","this week"],["先週","せんしゅう","まえの しゅう","last week"]]],
+["道","ドウ","みち","みち","road; way",[["道","みち","ひとや くるまが とおる ところ","road; way"]]],
+["金","キン","かね","おかね・きん","money; gold",[["お金","おかね","ものを かう ときに つかう もの","money"],["金曜日","きんようび","もくようびの つぎの ひ","Friday"]]],
+["長","チョウ","なが(い)","ながい","long",[["長い","ながい","ながさが ある","long"],["部長","ぶちょう","かいしゃの ぶの いちばん うえの ひと","department head"]]],
+["間","カン","あいだ","あいだ","between; interval",[["間","あいだ","ふたつの ものの なか","between; interval"],["一週間","いっしゅうかん","7かかん","one week"]]],
+["雨","ウ","あめ","あめ","rain",[["雨","あめ","そらから おちて くる みず","rain"],["大雨","おおあめ","つよく ふる あめ","heavy rain"]]],
+["電","デン","","でんき","electricity",[["電気","でんき","あかりや きかいを うごかす ちから","electricity; light"],["電話","でんわ","はなれた ひとと はなす どうぐ","telephone"]]],
+["食","ショク","た(べる)","たべる","to eat",[["食べる","たべる","くちに いれて おなかに おさめる","to eat"],["食べ物","たべもの","たべる もの","food"]]],
+["飲","イン","の(む)","のむ","to drink",[["飲む","のむ","みずや おちゃを くちから いれる","to drink"],["飲み物","のみもの","のむ もの","drink"]]],
+["駅","エキ","","でんしゃの とまる ところ","station",[["駅","えき","でんしゃに のる ところ","station"],["駅前","えきまえ","えきの まえの ばしょ","in front of the station"]]],
+["高","コウ","たか(い)","たかい","tall; expensive",[["高い","たかい","せが たかい／ねだんが たかい","tall; expensive"]]],
+["魚","ギョ","さかな","さかな","fish",[["魚","さかな","みずの なかを およぐ いきもの","fish"],["金魚","きんぎょ","あかい ちいさい かんしょうよう の さかな","goldfish"]]]
 ],
 "grammar":[
 ["〜は〜です","めいし＋は＋めいし＋です","AはBだ、と いう いちばん きほんの かたち","A is B","【わたしは がくせいです】。","「は」は「わ」と よむ"],
@@ -1641,24 +1662,24 @@ const DATA={
 ["どうして〜か","どうして＋ぶん＋か","りゆうを きく","why ~?","【どうして】 [来|こ]なかったのです【か】。","こたえは「〜からです」"]
 ]};
 const MONSTERS=[
-{"id":"kotonoha","name":"ことのはガ","area":"vocab","hp":3,"msg":"ひらひらと ことばを まきちらしている。","pal":{"a":"#3E8E4A","b":"#6FCE6A","c":"#BFF07A","d":"#14240F"},"px":["....a..a....","...aa..aa...","..aabbbbaa..",".aabbccbbaa.",".abbccccbba.","aabbccccbbaa","aabbcddcbbaa",".abbccccbba.","..abbccbba..","...aabbaa...","....a..a....","............"]},
-{"id":"goiworm","name":"ゴイワーム","area":"vocab","hp":4,"msg":"ずかんの ページを かじって そだった。","pal":{"a":"#7A4E9E","b":"#B47FD8","c":"#E4C6F5","d":"#18102A"},"px":[".....bbb....","....bcccb...","....bcdcb...","....bcccb...",".....bbb....","....aaaaa...","...aabbbaa..","..aabbbbbaa.",".aabbbbbbbaa",".aabbbbbbbaa","..aaabbbaaa.","....aaaaa..."]},
-{"id":"fudeobake","name":"ふでおばけ","area":"kanji","hp":3,"msg":"すみを たらしながら ういている。","pal":{"a":"#8B5A2B","b":"#C89050","c":"#1C1C2E","e":"#F0E060"},"px":[".....aa.....",".....aa.....","....abba....","....abba....","...abbbba...","...abbbba...","..acccccca..","..cceccecc..","..cccccccc..","...cccccc...","....cccc....",".....cc....."]},
-{"id":"kanjigolem","name":"カンジゴーレム","area":"kanji","hp":5,"msg":"からだが すべて へんと つくりで できている。","pal":{"a":"#5A6472","b":"#8C97A8","c":"#D2DAE6","d":"#E8603A"},"px":["..aaaaaaaa..",".abbbbbbbba.",".abcbbbbcba.",".abdbbbbdba.",".abbbccbbba.",".abbbbbbbba.","..aabbbbaa..","aaaabbbbaaaa","abbaabbaabba","aaaabbbbaaaa","...aa..aa...","..aaa..aaa.."]},
-{"id":"bunporobo","name":"ブンポウロボ","area":"grammar","hp":4,"msg":"せつぞくの きそくを まもらせようとしてくる。","pal":{"a":"#33528C","b":"#7CA6E0","c":"#FF5A4A"},"px":["...aaaaaa...","..abbbbbba..","..abcbbcba..","..abbbbbba..","..abbccbba..","...aaaaaa...","..aaaaaaaa..",".abaaaaaaba.",".abaaaaaaba.","..aaaaaaaa..","...aa..aa...","..aaa..aaa.."]},
-{"id":"jokenryu","name":"ジョウケンリュウ","area":"grammar","hp":5,"msg":"じょうけんを みたさないと とおしてくれない。","pal":{"a":"#1E6E5E","b":"#37A88E","c":"#8FE0CC","d":"#F8D048"},"px":["..aa....aa..","..aa....aa..",".aaaaaaaaaa.",".abbbbbbbba.",".abdbbbbdba.",".abbbbbbbba.",".aabbbbbbaa.","..acccccca..","..acacacac..","..acccccca..","...aaaaaa...","....a..a...."]},
-{"id":"machigai","name":"マチガイドクロ","area":"any","hp":4,"msg":"にどめの まちがいを まちかまえている。","pal":{"a":"#E8E4D8","b":"#20202E"},"px":["...aaaaaa...","..aaaaaaaa..",".aaaaaaaaaa.",".aabbaabbaa.",".aabbaabbaa.",".aaaaaaaaaa.","..aaabbaaa..","...aaaaaa...","..a.a.a.a...","..aaaaaaa...","..a.a.a.a...","............"]},
-{"id":"wasureme","name":"ワスレメダマ","area":"any","hp":3,"msg":"みつめていると おぼえたことを わすれそうになる。","pal":{"a":"#3A2E6E","b":"#6B58C4","c":"#FFFFFF","d":"#1A1020"},"px":["....aaaa....","..aabbbbaa..",".abbccccbba.",".abcccccccba","abbcccddccbb","abbcccddccbb","abbccccccccb",".abbccccbba.","..aabbbbaa..","...a.aa.a...","..a...a...a.",".a....a....a"]},
-{"id":"goukaku","name":"ゴウカクノツカイ","area":"boss","hp":10,"msg":"ごうかくの しるしを もって まちうけている。","pal":{"a":"#C8A030","b":"#F0D878","c":"#FFFFFF","d":"#3A2E10"},"px":["....aaaa....","...abbbba...","..abbccbba..","..abcddcba..","..abbccbba..","...abbbba...",".aaabbbbaaa.","aabbbbbbbbaa",".aabbbbbbaa.","..aabbbbaa..","...aa..aa...","..aa....aa.."]},
-{"id":"ruigigoke","name":"ソックリゴケ","area":"vocab","hp":3,"msg":"にた いみの ことばに ばけて ふえていく。","pal":{"a":"#5E6B22","b":"#8EA83A","c":"#C8D46A","d":"#1E2210"},"px":["....aaaa....","..aabbbbaa..",".abbccccbba.","abbcdccdcbba","abbcccccccba","abbccccccbba",".abbccccbba.","..abbccbba..",".aabbbbbbaa.","aabbbbbbbbaa","aa.aaaaaa.aa",".a..a..a..a."]},
-{"id":"katakanabachi","name":"カタカナバチ","area":"vocab","hp":4,"msg":"カタカナの ことばを あつめる はち。","pal":{"a":"#C8A02A","b":"#2A2418","c":"#9EC8E0","d":"#E85A2A"},"px":["...aaaaaa...","..addaaddaa.","...aaaaaa...","cc..aaaa..cc","ccc.aaaa.ccc","cc..bbbb..cc","...aaaaaa...","...bbbbbb...","...aaaaaa...","...bbbbbb...","....aaaa....",".....bb....."]},
-{"id":"bushuhebi","name":"ブシュヘビ","area":"kanji","hp":4,"msg":"かんじの ぶひんに わかれて、また まきつく。","pal":{"a":"#2E6B4A","b":"#4FA86E","c":"#C8E8A0","d":"#F0D030"},"px":["......aaa...",".....abbba..",".....adbda..",".....abbba..","....abbba...","...abbba....","..abbba.....","..abbba.....","...abbba....","....abccba..",".....abccba.","......abccb."]},
-{"id":"jukugogani","name":"ジュクゴガニ","area":"kanji","hp":5,"msg":"ふたつの はさみで かんじを くみあわせる。","pal":{"a":"#A83A2A","b":"#E06A4A","c":"#F8C8A0","d":"#2A1810"},"px":["aa........aa","abba....abba","abba....abba",".aa......aa.","..a.aaaa.a..","..aabbbbaa..",".abbdbbdbba.","abbbbbbbbbba","abbccccccbba",".abbbbbbbba.","..aaaaaaaa..",".a..a..a..a."]},
-{"id":"joshikurage","name":"ジョシクラゲ","area":"grammar","hp":3,"msg":"「は」と「が」の あいだを ただよっている。","pal":{"a":"#5A3A8E","b":"#8E6ACE","c":"#D8C8F0","d":"#F8D048"},"px":["...aaaaaa...",".aabbbbbbaa.","abbccccccbba","abcdcccdcbba","abbccccccbba",".abbbbbbbba.","..aabbbbaa..",".a.a.aa.a.a.",".b.b..bb..b.","..b.b..b.b..",".b..b...b.b.","..b..b...b.."]},
-{"id":"keigokishi","name":"テイネイキシ","area":"grammar","hp":5,"msg":"「です・ます」で いうまで みちを あけない。","pal":{"a":"#4A5470","b":"#8E9AB8","c":"#D8DEF0","d":"#C83A3A","e":"#F8D048"},"px":[".....dd.....","....dddd....","...aaaaaa...","..abbbbbba..","..abbbbbba..","..acccccca..","..abbbbbba..","...aaaaaa...",".aabbeebbaa.","aabbbeebbbaa","aabbbbbbbbaa",".aa......aa."]},
-{"id":"carelesskoumori","name":"ケアレスコウモリ","area":"any","hp":3,"msg":"わかったはずの もんだいを もちさる。","pal":{"a":"#3A2E4E","b":"#6E5A8E","c":"#F0C830"},"px":[".a........a.",".aa......aa.",".aaa.aa.aaa.","aaaaaaaaaaaa","abbacaacabba","abbbaaaaabba",".bbbaaaabbb.","..bbaaaabb..","...aaaaaa...","....aaaa....","....a..a....","............"]},
-{"id":"nemukegumo","name":"ネムケグモ","area":"any","hp":4,"msg":"よる おそくに あらわれて、あたまを ぼんやりさせる。","pal":{"a":"#2E2A3E","b":"#5A5470","c":"#C83A5A","d":"#8E88A8"},"px":["d..........d",".d........d.","..d.d..d.d..","...ddaadd...","..daaaaaad..",".daabbbbaad.","daabcbbcbaad",".aabbbbbbaa.",".aabbbbbbaa.","..aabbbbaa..","..d.aaaa.d..",".d...aa...d."]},
-{"id":"moshinomaou","name":"タメシノマオウ","area":"boss","hp":12,"msg":"ほんばんと おなじ すがたで、ちからを うつしだす。","pal":{"a":"#4A1030","b":"#8E2050","c":"#E85A7A","d":"#F8D048"},"px":["aa........aa","aaa......aaa",".aaa....aaa.","..aaaaaaaa..",".abbbbbbbba.","abbdbbbbdbba","abbbbbbbbbba","abbccccccbba",".abbccccbba.","aabbbbbbbbaa","aa.aaaaaa.aa",".a..a..a..a."]}
+{"id":"kotonoha","name":"ことのはガ","area":"vocab","hp":3,"msg":"ひらひらと ことばを まきちらしている。","pal":{"a":"#3E8E4A","b":"#6FCE6A","c":"#BFF07A","d":"#14240F"},"px":[".......daad..daad.......","......daaad..daaad......",".....ddaaad..daaadd.....","....daaaaaddddaaaaad....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daaaabbbbccbbbbaaaad..",".daaabbbbccccccbbbbaaad.",".daaabbbbccccccbbbbaaad.","daaabbbbccccccccbbbbaaad","daaabbbbccccccccbbbbaaad","aaaabbbbccccccccbbbbaaaa","aaaabbbbccddddccbbbbaaaa","daaabbbbccddddccbbbbaaad","daaabbbbccccccccbbbbaaad",".ddaabbbbccccccbbbbaadd.","..daabbbbccccccbbbbaad..","...ddaabbbbccbbbbaadd...","....daaaabbbbbbaaaad....",".....ddaaabbbbaaadd.....","......daaaddddaaad......",".......daad..daad.......","........dd....dd........","........................"]},
+{"id":"goiworm","name":"ゴイワーム","area":"vocab","hp":4,"msg":"ずかんの ページを かじって そだった。","pal":{"a":"#7A4E9E","b":"#B47FD8","c":"#E4C6F5","d":"#18102A"},"px":[".........ddbbbbdd.......","........dbbbbbbbbd......","........dbbccccbbd......",".......dbbccccccbbd.....",".......dbbccddccbbd.....",".......dbbccddccbbd.....",".......dbbccccccbbd.....","........dbbccccbbd......","........dbbbbbbbbd......",".........dbbbbbbd.......",".......ddaaaaaaaadd.....","......daaaaaaaaaaaad....",".....ddaaaabbbbaaaadd...","....daaaabbbbbbbbaaaad..","...ddaaaabbbbbbbbaaaadd.","..daaaabbbbbbbbbbbbaaaad","..daaaabbbbbbbbbbbbaaaad",".daaaabbbbbbbbbbbbbbaaaa",".daaaabbbbbbbbbbbbbbaaaa","..daaaabbbbbbbbbbbbaaaad","..daaaaaabbbbbbbbaaaaaad","...ddaaaaaabbbbaaaaaadd.",".....ddaaaaaaaaaaaadd...",".......ddaaaaaaaadd....."]},
+{"id":"fudeobake","name":"ふでおばけ","area":"kanji","hp":3,"msg":"すみを たらしながら ういている。","pal":{"d":"#14142A","a":"#8B5A2B","b":"#C89050","c":"#1C1C2E","e":"#F0E060"},"px":["..........daad..........",".........daaaad.........",".........daaaad.........","........daaaaaad........","........daabbaad........",".......daabbbbaad.......",".......daabbbbaad.......","......daabbbbbbaad......","......daabbbbbbaad......",".....daabbbbbbbbaad.....",".....daabbbbbbbbaad.....","....daaabbbbbbbbaaad....","....daaccccccccccaad....","...daccccccccccccccad...","...dcccceecccceeccccd...","...dcccceecccceeccccd...","...dccccccccccccccccd...","....dccccccccccccccd....","....dccccccccccccccd....",".....ddccccccccccdd.....","......dccccccccccd......",".......ddccccccdd.......","........dccccccd........",".........ddccdd........."]},
+{"id":"kanjigolem","name":"カンジゴーレム","area":"kanji","hp":5,"msg":"からだが すべて へんと つくりで できている。","pal":{"a":"#5A6472","b":"#8C97A8","c":"#D2DAE6","d":"#E8603A"},"px":["...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daabbbbbbbbbbbbbbaad..",".daabbbbbbbbbbbbbbbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbccbbbbbbbbccbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbccccbbbbbbaad.",".daabbbbbbbbbbbbbbbbaad.","..daabbbbbbbbbbbbbbaad..","...daaabbbbbbbbbbaaad...",".dddaaaabbbbbbbbaaaaddd.","daaaaaaabbbbbbbbaaaaaaad","aaaaaaaaabbbbbbaaaaaaaaa","aabbbbaaaabbbbaaaabbbbaa","aabbbbaaaabbbbaaaabbbbaa","aaaaaaaabbbbbbbbaaaaaaaa","daaaaaaabbbbbbbbaaaaaaad",".dddddaaaaddddaaaaddddd.","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
+{"id":"bunporobo","name":"ブンポウロボ","area":"grammar","hp":4,"msg":"せつぞくの きそくを まもらせようとしてくる。","pal":{"d":"#14142A","a":"#33528C","b":"#7CA6E0","c":"#FF5A4A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbccbbbbccbbaad...","...daabbccbbbbccbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbccbbbbbaad...","....daabbbccccbbbaad....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..dabbaaaaaaaaaaaabbad..",".daabbaaaaaaaaaaaabbaad.",".daabbaaaaaaaaaaaabbaad.","..dabbaaaaaaaaaaaabbad..","..daaaaaaaaaaaaaaaaaad..","...ddaaaaaaaaaaaaaadd...",".....daaaaaddaaaaad.....","....ddaaaad..daaaadd....","...daaaaaad..daaaaaad...","...daaaaad....daaaaad..."]},
+{"id":"jokenryu","name":"ジョウケンリュウ","area":"grammar","hp":5,"msg":"じょうけんを みたさないと とおしてくれない。","pal":{"a":"#1E6E5E","b":"#37A88E","c":"#8FE0CC","d":"#F8D048"},"px":["....daad........daad....","...daaaad......daaaad...","...daaaad......daaaad...","..daaaaaaddddddaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaabbbbbbbbbbbbbbaaad.",".daabbbbbbbbbbbbbbbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbddbbbbbbbbddbbaad.",".daabbbbbbbbbbbbbbbbaad.",".daaabbbbbbbbbbbbbbaaad.",".daaabbbbbbbbbbbbbbaaad.","..daaabbbbbbbbbbbbaaad..","..daaaccccccccccccaaad..","...daacccccccccccacad...","...daaccaaccaaccaaccd...","...daaccaaccaaccaaccd...","...daacccccccccccccad...","....daacccccccccccad....","....daaaaaaaaaaaaaad....",".....ddaaaaaaaaaadd.....","......daaaaddaaaad......",".......daad..daad......."]},
+{"id":"machigai","name":"マチガイドクロ","area":"any","hp":4,"msg":"にどめの まちがいを まちかまえている。","pal":{"d":"#14142A","a":"#E8E4D8","b":"#20202E"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","...ddaaaaaaaaaaaaaadd...","..daaaaaaaaaaaaaaaaaad..","..daaaaaaaaaaaaaaaaaad..",".daaaaaaaaaaaaaaaaaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaabbbbaaaabbbbaaaad.",".daaaaabbaaaaaabbaaaaad.",".daaaaaaaaaaaaaaaaaaaad.","..daaaaaaaaaaaaaaaaaad..","..daaaaaaabbbbaaaaaaad..","...ddaaaaabbbbaaaaadd...",".....daaaaaaaaaaaaad....","....dddaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","...daaaaaaaaaaaaaad.....","...daaaaaaaaaaaaaad.....","...daaddaaddaaddaad.....","...daaddaaddaaddaad.....","....dd..dd..dd..dd......","........................"]},
+{"id":"wasureme","name":"ワスレメダマ","area":"any","hp":3,"msg":"みつめていると おぼえたことを わすれそうになる。","pal":{"a":"#3A2E6E","b":"#6B58C4","c":"#FFFFFF","d":"#1A1020"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..","..daabbbbccccccbbbbaadd.",".daabbbccccccccccbbbbaad",".daabbbccccccccccccbbaad","daabbbccccccccccccccbbba","daabbbcccccccddcccccbbbb","aabbbbccccccddddccccbbbb","aabbbbccccccddddccccbbbb","aabbbbcccccccddccccccbbb","aabbbbcccccccccccccccbbb","daabbbbcccccccccccccccbd","daabbbbccccccccccbbbaad.",".ddaabbbbccccccbbbbaad..","..daaaabbbbbbbbbbaaaad..","...ddaaabbbbbbbbaaadd...",".....daaddaaaaddaaad....","....ddaad.daaaddaad.dd..","...daaad..daaad.dd.daad.","..daaad....daad....daaad",".daaad.....daad.....daaa",".daad......daad......daa"]},
+{"id":"goukaku","name":"ゴウカクノツカイ","area":"boss","hp":10,"msg":"ごうかくの しるしを もって まちうけている。","pal":{"a":"#C8A030","b":"#F0D878","c":"#FFFFFF","d":"#3A2E10"},"px":[".......ddaaaaaadd.......","......daaaaaaaaaad......",".....ddaabbbbbbaadd.....","....daabbbbbbbbbbaad....","....daabbbbccbbbbaad....","...daabbbccccccbbbaad...","...daabbccddddccbbaad...","...daabbccddddccbbaad...","...daabbbccccccbbbaad...","....daabbbbccbbbbaad....",".....dabbbbbbbbbbad.....","...dddaabbbbbbbbaaddd...",".ddaaaaabbbbbbbbaaaaadd.","daaaaaabbbbbbbbbbaaaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad",".ddaaaabbbbbbbbbbaaaadd.","..daaaabbbbbbbbbbaaaad..","...ddaaaabbbbbbaaaadd...",".....daaaaddddaaaad.....","....ddaaad....daaadd....","...daaaaad....daaaaad...","...daaadd......ddaaad..."]},
+{"id":"ruigigoke","name":"ソックリゴケ","area":"vocab","hp":3,"msg":"にた いみの ことばに ばけて ふえていく。","pal":{"a":"#5E6B22","b":"#8EA83A","c":"#C8D46A","d":"#1E2210"},"px":[".......ddaaaaaadd.......",".....ddaaaaaaaaaadd.....","...ddaaaabbbbbbaaaadd...","..daaaabbbbbbbbbbaaaad..",".ddaabbbbccccccbbbbaadd.","daabbbbccccccccccbbbbaad","daabbbbcddccccddcbbbbaad","aabbbbccddccccddcccbbbaa","aabbbbccccccccccccccbbaa","aabbbbccccccccccccccbbaa","aabbbbcccccccccccccbbbaa","daabbbbccccccccccbbbbaad","daabbbbccccccccccbbbbaad",".ddaabbbbccccccbbbbaadd.","...dabbbbccccccbbbbad...","...daabbbbbccbbbbbaad...",".ddaaabbbbbbbbbbbbaaadd.","daaaabbbbbbbbbbbbbbaaaad","daaaabbbbbbbbbbbbbbaaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]},
+{"id":"katakanabachi","name":"カタカナバチ","area":"vocab","hp":4,"msg":"カタカナの ことばを あつめる はち。","pal":{"a":"#C8A02A","b":"#2A2418","c":"#9EC8E0","d":"#E85A2A"},"px":[".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaaddd..","...daaddddaaaaddddaaaad.","...daaddddaaaaddddaaaad.","....daaaaaaaaaaaaaaddd..",".dd..ddaaaaaaaaaadd..dd.","dccdd.daaaaaaaaaad.ddccd","cccccd.daaaaaaaad.dccccc","ccccccddaaaaaaaaddcccccc","ccccccddaaaaaaaaddcccccc","cccccd.dbbbbbbbbd.dccccc","dccdd..dbbbbbbbbd..ddccd",".dd...daaaaaaaaaad...dd.",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....",".....dbbbbbbbbbbbbd.....",".....daaaaaaaaaaaad.....",".....daaaaaaaaaaaad.....",".....dbbbbbbbbbbbbd.....","......dbbbbbbbbbbd......",".......daaaaaaaad.......","........daaaaaad........",".........dbbbbd.........","..........dbbd.........."]},
+{"id":"bushuhebi","name":"ブシュヘビ","area":"kanji","hp":4,"msg":"かんじの ぶひんに わかれて、また まきつく。","pal":{"a":"#2E6B4A","b":"#4FA86E","c":"#C8E8A0","d":"#F0D030"},"px":["...........ddaaaadd.....","..........daaaaaaaad....","..........daabbbbaad....",".........daabbbbbbaad...",".........daaddbbddaad...",".........daaddbbddaad...",".........daabbbbbbaad...","........daabbbbbbaad....",".......ddaabbbbbbaad....","......daabbbbbbaadd.....",".....ddaabbbbbbaad......","....daabbbbbbaadd.......","....daabbbbbbaad........","...daabbbbbbaad.........","...daabbbbbbaad.........","....daabbbbbbaad........","....daabbbbbbaad........",".....ddaabbbbbaaddd.....","......daabbbccccbbadd...",".......ddaabcccccbbaad..","........daabbccccbbaad..",".........ddaabbccccbbad.","..........daabbccccbbbd.","...........ddabbccccbd.."]},
+{"id":"jukugogani","name":"ジュクゴガニ","area":"kanji","hp":5,"msg":"ふたつの はさみで かんじを くみあわせる。","pal":{"a":"#A83A2A","b":"#E06A4A","c":"#F8C8A0","d":"#2A1810"},"px":["daad................daad","aaaaddd..........dddaaaa","aaabbbad........dabbbaaa","aabbbbaad......daabbbbaa","aabbbbaad......daabbbbaa","daabbaad........daabbaad","daaaaaad........daaaaaad",".ddaaad..dddddd..daaadd.","..daaad.daaaaaad.daaad..","...daaddaaaaaaaaddaad...","...daaaaabbbbbbaaaaad...","..daaaabbbbbbbbbbaaaad..",".ddaabbbddbbbbddbbbaadd.","daabbbbbddbbbbddbbbbbaad","daabbbbbbbbbbbbbbbbbbaad","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaaaaaaaaaaaaaaad...","..dddaaaaaaaaaaaaaaddd..",".daaaddaaaaddaaaaddaaad.",".daad..daad..daad..daad."]},
+{"id":"joshikurage","name":"ジョシクラゲ","area":"grammar","hp":3,"msg":"「は」と「が」の あいだを ただよっている。","pal":{"a":"#5A3A8E","b":"#8E6ACE","c":"#D8C8F0","d":"#F8D048"},"px":[".....ddaaaaaaaaaadd.....","...ddaaaaaaaaaaaaaadd...",".ddaaaabbbbbbbbbbaaaadd.","daaaabbbbbbbbbbbbbbaaaad","daabbbbccccccccccbbbbaad","aabbbcccccccccccccbbbbaa","aabbccddccccccddccbbbbaa","aabbccddccccccddccbbbbaa","aabbbcccccccccccccbbbbaa","daabbbbccccccccccbbbbaad","daabbbbbbbbbbbbbbbbbbaad",".ddaabbbbbbbbbbbbbbaadd.","...daaabbbbbbbbbbaaad...","..dddaaabbbbbbbbaaaddd..",".daaddaaddaaaaddaaddaad.",".daaddaad.daaaddaaddaad.",".dbbddbbd..dbbbddd.dbbd.",".dbbddbbbd..dbbbd.dbbbd.","..ddbbddbbd.dbbbddbbdd..","..ddbbddbbd..dbbddbbdd..",".dbbdd.dbbd...dbbbddbbd.",".dbbdd.dbbbd...dbbddbbd.","..dbbbd.dbbbd...dbbbbd..","...dbbd..dbbd....dbbd..."]},
+{"id":"keigokishi","name":"テイネイキシ","area":"grammar","hp":5,"msg":"「です・ます」で いうまで みちを あけない。","pal":{"a":"#4A5470","b":"#8E9AB8","c":"#D8DEF0","d":"#C83A3A","e":"#F8D048"},"px":[".........dddddd.........","........dddddddd........","........dddddddd........",".......dddddddddd.......",".....ddaaaaaaaaaadd.....","....daaaaaaaaaaaaaad....","....daabbbbbbbbbbaad....","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daabbbbbbbbbbbbaad...","...daaccccccccccccaad...","...daaccccccccccccaad...","...daabbbbbbbbbbbbaad...","....daabbbbbbbbbbaad....",".....daaaaaaaaaaaad.....","...dddaaaaaaaaaaaaddd...",".ddaaaabbbeeeebbbaaaadd.","daaaabbbbbeeeebbbbbaaaad","daaaabbbbbeeeebbbbbaaaad","aaaabbbbbbbeebbbbbbbaaaa","aaaabbbbbbbbbbbbbbbbaaaa","daaaabbbbbbbbbbbbbbaaaad","daaaaaddddddddddddaaaaad",".ddaad............daadd."]},
+{"id":"carelesskoumori","name":"ケアレスコウモリ","area":"any","hp":3,"msg":"わかったはずの もんだいを もちさる。","pal":{"d":"#14142A","a":"#3A2E4E","b":"#6E5A8E","c":"#F0C830"},"px":[".daad..............daad.",".daaad............daaad.",".daaadd..........ddaaad.",".daaaaad...dd...daaaaad.",".daaaaad..daad..daaaaad.","daaaaaaaddaaaaddaaaaaaad","daaaaaaaaaaaaaaaaaaaaaad","aaaaaaaaaaaaaaaaaaaaaaaa","aaabbaaaccaaaaccaaabbaaa","aabbbbbaccaaaaccaabbbbaa","aabbbbbaaaaaaaaaaabbbbaa","dabbbbbbaaaaaaaaabbbbbad",".dbbbbbbaaaaaaaaabbbbbd.","..dbbbbbaaaaaaaabbbbbd..","..dbbbbbaaaaaaaabbbbbd..","...ddbbaaaaaaaaaabbdd...",".....daaaaaaaaaaaad.....","......daaaaaaaaaad......","......daaaaaaaaaad......",".......daaaaaaaad.......",".......daaaddaaad.......",".......daad..daad.......","........dd....dd........","........................"]},
+{"id":"nemukegumo","name":"ネムケグモ","area":"any","hp":4,"msg":"よる おそくに あらわれて、あたまを ぼんやりさせる。","pal":{"a":"#2E2A3E","b":"#5A5470","c":"#C83A5A","d":"#8E88A8"},"px":["ddd..................ddd","dddd................dddd","ddddd..............ddddd",".ddddd..dd....dd..ddddd.","..ddddddddd..ddddddddd..","...dddddddddddddddddd...","....ddddddaaaadddddd....",".....ddddaaaaaadddd.....","...ddddaaaaaaaaaadddd...","..dddaaaaaaaaaaaaaaddd..",".ddddaaaabbbbbbaaaadddd.","dddaaaabbbbbbbbbbaaaaddd","dddaaaabccbbbbccbaaaaddd","ddaaaabbccbbbbccbbaaaadd","ddaaaabbbbbbbbbbbbaaaadd",".daaaabbbbbbbbbbbbaaaad.",".daaaabbbbbbbbbbbbaaaad.","..daaaabbbbbbbbbbaaaad..","..daaaabbbbbbbbbbaaaad..","...daaaaabbbbbbaaaaad...","...ddddaaaaaaaaaadddd...","..dddddddaaaaaaddddddd..",".ddddd..daaaaaad..ddddd.",".dddd....ddaadd....dddd."]},
+{"id":"moshinomaou","name":"タメシノマオウ","area":"boss","hp":12,"msg":"ほんばんと おなじ すがたで、ちからを うつしだす。","pal":{"a":"#4A1030","b":"#8E2050","c":"#E85A7A","d":"#F8D048"},"px":["daadd..............ddaad","aaaaad............daaaaa","aaaaadd..........ddaaaaa","daaaaaad........daaaaaad","daaaaaadd......ddaaaaaad",".ddaaaaaaddddddaaaaaadd.","...daaaaaaaaaaaaaaaad...","...daaaaaaaaaaaaaaaad...",".ddaabbbbbbbbbbbbbbaadd.","daabbbbbbbbbbbbbbbbbbaad","daabbbddbbbbbbbbddbbbaad","aabbbbddbbbbbbbbddbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbbbbbbbbbbbbbbbbbaa","aabbbbccccccccccccbbbbaa","daabbbccccccccccccbbbaad",".dabbbbccccccccccbbbbad.",".daabbbbbccccccbbbbbaad.","daaabbbbbbbbbbbbbbbbaaad","aaaabbbbbbbbbbbbbbbbaaaa","aaaaddaaaaaaaaaaaaddaaaa","daaad.daaaaaaaaaad.daaad","daaad.daaaaddaaaad.daaad",".daad..daad..daad..daad."]}
 ];
 const HEROES=[
 {"id":"hero_m","name":"おとこ","label":"おとこの ゆうしゃ","pal":{"G":"#B8860B","K":"#4A3424","N":"#9AA6C8","S":"#D9A87C","a":"#17325C","b":"#2F5A9E","c":"#6E9FE0","d":"#14142A","e":"#1A2340","g":"#F8D048","k":"#2A1E14","m":"#9A6A4A","n":"#EDF2FF","s":"#F2C9A0","w":"#FFFFFF"},"px":["..............dGgd......ddd.....",".............dGggGd....dnnNd....","............daaggaad...dnnNd....","..........ddaccccbbadd.dnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbccccbbbbaddnnNd....",".........dabbbbbbbbbbaddnnNd....",".........dGGggGGGGggGGddnnNd....",".........dabSssssssSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSewssewSbaddnnNd....",".........dabSssssssSbaddnnNd....",".........daaSssmmssSaaddnnNd....","........ddddssssssssddddnnNd....",".......dcccaaaSSSSaaacccnnNdd...",".......dcccabbbbbbbbacGGGGGGGd..","......dggggggcGGGGcbasgggggggd..","......dgbbbbgcGggGcbasssKKKdd...","......dgbbGbgcGggGcbasssKKKd....","......dgbGgGgcGGGGcbasssKKKd....","......dgbbGbgcbbbbcbadddKKKd....","......dgbbbbgbbbbbbbad.dGGGd....","......dgbbbbgGGggGGGGd.dGGGd....",".......dgbbbgbbdabbad...ddd.....",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."],"px2":["..............dGgd..............",".............dGggGd.............","............daaggaad............","..........ddaccccbbadd..........",".........dabbccccbbbbad.........",".........dabbccccbbbbad.........",".........dabbbbbbbbbbad.........",".........dGGggGGGGggGGd.........",".........dabSssssssSbad.........",".........dabSewssewSbad.........",".........dabSewssewSbad.........",".........dabSssssssSbad.........",".........daaSssmmssSaad..d......","........ddddssssssssdddddGd.....",".......dcccaaaSSSSaaacccdGdddddd",".......dcccabbbbbbbbassssGnnnnnn","......dggggggcGGGGcbassssGnnnnnn","......dgbbbbgcGggGcbassssGNNNNNN","......dgbbGbgcGggGcbaddddGdddddd","......dgbGgGgcGGGGcbad..dGd.....","......dgbbGbgcbbbbcbad...d......","......dgbbbbgbbbbbbbad..........","......dgbbbbgGGggGGGGd..........",".......dgbbbgbbdabbad...........",".......dgbbbgbbdabbad...........","........dgbgabbdabbad...........",".........dggabbdabbad...........","..........ddabbaabbad...........","..........dkKKKkkKKKkd..........","..........dkkkkkkkkkkd..........","..........dkkkkkkkkkkd..........","...........dddddddddd..........."]},
@@ -1680,7 +1701,8 @@ const CHAPTERS=[
 {"id":"vocab-g","sec":"vocab","name":"がっこうと しごと","en":"School & Work","boss":"bushuhebi","ids":["v:勉強","v:宿題","v:授業","v:試験","v:テスト","v:問題","v:答え","v:質問","v:意味","v:言葉","v:文字","v:字","v:漢字","v:平仮名","v:片仮名","v:発音","v:会話","v:文法","v:作文","v:言語","v:日本語","v:英語","v:中国語","v:数学","v:科学","v:歴史","v:音楽","v:スポーツ","v:映画","v:ニュース","v:番組","v:歌","v:絵本","v:小説","v:物語","v:紙袋","v:会議","v:約束","v:予定","v:準備","v:用事","v:連絡","v:電話番号","v:メール","v:住所録","v:財産","v:値段","v:お釣り","v:レジ","v:切符売り場","v:旅館","v:部長","v:社長","v:名刺","v:書類","v:コピー","v:残業","v:休み","v:夏休み","v:春休み","v:冬休み","v:祭り","v:パーティー","v:プレゼント","v:お土産","v:チケット","v:席順","v:写真集","v:練習","v:試合","v:選手","v:野球","v:サッカー","v:テニス","v:水泳","v:自動車","v:工事","v:説明書","v:地震","v:火事","v:事故","v:経験","v:理由","v:方法","v:意見","v:返事","v:相談","v:注意","v:規則","v:自由時間","v:受験","v:合格","v:卒業","v:入学","v:留学","v:生活","v:習慣","v:文化","v:社会","v:自然"]},
 {"id":"vocab-h","sec":"vocab","name":"つなぎことばと あいさつ","en":"Connectors & Greetings","boss":"goukaku","ids":["v:とても","v:少し","v:ちょっと","v:たくさん","v:もっと","v:よく","v:時々","v:いつも","v:たいてい","v:あまり","v:全然","v:まだ","v:もう","v:すぐ","v:だんだん","v:ゆっくり","v:はやく","v:まっすぐ","v:ちょうど","v:だいたい","v:ほとんど","v:きっと","v:たぶん","v:必ず","v:ぜひ","v:また","v:まず","v:やっと","v:もうすぐ","v:これから","v:さっき","v:あとで","v:先に","v:一緒に","v:自分で","v:一人で","v:みんなで","v:本当に","v:はっきり","v:ちゃんと","v:いろいろ","v:どうぞ","v:どうも","v:もちろん","v:やはり","v:こう","v:そう","v:どう","v:なぜ","v:どうして","v:いくつ","v:いくら","v:どのぐらい","v:何回","v:何時","v:何曜日","v:これ","v:それ","v:あれ","v:どれ","v:この","v:その","v:あの","v:どの","v:こんな","v:そんな","v:あんな","v:どんな","v:そして","v:それから","v:でも","v:しかし","v:だから","v:それで","v:じゃあ","v:では","v:または","v:けれども","v:おはようございます","v:こんにちは","v:こんばんは","v:さようなら","v:ありがとうございます","v:すみません","v:ごめんなさい","v:いただきます","v:ごちそうさま","v:いってきます","v:ただいま","v:おかえりなさい","v:はじめまして","v:よろしく","v:おめでとう","v:はい","v:いいえ","v:ええ","v:あのう","v:もしもし","v:お願いします","v:失礼します","v:お元気ですか"]}
 ];
-const CREST={"size":56,"pal":{"g":"#F8D048","y":"#FFF0A8","o":"#B8860B","b":"#3A6ABE","B":"#24477E","r":"#C03A58","R":"#7E1E38","s":"#C3CAE6","S":"#79809E","w":"#FFFFFF","k":"#14142A"},"px":["...........................y............................","..........................yyy...........................",".........................yyyyy..........................","....Sss...................yyy.....................ssSS..",".....Sss...................y.....................ssSS...","......Sss.......................................ssSS....",".......Sss.....................................ssSS.....","........Sss...................................ssSS......",".........SsggggggggggggggggggggggggggggggggggssSS.......","..........SggggggggggggggggggggggggggggggggggsSS........","...........ggggggggggggggggggggggggggggggggggSS.........","...........yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyS..........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbkkkkkkkkkboorkkkkkkkkkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkkwwwwwkkboorkkwwwwwkkrryggg...........","...........gggybbbkwwwwwkkboorkkwwwwwkrrryggg...........","...........gggybbbkkwwwwwkboorkwwwwwkkrrryggg...........","...........gggybbbbkwwwwwkbookkwwwwwkrrrryggg...........","...........gggybbbbkwwwwwkkookwwwwwkkrrrryggg...........","...........gggybbbbkkwwwwwkookwwwwwkrrrrryggg...........","...........gggybbbbbkwwwwwkkkkwwwwwkrrrrryggg...........","...........gggybbbbbkkwwwwwkkwwwwwkkrrrrryggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyRRRRRRkkwwwwwwwwwwkkBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkkwwwwwwwwkkBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........ggggyRRRRRRRkkwwwwwwkkBBBBBBBygggg...........","............ggggyRRRRRRRkwwwwwwkBBBBBBBygggg............",".............gggyRRRRRRRkkwwwwwkBBBBBBByggg.............",".............ggggyRRRRRRRkkkkkkkBBBBBBygggg.............","..............ggggyRRRRRRRRooBBBBBBBBygggg..............","...............ggggyRRRRRRRooBBBBBBBygggg...............",".........gggggggggggyRRRRRRooBBBBBByggggggggggg.........","........rrrrrrrrrggggyRRRRRooBBBBByggggrrrrrrrrr........",".......RRRRRRRRRRRggggyRRRRooBBBByggggRRRRRRRRRRR.......","........RRRRRRRRRRRggggyRRRooBBByggggRRRRRRRRRRR........",".........gggggggggggggggyRRooBByggggggggggggggg.........",".....................gggggyooyggggg.....................",".......................gggggggggg.......................",".........................gggggg.........................","........................................................","........................................................","........................................................","........................................................","........................................................"]};</script>
+const CREST={"size":56,"pal":{"g":"#F8D048","y":"#FFF0A8","o":"#B8860B","b":"#3A6ABE","B":"#24477E","r":"#C03A58","R":"#7E1E38","s":"#C3CAE6","S":"#79809E","w":"#FFFFFF","k":"#14142A"},"px":["...........................y............................","..........................yyy...........................",".........................yyyyy..........................","....Sss...................yyy.....................ssSS..",".....Sss...................y.....................ssSS...","......Sss.......................................ssSS....",".......Sss.....................................ssSS.....","........Sss...................................ssSS......",".........SsggggggggggggggggggggggggggggggggggssSS.......","..........SggggggggggggggggggggggggggggggggggsSS........","...........ggggggggggggggggggggggggggggggggggSS.........","...........yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyS..........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbbbbbbbbbbboorrrrrrrrrrrryggg...........","...........gggybbkkkkkkkkkboorkkkkkkkkkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkwwwwwwwkboorkwwwwwwwkrryggg...........","...........gggybbkkwwwwwkkboorkkwwwwwkkrryggg...........","...........gggybbbkwwwwwkkboorkkwwwwwkrrryggg...........","...........gggybbbkkwwwwwkboorkwwwwwkkrrryggg...........","...........gggybbbbkwwwwwkbookkwwwwwkrrrryggg...........","...........gggybbbbkwwwwwkkookwwwwwkkrrrryggg...........","...........gggybbbbkkwwwwwkookwwwwwkrrrrryggg...........","...........gggybbbbbkwwwwwkkkkwwwwwkrrrrryggg...........","...........gggybbbbbkkwwwwwkkwwwwwkkrrrrryggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyooooookwwwwwkkwwwwwkooooooyggg...........","...........gggyRRRRRRkkwwwwwwwwwwkkBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkwwwwwwwwwwkBBBBBBByggg...........","...........gggyRRRRRRRkkwwwwwwwwkkBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........gggyRRRRRRRRkwwwwwwwwkBBBBBBBByggg...........","...........ggggyRRRRRRRkkwwwwwwkkBBBBBBBygggg...........","............ggggyRRRRRRRkwwwwwwkBBBBBBBygggg............",".............gggyRRRRRRRkkwwwwwkBBBBBBByggg.............",".............ggggyRRRRRRRkkkkkkkBBBBBBygggg.............","..............ggggyRRRRRRRRooBBBBBBBBygggg..............","...............ggggyRRRRRRRooBBBBBBBygggg...............",".........gggggggggggyRRRRRRooBBBBBByggggggggggg.........","........rrrrrrrrrggggyRRRRRooBBBBByggggrrrrrrrrr........",".......RRRRRRRRRRRggggyRRRRooBBBByggggRRRRRRRRRRR.......","........RRRRRRRRRRRggggyRRRooBBByggggRRRRRRRRRRR........",".........gggggggggggggggyRRooBByggggggggggggggg.........",".....................gggggyooyggggg.....................",".......................gggggggggg.......................",".........................gggggg.........................","........................................................","........................................................","........................................................","........................................................","........................................................"]};
+const CONFUSE={"さ":["ち","き","ざ"],"ち":["さ","き","ぢ"],"き":["さ","ち","ぎ"],"ね":["れ","わ","を"],"れ":["ね","わ","を"],"わ":["ね","れ","を"],"を":["ね","れ","わ"],"る":["ろ"],"ろ":["る"],"ぬ":["め"],"め":["ぬ","あ","お","の"],"は":["ほ","ま","け","ば","ぱ"],"ほ":["は","ま","ぼ","ぽ"],"ま":["は","ほ","よ"],"い":["り","こ"],"り":["い","こ"],"こ":["い","り","に","ご"],"く":["へ","ぐ"],"へ":["く","べ","ぺ"],"つ":["う","ら","し","づ"],"う":["つ","ら"],"ら":["つ","う","ふ"],"し":["つ","じ"],"た":["な","だ"],"な":["た"],"に":["こ"],"す":["む","ず"],"む":["す"],"そ":["ん","ぞ"],"ん":["そ"],"あ":["お","め"],"お":["あ","め"],"け":["は","げ"],"よ":["ま"],"の":["め"],"ふ":["ら","ぶ","ぷ"],"シ":["ツ","ミ","ジ"],"ツ":["シ","ミ"],"ミ":["シ","ツ"],"ソ":["ン","ノ","ゾ"],"ン":["ソ","ノ"],"ノ":["ソ","ン"],"ク":["タ","ワ","グ"],"タ":["ク","ワ","ダ"],"ワ":["ク","タ","フ","ウ"],"ス":["ヌ","ズ"],"ヌ":["ス"],"チ":["テ"],"テ":["チ","デ"],"ナ":["メ"],"メ":["ナ"],"フ":["ワ","ウ","ブ","プ"],"ウ":["フ","ワ"],"マ":["ア"],"ア":["マ"],"ル":["レ"],"レ":["ル"],"コ":["ユ","ゴ"],"ユ":["コ"],"ケ":["セ","ゲ"],"セ":["ケ","サ","ゼ"],"ハ":["ヘ","バ","パ"],"ヘ":["ハ","ベ","ペ"],"ロ":["ヨ"],"ヨ":["ロ"],"サ":["セ","ザ"],"ニ":["エ"],"エ":["ニ"],"ト":["ヒ","ド"],"ヒ":["ト","ビ","ピ"],"か":["が"],"が":["か"],"カ":["ガ"],"ガ":["カ"],"ぎ":["き"],"キ":["ギ"],"ギ":["キ"],"ぐ":["く"],"グ":["ク"],"げ":["け"],"ゲ":["ケ"],"ご":["こ"],"ゴ":["コ"],"ざ":["さ"],"ザ":["サ"],"じ":["し"],"ジ":["シ"],"ず":["す"],"ズ":["ス"],"せ":["ぜ"],"ぜ":["せ"],"ゼ":["セ"],"ぞ":["そ"],"ゾ":["ソ"],"だ":["た"],"ダ":["タ"],"ぢ":["ち"],"づ":["つ"],"て":["で"],"で":["て"],"デ":["テ"],"と":["ど"],"ど":["と"],"ド":["ト"],"ば":["は","ぱ"],"ぱ":["は","ば"],"バ":["ハ","パ"],"パ":["ハ","バ"],"ひ":["び","ぴ"],"び":["ひ","ぴ"],"ぴ":["ひ","び"],"ビ":["ヒ","ピ"],"ピ":["ヒ","ビ"],"ぶ":["ふ","ぷ"],"ぷ":["ふ","ぶ"],"ブ":["フ","プ"],"プ":["フ","ブ"],"べ":["へ","ぺ"],"ぺ":["へ","べ"],"ベ":["ヘ","ペ"],"ペ":["ヘ","ベ"],"ぼ":["ほ","ぽ"],"ぽ":["ほ","ぼ"],"ホ":["ボ","ポ"],"ボ":["ホ","ポ"],"ポ":["ホ","ボ"]};</script>
 <script>
 (function(){
 "use strict";
@@ -1724,8 +1746,8 @@ DATA.vocab.forEach(v=>ITEMS.push({id:'v:'+v[0],sec:'vocab',w:v[0],read:v[1],pos:
 // 漢字は「1字」を1項目にする。例語をそのまま項目にすると、
 // 食べる・電話のような中心的な語が「ことば」側と二重に登録されてしまうため。
 DATA.kanji.forEach(k=>ITEMS.push({
-  id:'k:'+k[0],sec:'kanji',w:k[0],read:(k[2]||k[1]),mean:k[3],en:'',
-  on:k[1],kun:k[2],words:k[4]||[]}));
+  id:'k:'+k[0],sec:'kanji',w:k[0],read:(k[2]||k[1]),mean:k[3],en:k[4],
+  on:k[1],kun:k[2],words:k[5]||[]}));
 DATA.grammar.forEach(g=>ITEMS.push({id:'g:'+g[0],sec:'grammar',w:g[0],read:'',conn:g[1],mean:g[2],en:g[3],ex:g[4],note:g[5]}));
 const BY_ID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const BY_SEC={kana:[],vocab:[],kanji:[],grammar:[]};
@@ -2138,9 +2160,11 @@ function W(word,read,sm,en){
   return `<span class="${cls}">${esc(word)}${read?`<span class="qread">${esc(read)}${rj}</span>`:''}</span>`;
 }
 // 漢字は問い方が語彙と違うので、選択肢を自前で組み立てる
-function optsOf(correct,cands){
+// ordered を立てると候補の順を崩さない。
+// 「似た字を先に置いた配列」を渡して、前から3つ取らせるため
+function optsOf(correct,cands,ordered){
   const seen=new Set([correct]), out=[];
-  for(const v of shuffle(cands.slice())){
+  for(const v of (ordered?cands.slice():shuffle(cands.slice()))){
     if(out.length>=3) break;
     if(!v||seen.has(v)) continue;
     seen.add(v); out.push(v);
@@ -2149,7 +2173,7 @@ function optsOf(correct,cands){
 }
 function kanjiQ(item){
   const pool=BY_SEC.kanji.filter(x=>x.id!==item.id);
-  const t=['k_mean','k_on','k_word'];
+  const t=['k_mean','k_on','k_word','k_en'];
   if(item.kun) t.push('k_kun');
   if(item.words.length) t.push('k_word');
   const kind=rec(item.id).lv<=1?'k_mean':pick(t);
@@ -2158,6 +2182,8 @@ function kanjiQ(item){
     return {label:'この ことばの よみかたは？',labelEn:'How do you read this word?',main:W(j[0],''),item,
       opts:optsOf(j[1],pool.flatMap(x=>x.words.map(w=>w[1]))),ruby:false};
   }
+  if(kind==='k_en') return {label:'この かんじを えいごで いうと？',labelEn:'What does this kanji mean in English?',
+    main:W(item.w,''),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
   if(kind==='k_on') return {label:'この かんじの おんよみは？',labelEn:'On-reading (from Chinese)?',main:W(item.w,''),item,
     opts:optsOf(item.on,pool.map(x=>x.on)),ruby:false};
   if(kind==='k_kun') return {label:'この かんじの くんよみは？',labelEn:'Kun-reading (Japanese)?',main:W(item.w,''),item,
@@ -2196,6 +2222,22 @@ function listenQ(item){
     main:earHtml(),item,say:item.read,
     opts:optsOf(item.mean,distractors(item,'mean',8).map(d=>d.mean)),ruby:true};
 }
+// 誤答は、まず見た目が紛らわしい字から取る。
+// ランダムに70字から引くと、さ/ち や シ/ツ が並ぶ確率は4%しかなく、
+// 初学者がいちばん間違える「見分け」を一度も練習しないまま進んでしまう。
+//
+// ただし全部を紛らわしい字にはしない。覚える前から は/ほ/ま/け を並べても
+// 当て推量になるだけで、間違った紐づけを覚えかねない。
+// 出したての字は1つだけ混ぜ、慣れてきたら増やして見分けさせる。
+function kanaNear(item,pool){
+  const near=shuffle((CONFUSE[item.w]||[])
+    .map(c=>pool.find(x=>x.w===c))
+    .filter(Boolean));
+  const lv=rec(item.id).lv;
+  const take=lv<=1?1:(lv<=3?2:3);
+  const rest=shuffle(pool.filter(x=>near.indexOf(x)<0));
+  return near.slice(0,take).concat(shuffle(near.slice(take).concat(rest)));
+}
 // かなの出題。選択肢は同じ字種（ひらがな同士・カタカナ同士）でそろえる
 function kanaQ(item,force){
   const pool=BY_SEC.kana.filter(x=>x.id!==item.id && x.kata===item.kata);
@@ -2205,13 +2247,13 @@ function kanaQ(item,force){
   const kind=(force&&(force!=='n_listen'||TTS.ready))?force
             :(rec(item.id).lv<=1?'n_read':pick(t));
   if(kind==='n_write') return {label:'この おとの かなは？',labelEn:'Which kana makes this sound?',
-    main:W(item.romaji,'',false,true),item,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+    main:W(item.romaji,'',false,true),item,opts:optsOf(item.w,kanaNear(item,pool).map(x=>x.w),true),ruby:false};
   if(kind==='n_word') return {label:'この ことばの よみかたは？',labelEn:'How do you read this word?',
     main:W(item.ex,''),item,opts:optsOf(item.exr,pool.map(x=>x.exr)),ruby:false};
   if(kind==='n_listen') return {label:'きこえた ことばは？',labelEn:'Which word did you hear?',
     main:earHtml(),item,say:item.ex,opts:optsOf(item.ex,pool.map(x=>x.ex)),ruby:false};
   return {label:'この かなの おとは？',labelEn:'What sound is this kana?',
-    main:W(item.w,''),item,opts:optsOf(item.romaji,pool.map(x=>x.romaji)),ruby:false};
+    main:W(item.w,''),item,opts:optsOf(item.romaji,kanaNear(item,pool).map(x=>x.romaji),true),ruby:false};
 }
 function makeQ(item,mode){
   // モードの判定を先に置く。かなを先に見てしまうと、聴解モードでも
@@ -2448,8 +2490,9 @@ function monPool(sec,boss){
 const foe = () => B.foes[B.tgt] || B.foes[B.foes.length-1];
 const aliveFoes = () => B.foes.filter(f=>f.hp>0);
 function aimNext(){ const i=B.foes.findIndex(f=>f.hp>0); if(i>=0) B.tgt=i; }
-// 体が増えるほど1体を小さく描く。3体でも横幅に収まる大きさにしている
-const foeScale = (n,boss) => boss?13:(n>=3?7:(n===2?8:9));
+// 体が増えるほど1体を小さく描く。3体でも横幅に収まる大きさにしている。
+// 12x12から24x24に上げたぶん倍率は半分。画面上の大きさは従来どおり
+const foeScale = (n,boss) => boss?6:(n>=3?3:(n===2?4:5));
 function makeFoes(sec,boss,mon,monMax){
   if(mon){ const mx=monMax||mon.hp; return [{m:mon,max:mx,hp:mx}]; }
   const pool=monPool(sec,boss);
@@ -2696,7 +2739,7 @@ function learnHtml(it){
     if(TTS.ready) h+=`<div class="ex">${esc(it.ex)}${sayBtn(it.ex)}</div>`;
   }else if(it.sec==='kanji'){
     h=`<dl><dt>かんじ</dt><dd><b>${esc(it.w)}</b></dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}</dd>
+       <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd>
        <dt>よみ</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}</dd></dl>`;
     if(it.words.length) h+=`<div class="ex">${it.words.map(j=>
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
@@ -2883,6 +2926,46 @@ function vShop(){
   </div></div>`;
 }
 
+/* ===== 50音表 =====
+   ひらがなの並びを持っておき、カタカナはコードをずらして作る。
+   や行・わ行の欠けは空マスとして残す（そこが空いているのも表の情報） */
+const GOJUON=[
+  ['あ','い','う','え','お'],
+  ['か','き','く','け','こ'],
+  ['さ','し','す','せ','そ'],
+  ['た','ち','つ','て','と'],
+  ['な','に','ぬ','ね','の'],
+  ['は','ひ','ふ','へ','ほ'],
+  ['ま','み','む','め','も'],
+  ['や','' ,'ゆ','' ,'よ'],
+  ['ら','り','る','れ','ろ'],
+  ['わ','' ,'' ,'' ,'を'],
+  ['ん','' ,'' ,'' ,''  ]
+];
+const DAKUON=[
+  ['が','ぎ','ぐ','げ','ご'],
+  ['ざ','じ','ず','ぜ','ぞ'],
+  ['だ','ぢ','づ','で','ど'],
+  ['ば','び','ぶ','べ','ぼ'],
+  ['ぱ','ぴ','ぷ','ぺ','ぽ']
+];
+const toKata = c => c?String.fromCharCode(c.charCodeAt(0)+0x60):'';
+function kanaCell(ch){
+  if(!ch) return '<span class="kc gap"></span>';
+  const it=BY_ID['n:'+ch];
+  // ヲ・ヂ・ヅ は現代のカタカナ表記で使わないので収録していない。表には薄く残す
+  if(!it) return `<span class="kc none"><b>${esc(ch)}</b></span>`;
+  const r=rec(it.id);
+  return `<span class="kc s${r.lv}" title="${esc(it.romaji)}"><b>${esc(ch)}</b><i>${esc(it.romaji)}</i></span>`;
+}
+function kanaChart(kata){
+  const conv=rows=>rows.map(r=>r.map(c=>kata?toKata(c):c));
+  const draw=rows=>`<div class="kchart">${rows.map(r=>r.map(kanaCell).join('')).join('')}</div>`;
+  return draw(conv(GOJUON))+
+    `<div class="ktitle">だくおん・はんだくおん${gl('Voiced sounds')}</div>`+
+    draw(conv(DAKUON));
+}
+
 /* ===== 図鑑 ===== */
 let bookSec='vocab';
 function vBook(){
@@ -2897,7 +2980,10 @@ function vBook(){
     `<button data-bs="${k}" aria-pressed="${k===bookSec}">${SEC_SHORT[k]} ${BY_SEC[k].length}</button>`).join('')}</div>
   <div class="win"><span class="win-t">おぼえた ぐあい${gl('Progress')}</span>
     <div class="note">${s.done} / ${s.n} こ おぼえました（★4いじょう）</div>
-    <div class="grid">${tiles.map(i=>`<span class="tile s${rec(i.id).lv}" title="${esc(i.w)}"></span>`).join('')}</div>
+    ${bookSec==='kana'
+      ? `<div class="ktitle" style="margin-top:4px">ひらがな${gl('Hiragana')}</div>${kanaChart(false)}
+         <div class="ktitle">カタカナ${gl('Katakana')}</div>${kanaChart(true)}`
+      : `<div class="grid">${tiles.map(i=>`<span class="tile s${rec(i.id).lv}" title="${esc(i.w)}"></span>`).join('')}</div>`}
     <div class="leg">${[[0,'まだ'],[1,'であった'],[2,'★2'],[3,'★3'],[4,'★4'],[5,'★5'],[6,'かんぺき']]
       .map(([n,t])=>`<span><span class="tile s${n}"></span>${t}</span>`).join('')}</div>
   </div>
@@ -2912,7 +2998,7 @@ function vBook(){
   <div class="win"><span class="win-t">モンスターずかん${gl('Monsters')}</span>
     <div class="zroster">${MONSTERS.map(m=>{
       const c=S.defeated[m.id]||0;
-      return `<div class="zcard ${c?'seen':''}">${monHtml(m,5)}
+      return `<div class="zcard ${c?'seen':''}">${monHtml(m,3)}
         <span class="zn">${c?esc(m.name):'？？？'}</span>
         <span class="zc">${c?'たおした '+c:'まだ'}</span>
         ${c?`<span class="zd">${esc(m.msg)}</span>`:''}</div>`;}).join('')}</div>
@@ -3010,7 +3096,7 @@ function vConf(){
   </div>
   <div class="win"><span class="win-t">はいって いる もの${gl('Contents')}</span>
     <div class="note">
-      ことば ${BY_SEC.vocab.length} ／ かんじ ${BY_SEC.kanji.length}じ（れいご ${DATA.kanji.reduce((a,k)=>a+k[4].length,0)}） ／ ぶんぽう ${BY_SEC.grammar.length}<br><br>
+      ことば ${BY_SEC.vocab.length} ／ かんじ ${BY_SEC.kanji.length}じ（れいご ${DATA.kanji.reduce((a,k)=>a+k[5].length,0)}） ／ ぶんぽう ${BY_SEC.grammar.length}<br><br>
       ここに ある ことば・かんじ・ぶんぽうは、ＪＬＰＴ Ｎ５の しゅつだいはんいを もとに えらんだ ものです。
       いみ・れいぶん・もんだいは すべて この アプリの ために かきおろした もので、
       いちはんの きょうざいの ほんぶんは いっさい つかって いません。
