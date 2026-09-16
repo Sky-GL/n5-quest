@@ -313,20 +313,28 @@ rt{
   text-shadow:3px 3px 0 #6B4A00, 6px 6px 0 #000, 0 0 12px rgba(0,0,0,.85);
 }
 .title-sub{
-  display:inline-block; margin-top:12px; padding:11px 10px 0; font-size:12.5px;
+  display:inline-block; margin-top:20px; padding:11px 10px 0; font-size:12.5px;
   color:#C6CCE4; letter-spacing:.36em; border-top:var(--px) solid #2E2E58;
   text-shadow:0 2px 5px #000, 0 0 10px #000;
 }
-/* 英語のときのロゴ。ドラクエの海外版は「DRAGON」が小さく上、「QUEST」が
-   大きく下という組み方なので、それをなぞる */
-.title-main.en{
+/* ロゴ。ドラクエのマークは「DRAGON」が小さく上、「QUEST」が大きく下で、
+   しかも下段は水平に並んでいない。両端の字ほど大きく、外へ倒れて弧を描く。
+   その傾きが出ないと、ただの太字の行になってしまう。
+   --d は中央からの距離、--s は左右どちら側か（-1 / 0 / +1）。 */
+.title-main{
   display:flex; flex-direction:column; align-items:center;
-  line-height:1; letter-spacing:.12em;
+  line-height:1; letter-spacing:.06em;
 }
-.title-main.en .tl-sm{
-  font-size:.5em; letter-spacing:.46em; margin-left:.46em; margin-bottom:.1em;
+.tl-sm{
+  font-size:.54em; letter-spacing:.42em; margin-left:.42em; margin-bottom:.02em;
   /* 紋章の濃い中央に重なる位置なので、下段より影を強くしないと沈む */
   color:#FFD66B; text-shadow:2px 2px 0 #6B4A00, 4px 4px 0 #000, 0 0 14px #000;
+}
+.tl-lg{display:flex; align-items:baseline; justify-content:center; gap:.06em}
+.tl-lg i{
+  font-style:normal; display:inline-block;
+  font-size:calc(1em + var(--d) * .2em);
+  transform:translateY(calc(var(--d) * .1em)) rotate(calc(var(--s) * var(--d) * 4deg));
 }
 /* 英語は字数が多いので、字間をつめないと携帯で折り返す */
 .title-sub.en{letter-spacing:.13em; font-size:11.5px}
@@ -2393,12 +2401,24 @@ function slotSummary(n){
   for(const k in srs) if(srs[k] && srs[k].lv>=4) done++;
   return {name:d.name||'なまえなし', lv:d.lv||1, done, streak:d.streak||0, hero:d.hero||'hero_m'};
 }
-// 英語をえらんだ人には、ロゴも副題も英語で出す。
-// かなも読めない段階で「ことばの ぼうけん」だけ出ていても、飾りにしかならない
+// ロゴは日本語をえらんでも英語のまま。
+// ドラクエも日本版のマークは英字の DRAGON QUEST で、そこは訳していない。
+// 副題だけ、読む人の言語に合わせる
+function archWord(w){
+  const c=(w.length-1)/2;
+  return [...w].map((ch,i)=>{
+    const d=Math.abs(i-c), sgn=i<c?-1:(i>c?1:0);
+    return `<i style="--d:${d};--s:${sgn}">${esc(ch)}</i>`;
+  }).join('');
+}
 function titleLogo(){
-  if(!S.uiEn) return `<div class="title-main">Ｎ５クエスト</div>
+  const logo=`<div class="title-main">
+        <span class="tl-sm">N5</span>
+        <span class="tl-lg">${archWord('QUEST')}</span>
+      </div>`;
+  if(!S.uiEn) return logo+`
       <div class="title-sub">ことばの ぼうけん</div>`;
-  return `<div class="title-main en"><span class="tl-sm">N5</span><span>QUEST</span></div>
+  return logo+`
       <div class="title-sub en">The Journey of a Thousand Words</div>
       <div class="title-ja">ことばの ぼうけん</div>`;
 }
