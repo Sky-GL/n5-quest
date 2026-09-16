@@ -19,7 +19,6 @@ export const HEROES = [
       G: '#B8860B',   // 金の影
       K: '#4A3424',   // ブーツの明
       N: '#9AA6C8',   // 剣身の影
-      P: '#6E1A32',   // マント
       S: '#D9A87C',   // 肌の影
       a: '#17325C',   // 鎧の影
       b: '#2F5A9E',   // 鎧
@@ -30,7 +29,6 @@ export const HEROES = [
       k: '#2A1E14',   // ブーツ
       m: '#9A6A4A',   // 口
       n: '#EDF2FF',   // 剣身
-      p: '#B0364F',   // マントの明
       s: '#F2C9A0',   // 肌
       w: '#FFFFFF',   // 白目
     },
@@ -48,24 +46,24 @@ export const HEROES = [
       '.........dabSewssewSbaddnnNd....',
       '.........dabSssssssSbaddnnNd....',
       '.........daaSssmmssSaaddnnNd....',
-      '....ddddddddssssssssddddnnNd....',
-      '...dpPPPcccaaaSSSSaaacccnnNdd...',
-      '...dPPPPcccabbbbbbbbacGGGGGGGd..',
-      '...dPPPggggggcGGGGcbasgggggggd..',
-      '...dPPPgbbbbgcGggGcbasssKKKdd...',
-      '..dPPPPgbbGbgcGggGcbasssKKKd....',
-      '..dpPPPgbGgGgcGGGGcbasssKKKd....',
-      '..dPPPPgbbGbgcbbbbcbadddKKKd....',
-      '..dPPPPgbbbbgbbbbbbbad.dGGGd....',
-      '.dPPPPPgbbbbgGGggGGGGd.dGGGd....',
-      '.dPPPPPPgbbbgbbdabbad...ddd.....',
-      '.dpPPPPPgbbbgbbdabbad...........',
-      '.dPPPPPPPgbgabbdabbad...........',
-      'dPPPPPPPPPggabbdabbad...........',
-      'dPPPPPPPPPPdabbaabbad...........',
-      '.dPPPPPPPPPkKKKkkKKKkd..........',
-      '.dPPPPPPPPPkkkkkkkkkkd..........',
-      '..dddddddddkkkkkkkkkkd..........',
+      '........ddddssssssssddddnnNd....',
+      '.......dcccaaaSSSSaaacccnnNdd...',
+      '.......dcccabbbbbbbbacGGGGGGGd..',
+      '......dggggggcGGGGcbasgggggggd..',
+      '......dgbbbbgcGggGcbasssKKKdd...',
+      '......dgbbGbgcGggGcbasssKKKd....',
+      '......dgbGgGgcGGGGcbasssKKKd....',
+      '......dgbbGbgcbbbbcbadddKKKd....',
+      '......dgbbbbgbbbbbbbad.dGGGd....',
+      '......dgbbbbgGGggGGGGd.dGGGd....',
+      '.......dgbbbgbbdabbad...ddd.....',
+      '.......dgbbbgbbdabbad...........',
+      '........dgbgabbdabbad...........',
+      '.........dggabbdabbad...........',
+      '..........ddabbaabbad...........',
+      '..........dkKKKkkKKKkd..........',
+      '..........dkkkkkkkkkkd..........',
+      '..........dkkkkkkkkkkd..........',
       '...........dddddddddd...........'
     ],
     px2: [
@@ -82,24 +80,24 @@ export const HEROES = [
       '.........dabSewssewSbad.........',
       '.........dabSssssssSbad.........',
       '.........daaSssmmssSaad..d......',
-      '....ddddddddssssssssdddddGd.....',
-      '...dpPPPcccaaaSSSSaaacccdGdddddd',
-      '...dPPPPcccabbbbbbbbassssGnnnnnn',
-      '...dPPPggggggcGGGGcbassssGnnnnnn',
-      '...dPPPgbbbbgcGggGcbassssGNNNNNN',
-      '..dPPPPgbbGbgcGggGcbaddddGdddddd',
-      '..dpPPPgbGgGgcGGGGcbad..dGd.....',
-      '..dPPPPgbbGbgcbbbbcbad...d......',
-      '..dPPPPgbbbbgbbbbbbbad..........',
-      '.dPPPPPgbbbbgGGggGGGGd..........',
-      '.dPPPPPPgbbbgbbdabbad...........',
-      '.dpPPPPPgbbbgbbdabbad...........',
-      '.dPPPPPPPgbgabbdabbad...........',
-      'dPPPPPPPPPggabbdabbad...........',
-      'dPPPPPPPPPPdabbaabbad...........',
-      '.dPPPPPPPPPkKKKkkKKKkd..........',
-      '.dPPPPPPPPPkkkkkkkkkkd..........',
-      '..dddddddddkkkkkkkkkkd..........',
+      '........ddddssssssssdddddGd.....',
+      '.......dcccaaaSSSSaaacccdGdddddd',
+      '.......dcccabbbbbbbbassssGnnnnnn',
+      '......dggggggcGGGGcbassssGnnnnnn',
+      '......dgbbbbgcGggGcbassssGNNNNNN',
+      '......dgbbGbgcGggGcbaddddGdddddd',
+      '......dgbGgGgcGGGGcbad..dGd.....',
+      '......dgbbGbgcbbbbcbad...d......',
+      '......dgbbbbgbbbbbbbad..........',
+      '......dgbbbbgGGggGGGGd..........',
+      '.......dgbbbgbbdabbad...........',
+      '.......dgbbbgbbdabbad...........',
+      '........dgbgabbdabbad...........',
+      '.........dggabbdabbad...........',
+      '..........ddabbaabbad...........',
+      '..........dkKKKkkKKKkd..........',
+      '..........dkkkkkkkkkkd..........',
+      '..........dkkkkkkkkkkd..........',
       '...........dddddddddd...........'
     ]
   },
@@ -110,7 +108,6 @@ export const HEROES = [
       H: '#C89A50',   // 髪
       K: '#4A3424',   // ブーツの明
       N: '#9AA6C8',   // 剣身の影
-      P: '#1F3E6E',   // マント
       S: '#D9A87C',   // 肌の影
       a: '#5E1830',   // 鎧の影
       b: '#A8304A',   // 鎧
@@ -122,7 +119,6 @@ export const HEROES = [
       k: '#2A1E14',   // ブーツ
       m: '#9A6A4A',   // 口
       n: '#EDF2FF',   // 剣身
-      p: '#3A6ABE',   // マントの明
       s: '#F2C9A0',   // 肌
       w: '#FFFFFF',   // 白目
     },
@@ -140,24 +136,24 @@ export const HEROES = [
       '........dHabSewssewSbaHdnnNd....',
       '........dHabSssssssSbaHdnnNd....',
       '........dHaaSssmmssSaaHdnnNd....',
-      '....dddddHddssssssssddHdnnNd....',
-      '...dpPPPcccaaaSSSSaaacccnnNdd...',
-      '...dPPPPcccabbbbbbbbacGGGGGGGd..',
-      '...dPPPggggggcGGGGcbasgggggggd..',
-      '...dPPPgbbbbgcGggGcbasssKKKdd...',
-      '..dPPPPgbbGbgcGggGcbasssKKKd....',
-      '..dpPPPgbGgGgcGGGGcbasssKKKd....',
-      '..dPPPPgbbGbgcbbbbcbadddKKKd....',
-      '..dPPPPgbbbbgbbbbbbbad.dGGGd....',
-      '.dPPPPPgbbbbgGGggGGGGaddGGGd....',
-      '.dPPPPPPgbbbgbbbbbbbbad.ddd.....',
-      '.dpPPPPPgbbbgbbbbbbbbad.........',
-      '.dPPPPPPPgbgGGGGGGGGGad.........',
-      'dPPPPPPPPPggabbdabbadd..........',
-      'dPPPPPPPPPPdabbaabbad...........',
-      '.dPPPPPPPPPkKKKkkKKKkd..........',
-      '.dPPPPPPPPPkkkkkkkkkkd..........',
-      '..dddddddddkkkkkkkkkkd..........',
+      '........dHddssssssssddHdnnNd....',
+      '.......dcccaaaSSSSaaacccnnNdd...',
+      '.......dcccabbbbbbbbacGGGGGGGd..',
+      '......dggggggcGGGGcbasgggggggd..',
+      '......dgbbbbgcGggGcbasssKKKdd...',
+      '......dgbbGbgcGggGcbasssKKKd....',
+      '......dgbGgGgcGGGGcbasssKKKd....',
+      '......dgbbGbgcbbbbcbadddKKKd....',
+      '......dgbbbbgbbbbbbbad.dGGGd....',
+      '......dgbbbbgGGggGGGGaddGGGd....',
+      '.......dgbbbgbbbbbbbbad.ddd.....',
+      '.......dgbbbgbbbbbbbbad.........',
+      '........dgbgGGGGGGGGGad.........',
+      '.........dggabbdabbadd..........',
+      '..........ddabbaabbad...........',
+      '..........dkKKKkkKKKkd..........',
+      '..........dkkkkkkkkkkd..........',
+      '..........dkkkkkkkkkkd..........',
       '...........dddddddddd...........'
     ],
     px2: [
@@ -174,24 +170,24 @@ export const HEROES = [
       '........dHabSewssewSbaHd........',
       '........dHabSssssssSbaHd........',
       '........dHaaSssmmssSaaHd.d......',
-      '....dddddHddssssssssddHddGd.....',
-      '...dpPPPcccaaaSSSSaaacccdGdddddd',
-      '...dPPPPcccabbbbbbbbassssGnnnnnn',
-      '...dPPPggggggcGGGGcbassssGnnnnnn',
-      '...dPPPgbbbbgcGggGcbassssGNNNNNN',
-      '..dPPPPgbbGbgcGggGcbaddddGdddddd',
-      '..dpPPPgbGgGgcGGGGcbad..dGd.....',
-      '..dPPPPgbbGbgcbbbbcbad...d......',
-      '..dPPPPgbbbbgbbbbbbbad..........',
-      '.dPPPPPgbbbbgGGggGGGGad.........',
-      '.dPPPPPPgbbbgbbbbbbbbad.........',
-      '.dpPPPPPgbbbgbbbbbbbbad.........',
-      '.dPPPPPPPgbgGGGGGGGGGad.........',
-      'dPPPPPPPPPggabbdabbadd..........',
-      'dPPPPPPPPPPdabbaabbad...........',
-      '.dPPPPPPPPPkKKKkkKKKkd..........',
-      '.dPPPPPPPPPkkkkkkkkkkd..........',
-      '..dddddddddkkkkkkkkkkd..........',
+      '........dHddssssssssddHddGd.....',
+      '.......dcccaaaSSSSaaacccdGdddddd',
+      '.......dcccabbbbbbbbassssGnnnnnn',
+      '......dggggggcGGGGcbassssGnnnnnn',
+      '......dgbbbbgcGggGcbassssGNNNNNN',
+      '......dgbbGbgcGggGcbaddddGdddddd',
+      '......dgbGgGgcGGGGcbad..dGd.....',
+      '......dgbbGbgcbbbbcbad...d......',
+      '......dgbbbbgbbbbbbbad..........',
+      '......dgbbbbgGGggGGGGad.........',
+      '.......dgbbbgbbbbbbbbad.........',
+      '.......dgbbbgbbbbbbbbad.........',
+      '........dgbgGGGGGGGGGad.........',
+      '.........dggabbdabbadd..........',
+      '..........ddabbaabbad...........',
+      '..........dkKKKkkKKKkd..........',
+      '..........dkkkkkkkkkkd..........',
+      '..........dkkkkkkkkkkd..........',
       '...........dddddddddd...........'
     ]
   }
