@@ -320,6 +320,13 @@ rt{
 .title-hero{position:relative; display:grid; place-items:center}
 .title-hero canvas{animation:bob 2.6s steps(2,end) infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+/* 最初の画面の言語えらび。ぼうけんのしょを選ぶ前に要るので、
+   書の中ではなく端末に持たせる（n5quest:uien） */
+.langpick{
+  position:relative; z-index:1; display:flex; gap:8px; justify-content:center;
+  margin-top:-8px;
+}
+.langpick .hp-b{min-width:88px; font-size:14px; padding:5px 12px}
 .heropick{display:flex; align-items:center; gap:8px; margin-top:5px; padding:7px 5px 1px; border-top:1px solid #23234A}
 .hp-l{font-size:12.5px; color:var(--dim); margin-right:auto}
 .hp-b{
@@ -366,6 +373,17 @@ rt{
 }
 /* ローマ字。かなを覚えきる前の人のための補助なので、かなより一段弱く見せる */
 .rj{color:#8A92B6; font-size:.86em; letter-spacing:.04em}
+/* 覚えた項目の英語。消さずに ひと手間 おく。
+   消すと「読めるが意味が分からない」で詰むので、たたむだけにする */
+.enfold{margin-top:3px}
+.enfold summary{
+  cursor:pointer; font-size:12px; color:#6E76A0; list-style:none;
+  display:inline-block; border-bottom:1px dotted #4A5070;
+}
+.enfold summary::-webkit-details-marker{display:none}
+.enfold summary::after{content:" ▸"; font-size:9px}
+.enfold[open] summary::after{content:" ▾"}
+.enfold[open] summary{color:var(--dim)}
 .qword .rj{font-size:.62em}
 /* ---- ステージ ---- */
 .stage-card{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:center}
@@ -1731,8 +1749,8 @@ const bare = s => String(s).replace(RUBY,'$1');
 // 例文の 【…】 は出題の対象語。学びの窓では強調、穴埋めでは空欄にする
 const MARK=/【[^】]*】/;
 const MARK_G=/【[^【】]*】/g;
-const exHtml = s => rb(s).replace(/【/g,'<b>').replace(/】/g,'</b>');
-const blankHtml = s => rb(String(s).replace(MARK_G,'')).replace(//g,'<span class="blank"> </span>');
+const exHtml = s => rbFade(s).replace(/【/g,'<b>').replace(/】/g,'</b>');
+const blankHtml = s => rbFade(String(s).replace(MARK_G,'')).replace(//g,'<span class="blank"> </span>');
 
 /* ===== 出題項目 ===== */
 const ITEMS=[];
@@ -1766,7 +1784,7 @@ const expToNext = lv => 100 + (lv-1)*60;
 const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
-  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, sound:true, speech:true, hero:'hero_m',
+  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, romajiFaded:0, fadeRuby:true, sound:true, speech:true, hero:'hero_m',
   name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
   chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', knowsKana:null, updatedAt:0
 };
@@ -1788,8 +1806,15 @@ function slotUsed(n){
   const d=readSlot(n);
   return !!(d && (d.name || d.exp>0 || d.lv>1 || Object.keys(d.srs||{}).length));
 }
+// 画面の英語は「その端末を使う人の読める言語」なので、書(S)ではなく端末に持つ。
+// ぼうけんのしょを選ぶ前のタイトル画面でも必要になるため
+const UIEN_KEY='n5quest:uien';
+const uiEnPref = () => { const v=lsGet(UIEN_KEY); return v===null?true:v==='1'; };
+function setUiEnPref(on){ lsSet(UIEN_KEY,on?'1':'0'); S.uiEn=on; if(S.name) writeSlot(SLOT,S); }
 function normalize(s){
+  const fresh=!s;
   s=Object.assign({},JSON.parse(JSON.stringify(DEFAULT)),s||{});
+  if(fresh) s.uiEn=uiEnPref();     // 新しい書は端末の言語えらびを引き継ぐ
   s.hp=Math.max(0,Math.min(s.hp,s.maxHp)); s.mp=Math.max(0,Math.min(s.mp,s.maxMp));
   return s;
 }
@@ -1869,6 +1894,45 @@ function stats(sec){
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
   return {n:pool.length,done,due,fresh,dist,rate:sum/(pool.length*MAX_LV)};
 }
+/* ===== 支援を薄める =====
+   ゼロからN5合格までを通す前提。本番は100%日本語なので、
+   ローマ字・英語・ふりがなは最後まで出しっぱなしにはできない。
+   薄める基準は章や日数ではなく「その人がその項目をどれだけ知っているか」。
+   章で切ると遅い人には早すぎ、速い人には遅すぎる。 */
+const FADE={ en:4, ruby:4 };          // ★いくつで支援を下げるか
+const KANA_DONE=0.8;                  // かながこれだけ進んだらローマ字を外す
+
+// ローマ字だけは、語の難しさではなく「その人のかなの習熟」で決まる。
+// かなが読めるのにローマ字が出ていると、いつまでもかなを見ないため。
+function fadeRomaji(){
+  if(!S.romaji || S.romajiFaded) return 0;
+  if(stats('kana').rate < KANA_DONE) return 0;
+  S.romaji=0; S.romajiFaded=1;
+  return 1;
+}
+// 英語は消さない。消すと「読めるが意味が分からない」で詰む。
+// 覚えた項目だけ、ひと手間おいて出す
+function enBlock(it,text){
+  if(!S.showEn||!text) return '';
+  if(rec(it.id).lv<FADE.en) return `<br><span class="en">${esc(text)}</span>`;
+  return `<details class="enfold"><summary>えいご${gl('English')}</summary><span class="en">${esc(text)}</span></details>`;
+}
+// 覚えた漢字はふりがなを外す。本番の文字・語彙はふりがな無しで読ませるので、
+// 出しっぱなしだと「ふりがなが無いと読めない」まま試験に行くことになる
+function rbFade(s){
+  if(!S.fadeRuby) return rb(s);
+  let out='', last=0, m;
+  RUBY.lastIndex=0;
+  while((m=RUBY.exec(s))){
+    out+=esc(s.slice(last,m.index));
+    const base=m[1];
+    const known = base.length===1 && BY_ID['k:'+base] && rec('k:'+base).lv>=FADE.ruby;
+    out += known ? esc(base) : '<ruby>'+esc(base)+'<rt>'+esc(m[2])+'</rt></ruby>';
+    last=m.index+m[0].length;
+  }
+  return out+esc(s.slice(last));
+}
+
 /* ===== ホーム画面への案内 =====
    iOSのSafariには「7日さわらないとスクリプトの保存領域を消す」規則がある。
    ふつうにブラウザで開いているだけだと、1週間あけた人の進捗が飛びうる。
@@ -2322,6 +2386,10 @@ function titleShell(inner, sub){
       <div class="title-main">Ｎ５クエスト</div>
       <div class="title-sub">ことばの ぼうけん</div>
     </div>
+    <div class="langpick">
+      <button class="hp-b" data-uien="0" aria-pressed="${!S.uiEn}">にほんご</button>
+      <button class="hp-b" data-uien="1" aria-pressed="${S.uiEn}">English</button>
+    </div>
     ${inner}
     ${sub?`<div class="title-save">${sub}</div>`:''}
   </div>`;
@@ -2330,16 +2398,18 @@ function vTitle(){
   const heroId=(slotSummary(SLOT)||{}).hero||S.hero;
   $('#view').innerHTML=titleShell(`
     <div class="title-hero">${monHtml(heroOf(heroId),5)}</div>
-    <div class="win title-menu"><span class="win-t">ぼうけんのしょ</span><div class="cmds">
+    <div class="win title-menu"><span class="win-t">ぼうけんのしょ${gl('Save file')}</span><div class="cmds">
       ${SLOTS.map(n=>{
         const u=slotUsed(n), g=u?slotSummary(n):null;
         return `<button class="cmd" data-slot="${n}"><span class="cur">▶</span><span>
-          <span class="slot-no">${n}</span>${u?esc(g.name):'<span class="slot-empty">つかって いません</span>'}
-          ${u?`<br><span class="note">レベル ${g.lv} ・ おぼえた ${g.done} / ${ITEMS.length} ・ ${g.streak}にち れんぞく</span>`:''}
+          <span class="slot-no">${n}</span>${u?esc(g.name):`<span class="slot-empty">つかって いません</span>${gl('Empty - tap to start')}`}
+          ${u?`<span class="note">レベル ${g.lv} ・ おぼえた ${g.done} / ${ITEMS.length} ・ ${g.streak}にち れんぞく</span>
+             ${gl('Level '+g.lv+' · '+g.done+' learned · '+g.streak+'-day streak')}`:''}
         </span></button>`;
       }).join('')}
     </div></div>`,
-    `ことば ${BY_SEC.vocab.length} ・ かんじ ${BY_SEC.kanji.length}じ ・ ぶんぽう ${BY_SEC.grammar.length}`);
+    `ことば ${BY_SEC.vocab.length} ・ かんじ ${BY_SEC.kanji.length}じ ・ ぶんぽう ${BY_SEC.grammar.length}
+     ${gl(BY_SEC.kana.length+' kana · '+BY_SEC.vocab.length+' words · '+BY_SEC.kanji.length+' kanji · '+BY_SEC.grammar.length+' grammar')}`);
   paintStars();
 }
 function paintStars(){
@@ -2384,23 +2454,23 @@ function paintHud(){
 function vNewGame(){
   $('#view').innerHTML=titleShell(`
     <div class="title-hero">${monHtml(heroOf(S.hero),5)}</div>
-    <div class="win title-menu"><span class="win-t">ぼうけんのしょ ${SLOT}</span>
+    <div class="win title-menu"><span class="win-t">ぼうけんのしょ ${SLOT}${gl('Save file '+SLOT)}</span>
       <div class="fld" style="margin-bottom:8px">
-        <label for="f-name">なまえ（8もじまで）</label>
+        <label for="f-name">なまえ（8もじまで）${gl('Your name (up to 8 characters)')}</label>
         <input type="text" id="f-name" maxlength="8" value="${esc(S.name||'')}" placeholder="れい：スカイ" autocomplete="off">
       </div>
       <div class="heropick" style="margin-bottom:6px">
-        <span class="hp-l">ゆうしゃ</span>
-        ${HEROES.map(h=>`<button class="hp-b" data-hero="${esc(h.id)}" aria-pressed="${S.hero===h.id}">${esc(h.name)}</button>`).join('')}
+        <span class="hp-l">ゆうしゃ${gl('Hero')}</span>
+        ${HEROES.map(h=>`<button class="hp-b" data-hero="${esc(h.id)}" aria-pressed="${S.hero===h.id}">${esc(h.name)}${gl(h.id==='hero_f'?'Female':'Male')}</button>`).join('')}
       </div>
       <div class="heropick" style="margin-bottom:8px">
         <span class="hp-l">ひらがなは よめますか？${gl('Can you read hiragana?')}</span>
-        <button class="hp-b" data-kanaq="1" aria-pressed="${S.knowsKana===true}">はい</button>
-        <button class="hp-b" data-kanaq="0" aria-pressed="${S.knowsKana===false}">いいえ</button>
+        <button class="hp-b" data-kanaq="1" aria-pressed="${S.knowsKana===true}">はい${gl('Yes')}</button>
+        <button class="hp-b" data-kanaq="0" aria-pressed="${S.knowsKana===false}">いいえ${gl('No')}</button>
       </div>
       <div class="cmds">
-        <button class="cmd" data-newgo=""><span class="cur">▶</span><span>この なまえで はじめる</span></button>
-        <button class="cmd" data-go2="title"><span class="cur">▶</span><span>やめる</span></button>
+        <button class="cmd" data-newgo=""><span class="cur">▶</span><span>この なまえで はじめる${gl('Start with this name')}</span></button>
+        <button class="cmd" data-go2="title"><span class="cur">▶</span><span>やめる${gl('Cancel')}</span></button>
       </div>
     </div>`);
   paintStars();
@@ -2690,6 +2760,8 @@ function answer(n){
     setTimeout(()=>{const s=$('#stage'); if(s) s.classList.remove('flash');},400);
   }
   B.exp+=gainExp; S.exp+=gainExp; S.doneToday++; touched=true;
+  // かなが仕上がったらローマ字を一度だけ外す。あとは設定で本人が決める
+  if(fadeRomaji()) B.romajiOff=1;
   const markHit=markStudied();
   if(markHit) B.markHit=markHit;
   // 今日のノルマに届いたら、その日1回だけ ごほうび。連続が長いほど多い
@@ -2739,19 +2811,19 @@ function learnHtml(it){
     if(TTS.ready) h+=`<div class="ex">${esc(it.ex)}${sayBtn(it.ex)}</div>`;
   }else if(it.sec==='kanji'){
     h=`<dl><dt>かんじ</dt><dd><b>${esc(it.w)}</b></dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd>
+       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd>
        <dt>よみ</dt><dd>おん ${esc(it.on||'—')} ／ くん ${esc(it.kun||'—')}</dd></dl>`;
     if(it.words.length) h+=`<div class="ex">${it.words.map(j=>
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
   }else if(it.sec==='vocab'){
     h=`<dl><dt>ことば</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${S.romaji?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd></dl>`;
+       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
     if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
   }else{
     h=`<dl><dt>かたち</dt><dd><b>${esc(it.w)}</b></dd>
        <dt>つなぎ</dt><dd>${rb(it.conn)}</dd>
-       <dt>いみ</dt><dd>${rb(it.mean)}${S.showEn&&it.en?`<br><span class="en">${esc(it.en)}</span>`:''}</dd></dl>`;
+       <dt>いみ</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
     if(it.ex) h+=`<div class="ex">${exHtml(it.ex)}${TTS.ready?sayBtn(sayText(it.ex)):''}</div>`;
     if(it.note) h+=`<div class="en">${rb(it.note)}</div>`;
   }
@@ -2861,6 +2933,7 @@ function vAfter(){
     <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back to adventure')}</span></button>
   </div></div>`;
   const extra=
+    (B.romajiOff?`\nかなを おぼえたので、ローマ字を けしました。\nせっていで もどせます。`:'')+
     (B.bonus?`\nきょうの ノルマ たっせい！ ${B.bonus}ゴールドの ごほうび！`:'')+
     (B.markHit?`\n${B.markHit}にち れんぞくの しるしを てに いれた！ ${B.markHit*10}ゴールド！`:'')+
     chapMsg;
@@ -3087,12 +3160,22 @@ function vConf(){
     <div class="tg"><span>えいごの いみも みせる${gl('Show English meanings')}</span><button data-tg="showEn"><b>${S.showEn?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>がめんに えいごを つける${gl('Show English on the menus')}</span><button data-tg="uiEn"><b>${S.uiEn?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>ローマ字も みせる${gl('Show romaji under the kana')}</span><button data-tg="romaji"><b>${S.romaji?'オン':'オフ'}</b></button></div>
+    <div class="tg"><span>おぼえた かんじの ふりがなを けす${gl('Hide furigana on kanji you have learned')}</span><button data-tg="fadeRuby"><b>${S.fadeRuby?'オン':'オフ'}</b></button></div>
     ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
       `<div class="tg"><span>よみあげ${gl('Speech')}</span><b style="color:var(--dim)">この きかいでは つかえません</b></div>`}
     <div class="tg"><span>こうかおん${gl('Sound')}</span><button data-tg="sound"><b>${S.sound?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>ゆうしゃ${gl('Hero')}</span><span class="heropick" style="margin:0; padding:0; border:none">
       ${HEROES.map(h=>`<button class="hp-b" data-hero="${esc(h.id)}" aria-pressed="${S.hero===h.id}">${esc(h.name)}</button>`).join('')}
     </span></div>
+  </div>
+  <div class="win"><span class="win-t">たすけは すこしずつ へります${gl('Support fades as you learn')}</span>
+    <div class="note">
+      ほんばんの しけんは ぜんぶ にほんごです。だから たすけは ずっとは 出しません。<br>
+      ・ローマ字 … かなを おぼえたら きえます<br>
+      ・えいご … ★4に なったら、おしたときだけ 出ます<br>
+      ・ふりがな … その かんじが ★4に なったら きえます<br>
+      ${gl('The real exam is all Japanese, so the crutches fade item by item as you learn each one.')}
+    </div>
   </div>
   <div class="win"><span class="win-t">はいって いる もの${gl('Contents')}</span>
     <div class="note">
@@ -3115,7 +3198,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-uien],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -3128,6 +3211,11 @@ document.addEventListener('click',e=>{
       }else{ persist(); vConf(); }
     }
     return;
+  }
+  if(t.hasAttribute('data-uien')){
+    // なまえを入れている途中で切り替えられる。再描画で消さないよう持ち越す
+    if(route==='newgame') S.name=($('#f-name')?.value||'').trim();
+    setUiEnPref(d.uien==='1'); SFX.sel(); return render();
   }
   if(t.hasAttribute('data-nohome')){ lsSet(HOME_KEY,'1'); SFX.sel(); return render(); }
   if(t.hasAttribute('data-kanaq')){
@@ -3191,7 +3279,11 @@ document.addEventListener('click',e=>{
   if(d.ask) return askAI(d.ask);
   if(d.spell) return cast(d.spell,t);
   // 画面全体の見た目が変わる設定（uiEn）もあるので、vConf() ではなく render() を通す
-  if(d.tg){ S[d.tg]=!S[d.tg]; persist(); SFX.sel(); return render(); }
+  if(d.tg){
+    S[d.tg]=!S[d.tg];
+    if(d.tg==='uiEn') lsSet(UIEN_KEY,S.uiEn?'1':'0');   // 端末の言語えらびと食い違わせない
+    persist(); SFX.sel(); return render();
+  }
   if(t.hasAttribute('data-reset')){
     if(confirm(`ぼうけんのしょ ${SLOT}${S.name?'（'+S.name+'）':''} を けします。よろしいですか？`)){
       try{ localStorage.removeItem(KEY(SLOT)); }catch(e){}
