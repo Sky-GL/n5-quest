@@ -585,13 +585,16 @@ DATA.kanji.forEach(k=>ITEMS.push({
   id:'k:'+k[0],sec:'kanji',w:k[0],read:(k[2]||k[1]),mean:k[3],en:k[4],
   on:k[1],kun:k[2],words:k[5]||[]}));
 DATA.grammar.forEach(g=>ITEMS.push({id:'g:'+g[0],sec:'grammar',w:g[0],read:'',conn:g[1],mean:g[2],en:g[3],ex:g[4],note:g[5]}));
+// かいわの文は「文型」ではなく、そのまま口に出すもの。
+// かなだけで書いてあるので、読みも自分自身になる
+DATA.phrase.forEach(f=>ITEMS.push({id:'p:'+f[0],sec:'phrase',w:f[0],read:f[0],mean:f[1],en:f[2],scene:f[3]}));
 const BY_ID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const BY_SEC={kana:[],vocab:[],kanji:[],grammar:[]};
+const BY_SEC={kana:[],vocab:[],kanji:[],grammar:[],phrase:[]};
 ITEMS.forEach(i=>BY_SEC[i.sec].push(i));
-const SEC={kana:'かなの いずみ',vocab:'ことばの もり',kanji:'かんじの いせき',grammar:'ぶんぽうの とう'};
-const SEC_SHORT={kana:'かな',vocab:'ことば',kanji:'かんじ',grammar:'ぶんぽう'};
+const SEC={kana:'かなの いずみ',phrase:'あいさつの みち',vocab:'ことばの もり',kanji:'かんじの いせき',grammar:'ぶんぽうの とう'};
+const SEC_SHORT={kana:'かな',phrase:'かいわ',vocab:'ことば',kanji:'かんじ',grammar:'ぶんぽう'};
 // 区分の英語。地名なので雰囲気は残しつつ、やさしい語だけで
-const SEC_EN={kana:'Kana Spring',vocab:'Word Forest',kanji:'Kanji Ruins',grammar:'Grammar Tower'};
+const SEC_EN={kana:'Kana Spring',phrase:'Road of Greetings',vocab:'Word Forest',kanji:'Kanji Ruins',grammar:'Grammar Tower'};
 // かなは JLPT の出題範囲ではなく その手前の準備。点数の見積もりからは外す
 const JLPT_SECS=['vocab','kanji','grammar'];
 // UIに添える英語。出し分けは body のクラスでまとめて行う（静的なナビにも効かせるため）
@@ -609,7 +612,7 @@ const gl = t => `<span class="${glCls(t)}">${esc(t)}</span>`;
 // 3=ぜんぶ英語 / 2=短いラベルを外す / 1=長い解説だけ英語 / 0=日本語版
 function uiStage(){
   if(!S.uiEn) return 0;
-  if(chapClearedCount()/CHAPTERS.length >= 0.5) return 1;
+  if(chapClearedCount()/chapTotal() >= 0.5) return 1;
   if(stats('kana').rate >= KANA_DONE) return 2;
   return 3;
 }
@@ -630,7 +633,7 @@ const expToNext = lv => 100 + (lv-1)*60;
 const DEFAULT={
   lv:1, exp:0, hp:20, maxHp:20, mp:5, maxMp:5, gold:0,
   streak:0, lastDay:'', lastStudyDay:'', doneToday:0,
-  examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, romajiFaded:0, fadeRuby:true, sound:true, speech:true, hero:'hero_m',
+  course:'n5', examDate:'2026-12-06', newPerDay:12, showEn:true, uiEn:true, romaji:false, romajiFaded:0, fadeRuby:true, sound:true, speech:true, hero:'hero_m',
   name:'', srs:{}, defeated:{}, best:0, listenOk:0, listenN:0,
   chap:{}, charm:0, bought:{}, robe:'', marks:{}, bonusDay:'', dayGoal:0, goalDay:'', knowsKana:null, updatedAt:0
 };
@@ -657,10 +660,23 @@ function slotUsed(n){
 const UIEN_KEY='n5quest:uien';
 const uiEnPref = () => { const v=lsGet(UIEN_KEY); return v===null?true:v==='1'; };
 function setUiEnPref(on){ lsSet(UIEN_KEY,on?'1':'0'); S.uiEn=on; if(S.name) writeSlot(SLOT,S); }
+/* 章を分けたときの引きつぎ。
+   ひらがな71字の章を「46おん」と「だくてんと ようおん」に割ったので、
+   古い書は新しいほうの章に印が無く、クリアずみの人が前に戻されてしまう。
+   分ける前にクリアしていたなら、分けた先もクリアしたものとして扱う。 */
+const CHAP_SPLIT={'kana-a':['kana-a2'],'kana-b':['kana-b2'],'grammar-a':['grammar-0']};
+function migrateChapters(s){
+  const c=s.chap||{};
+  Object.keys(CHAP_SPLIT).forEach(from=>{
+    if(!(c[from]&&c[from].cleared)) return;
+    CHAP_SPLIT[from].forEach(to=>{ if(!c[to]) c[to]={cleared:1,best:c[from].best||0,split:1}; });
+  });
+}
 function normalize(s){
   const fresh=!s;
   s=Object.assign({},JSON.parse(JSON.stringify(DEFAULT)),s||{});
   if(fresh) s.uiEn=uiEnPref();     // 新しい書は端末の言語えらびを引き継ぐ
+  migrateChapters(s);
   s.hp=Math.max(0,Math.min(s.hp,s.maxHp)); s.mp=Math.max(0,Math.min(s.mp,s.maxMp));
   return s;
 }
@@ -734,7 +750,7 @@ function grade(id,ok){
   S.srs[id]=r; return r;
 }
 function stats(sec){
-  const pool=!sec?ITEMS:(Array.isArray(sec)?sec.reduce((a,x)=>a.concat(BY_SEC[x]),[]):BY_SEC[sec]);
+  const pool=!sec?courseItems():(Array.isArray(sec)?sec.reduce((a,x)=>a.concat(BY_SEC[x]),[]):BY_SEC[sec]);
   let done=0,sum=0,due=0,fresh=0; const dist=[0,0,0,0,0,0,0];
   pool.forEach(i=>{const r=rec(i.id); dist[r.lv]++; sum+=r.lv;
     if(r.lv>=4)done++; if(isDue(i.id))due++; if(isNew(i.id))fresh++;});
@@ -810,9 +826,32 @@ function chapStats(c){
   return {n:c.ids.length,done,seen,rate:c.ids.length?done/c.ids.length:0};
 }
 // いま取り組んでいる章＝まだクリアしていない最初の章
-function currentChapter(){ return CHAPTERS.find(c=>!chapCleared(c))||CHAPTERS[CHAPTERS.length-1]; }
-const chapNo = c => CHAPTERS.indexOf(c)+1;
-const chapClearedCount = () => CHAPTERS.filter(chapCleared).length;
+/* コースは2つ。
+   英語版から入る人にとって N5 は遠すぎる。ねらいを2つに絞る。
+     1. ひらがな・カタカナが読める
+     2. かんたんな かいわが できる
+   その4章だけを画面に出し、終わったら N5 のコースに引きわたす。
+   ぜんぶ見せたほうが親切に見えるが、1197項目を最初に見せられると
+   どこから手を付ければいいのか分からなくなる。 */
+const BEGINNER=['kana-a','kana-a2','kana-b','kana-b2','phrase-a','phrase-b','grammar-0'];
+const BEG_SET=new Set(BEGINNER);
+// 項目がどの章のものか。章データは ids しか持たないので、一度だけ逆引きを作る
+const CHAP_OF={};
+CHAPTERS.forEach(c=>c.ids.forEach(id=>CHAP_OF[id]=c.id));
+const chapOf = id => CHAP_OF[id];
+const isBeginner = () => S.course==='beginner';
+// いま歩ける章。コースの外の章は、そもそも見せない
+const chapList = () => isBeginner()?CHAPTERS.filter(c=>BEG_SET.has(c.id)):CHAPTERS;
+const begDone = () => BEGINNER.every(id=>!!(S.chap[id]&&S.chap[id].cleared));
+// はじめてのコースで出す区分。この2つだけ
+const secList = () => isBeginner()?['kana','phrase']:['kana','phrase','vocab','kanji','grammar'];
+function currentChapter(){ const L=chapList(); return L.find(c=>!chapCleared(c))||L[L.length-1]; }
+const chapNo = c => chapList().indexOf(c)+1;
+const chapClearedCount = () => chapList().filter(chapCleared).length;
+const chapTotal = () => chapList().length;
+// コースの中の項目だけ。はじめてのコースで 1197 を分母にすると、
+// いつまでも数％のままで、進んでいる実感が出ない
+const courseItems = () => isBeginner()?ITEMS.filter(i=>BEG_SET.has(chapOf(i.id))):ITEMS;
 
 /* ===== どうぐや =====
    ゴールドは倒すたびに増えるのに使い道が無いと、ただの数字になってしまう。
@@ -1031,7 +1070,9 @@ function heroSwing(){
 
 /* ===== 出題 ===== */
 function buildQueue(sec,limit){
-  const pool=sec?BY_SEC[sec]:ITEMS;
+  // コースの外の項目は出さない。英語版で いきなり漢字が出てきたら、そこで止まる
+  const inCourse=i=>!isBeginner()||BEG_SET.has(chapOf(i.id));
+  const pool=(sec?BY_SEC[sec]:ITEMS).filter(inCourse);
   const due=pool.filter(i=>isDue(i.id)).sort((a,b)=>rec(a.id).due-rec(b.id).due);
   const fresh=pool.filter(i=>isNew(i.id));
   const q=quota();
@@ -1113,6 +1154,7 @@ function earHtml(){
 }
 function listenQ(item){
   if(item.sec==='kana') return kanaQ(item,'n_listen');
+  if(item.sec==='phrase') return phraseQ(item,TTS.ready?'p_listen':'p_en');
   if(item.sec==='kanji'){
     const pool=BY_SEC.kanji.filter(x=>x.id!==item.id);
     const j=pick(item.words);
@@ -1167,12 +1209,30 @@ function kanaQ(item,force){
   return {label:'この かなの おとは？',labelEn:'What sound is this kana?',
     main:W(item.w,''),item,opts:optsOf(item.romaji,kanaNear(item,pool).map(x=>x.romaji),true),ruby:false};
 }
+/* かいわの文の出し方。
+   ここは「文法を当てる」ところではないので、問い方を3つに絞る。
+   いみを選ぶ → 英語から文を選ぶ → 聞いて選ぶ。
+   はじめは いちばん素直な「いみを選ぶ」に固定する。 */
+function phraseQ(item,force){
+  const pool=BY_SEC.phrase.filter(x=>x.id!==item.id);
+  const t=['p_en'];
+  if(rec(item.id).lv>=2) t.push('p_jp');
+  if(TTS.ready) t.push('p_listen');
+  const kind=force||(rec(item.id).lv<=1?'p_en':pick(t));
+  if(kind==='p_jp') return {label:'この いみの ぶんは？',labelEn:'Which phrase means this?',
+    main:W(item.en,'',false,true),item,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+  if(kind==='p_listen') return {label:'きこえた ぶんは？',labelEn:'Which phrase did you hear?',
+    main:earHtml(),item,say:item.w,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false};
+  return {label:'この ぶんの いみは？',labelEn:'What does this phrase mean?',
+    main:W(item.w,''),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
+}
 function makeQ(item,mode){
   // モードの判定を先に置く。かなを先に見てしまうと、聴解モードでも
   // 音の出ない問題が混ざって「おとだけで こたえる」と食い違う
   if(mode==='listen') return listenQ(item);
   if(item.sec==='kana') return kanaQ(item);
   if(item.sec==='kanji') return kanjiQ(item);
+  if(item.sec==='phrase') return phraseQ(item);
   const t=[];
   if(item.sec==='vocab'){
     t.push('v_mean','v_en');
@@ -1393,13 +1453,21 @@ function vField(){
       <button class="cmd" data-chap="${esc(ch.id)}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>この ステージを れんしゅう${gl('Practice this stage')}</span></button>
       <button class="cmd" data-chapboss="${esc(ch.id)}" ${(!open||S.hp<=0)?'disabled':''}><span class="cur">▶</span><span>ステージの ぬしに いどむ${gl('Challenge the stage boss')}
         <span class="note">20もん・たおせば クリア${gl('20 questions - beat it to clear the stage')}</span></span></button>
-      <button class="cmd" data-go2="stages"><span class="cur">▶</span><span>ステージ いちらん（${chapClearedCount()} / ${CHAPTERS.length} クリア）${gl('All stages')}</span></button>
+      <button class="cmd" data-go2="stages"><span class="cur">▶</span><span>ステージ いちらん（${chapClearedCount()} / ${chapTotal()} クリア）${gl('All stages')}</span></button>
     </div>
   </div>
+  ${(isBeginner()&&begDone())?`<div class="win hint"><span class="win-t">つぎの たびへ${gl('Ready for the next journey')}</span>
+    <div class="note">かなが よめるように なって、かいわの ぶんも 30いじょう おぼえました。
+      ここから さきは ことば・かんじ・ぶんぽうの たびです。${
+      gl('You can read the kana and you know the everyday phrases. From here the journey adds words, kanji and grammar - the JLPT N5 range.')}</div>
+    <div class="cmds" style="margin-top:8px">
+      <button class="cmd" data-course="n5"><span class="cur">▶</span><span>Ｎ５の たびに すすむ${gl('Continue to the N5 journey')}</span></button>
+    </div>
+  </div>`:''}
   <div class="win"><span class="win-t">コマンド${gl('Command')}</span>
     <div class="cmds">
       ${S.hp<=0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
-      ${['kana','vocab','kanji','grammar'].map(sec=>{
+      ${secList().map(sec=>{
         const s=stats(sec);
         return `<button class="cmd" data-dun="${sec}" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>${SEC[sec]}${gl(SEC_EN[sec])}
           <span class="note">ふくしゅう ${s.due} ・ まだ ${s.fresh}${gl(`Review ${s.due} · New ${s.fresh}`)}</span></span></button>`;
@@ -1407,8 +1475,8 @@ function vField(){
       <button class="cmd" data-dun="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>きょうの たび（ぜんぶの ばしょを まわる）${gl("Today's journey - every area")}</span></button>
       ${TTS.ready?`<button class="cmd" data-listen="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ちょうかいの どうくつ${gl('Listening Cave - answer by ear')}
         <span class="note">おとだけで こたえる ${S.listenN?`・ いままで ${Math.round(S.listenOk/S.listenN*100)}％`:''}${gl('Answer by ear only'+(S.listenN?` · ${Math.round(S.listenOk/S.listenN*100)}% so far`:''))}</span></span></button>`:''}
-      <button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
-        <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}${gl('A 30-question test'+(S.best?` · best ${S.best}%`:''))}</span></span></button>
+      ${isBeginner()?'':`<button class="cmd" data-boss="" ${S.hp<=0?'disabled':''}><span class="cur">▶</span><span>ゴウカクノツカイに いどむ${gl('Challenge the boss - 30 questions')}
+        <span class="note">30もんの ちからだめし${S.best?` ・ さいこう ${S.best}％`:''}${gl('A 30-question test'+(S.best?` · best ${S.best}%`:''))}</span></span></button>`}
       ${S.hp>0?`<button class="cmd" data-inn=""><span class="cur">▶</span><span>やどやで ねる（ＨＰ・ＭＰ ぜんかいふく）${gl('Sleep at the inn - full recovery')}</span></button>`:''}
       <button class="cmd" data-go2="shop"><span class="cur">▶</span><span>どうぐやに いく${gl('Shop')}
         <span class="note">もっている ゴールド ${S.gold}${S.charm?` ・ まもりのふだ ${S.charm}`:''}${gl(`You have ${S.gold} gold`+(S.charm?` · ${S.charm} streak charms`:''))}</span></span></button>
@@ -1557,7 +1625,7 @@ function drawBattle(intro){
   <div id="after"></div>`;
   paintMons();
   window.scrollTo(0,0);  // 前の問題のスクロール位置を引きずらない
-  type($('#bmsg'), (intro?esc(intro)+'\n':'')+`<span class="q">${esc(Q.label)}${Q.labelEn?gl(Q.labelEn):''}</span>\n`+Q.main);
+  type($('#bmsg'), (intro?intro+'\n':'')+`<span class="q">${esc(Q.label)}${Q.labelEn?gl(Q.labelEn):''}</span>\n`+Q.main);
   // 聴解は音がすべてなので、文字送りの終わりを待たずに鳴らす
   if(Q.say) replaySay();
 }
@@ -1714,6 +1782,12 @@ function learnHtml(it){
     if(it.words.length) h+=`<div class="ex">${it.words.map(j=>
       `<b>${esc(j[0])}</b>（${esc(j[1])}）${TTS.ready?sayBtn(j[1]):''}　${rb(j[2])}`+
       (S.showEn&&j[3]?`<br><span class="en">${esc(j[3])}</span>`:'')).join('<br>')}</div>`;
+  }else if(it.sec==='phrase'){
+    // ここは意味の分解をしない。口に出せることが目的なので、文・意味・使う場面だけ
+    h=`<dl><dt>ぶん${gl('Phrase')}</dt><dd><b>${esc(it.w)}</b>${TTS.ready?sayBtn(it.w,1):''}</dd>
+       <dt>いみ${gl('Meaning')}</dt><dd>${esc(it.mean)}${enBlock(it,it.en)}</dd>
+       <dt>いつ${gl('When to use it')}</dt><dd>${esc(it.scene)}</dd></dl>`;
+    h+=exRj(it.w);
   }else if(it.sec==='vocab'){
     h=`<dl><dt>ことば${gl('Word')}</dt><dd><b>${esc(it.w)}</b>（${esc(it.read)}${rjOn()?' / '+esc(toRomaji(it.read)):''}）${TTS.ready?sayBtn(it.read):''}<span class="en"> ${rb(it.pos)}</span></dd>
        <dt>いみ${gl('Meaning')}</dt><dd>${rb(it.mean)}${enBlock(it,it.en)}</dd></dl>`;
@@ -1874,8 +1948,8 @@ function vStages(){
   const cur=currentChapter();
   $('#view').innerHTML=`
   <div class="win"><span class="win-t">ステージ いちらん${gl('All stages')}</span>
-    <div class="note">${chapClearedCount()} / ${CHAPTERS.length} クリア${gl(`${chapClearedCount()} of ${CHAPTERS.length} stages cleared`)}</div>
-    <div style="margin-top:8px">${CHAPTERS.map((c,i)=>{
+    <div class="note">${chapClearedCount()} / ${chapTotal()} クリア${gl(`${chapClearedCount()} of ${chapTotal()} stages cleared`)}</div>
+    <div style="margin-top:8px">${chapList().map((c,i)=>{
       const cs=chapStats(c), done=chapCleared(c), now=c.id===cur.id;
       // 行ごと押せるようにして、クリアずみの章にも戻れるようにする
       return `<button class="chap ${done?'done':''} ${now?'now':''}" data-chap="${esc(c.id)}" ${S.hp<=0?'disabled':''}>
@@ -1889,7 +1963,6 @@ function vStages(){
       ステージは じゅんばんに すすみます。あたらしい ことばは、いまの ステージの ものから 出て きます。
       どの ステージも おして れんしゅう できます。
       ${gl('Stages unlock in order. New items come from your current stage first. You can tap any stage to practise it.')}
-    ${gl('New items are drawn from your current stage first.')}
   </div></div>
   <div class="win tight"><div class="cmds">
     <button class="cmd" data-go2="field"><span class="cur">▶</span><span>ぼうけんに もどる${gl('Back')}</span></button>
@@ -2031,7 +2104,7 @@ function vStatus(){
       <span class="st-l">けいけんち${gl('Experience')}</span><span class="st-row"><span class="st-n">${S.exp}</span><span class="st-l">つぎまで ${expToNext(S.lv)-S.exp}</span></span>
       <span class="st-l">ゴールド${gl('Gold')}</span><span class="st-row"><span class="st-n">${S.gold}</span></span>
       <span class="st-l">れんぞく${gl('Streak')}</span><span class="st-row"><span class="st-n">${S.streak} にち</span>${S.charm?`<span class="st-l">まもりのふだ ${S.charm}</span>`:''}</span>
-      <span class="st-l">ステージ${gl('Stages')}</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${CHAPTERS.length}</span><span class="st-l">クリア</span></span>
+      <span class="st-l">ステージ${gl('Stages')}</span><span class="st-row"><span class="st-n">${chapClearedCount()} / ${chapTotal()}</span><span class="st-l">クリア</span></span>
       <span class="st-l">たおした かず${gl('Enemies defeated')}</span><span class="st-row"><span class="st-n">${Object.values(S.defeated).reduce((a,b)=>a+b,0)}</span></span>
     </div>
   </div>
@@ -2095,6 +2168,10 @@ function vConf(){
       <input type="number" id="f-new" min="3" max="40" value="${S.newPerDay}"></div>
     <div class="tg"><span>えいごの いみも みせる${gl('Show English meanings')}</span><button data-tg="showEn"><b>${S.showEn?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>がめんに えいごを つける${gl('Show English on the menus')}</span><button data-tg="uiEn"><b>${S.uiEn?'オン':'オフ'}</b></button></div>
+    <div class="tg"><span>コース${gl('Course')}</span><span>
+      <button class="hp-b" data-course="beginner" aria-pressed="${isBeginner()}">かな と かいわ${gl('Kana & conversation')}</button>
+      <button class="hp-b" data-course="n5" aria-pressed="${!isBeginner()}">Ｎ５${gl('JLPT N5')}</button>
+    </span></div>
     <div class="tg"><span>ローマ字も みせる${gl('Show romaji under the kana')}</span><button data-tg="romaji"><b>${S.romaji?'オン':'オフ'}</b></button></div>
     <div class="tg"><span>おぼえた かんじの ふりがなを けす${gl('Hide furigana on kanji you have learned')}</span><button data-tg="fadeRuby"><b>${S.fadeRuby?'オン':'オフ'}</b></button></div>
     ${TTS.ready?`<div class="tg"><span>よみあげ（にほんごの おと）${gl('Speak Japanese aloud')}</span><button data-tg="speech"><b>${S.speech?'オン':'オフ'}</b></button></div>`:
@@ -2138,7 +2215,7 @@ function vConf(){
 
 /* ===== 入力 ===== */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-uien],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
+  const t=e.target.closest('[data-go],[data-go2],[data-slot],[data-newgo],[data-hero],[data-dun],[data-boss],[data-listen],[data-inn],[data-a],[data-next],[data-run],[data-retry],[data-bs],[data-ask],[data-spell],[data-tg],[data-reset],[data-replay],[data-sayt],[data-course],[data-uien],[data-kanaq],[data-nohome],[data-chap],[data-chapboss],[data-buy],[data-wear]');
   if(!t||t.disabled) return;
   const d=t.dataset;
   if(d.hero){
@@ -2152,6 +2229,7 @@ document.addEventListener('click',e=>{
     }
     return;
   }
+  if(d.course){ S.course=d.course; persist(); SFX.up(); return render(); }
   if(t.hasAttribute('data-uien')){
     // なまえを入れている途中で切り替えられる。再描画で消さないよう持ち越す
     if(route==='newgame') S.name=($('#f-name')?.value||'').trim();
@@ -2177,6 +2255,12 @@ document.addEventListener('click',e=>{
     if(!v){ alert('なまえを いれて ください。'+N5NL+'Please enter a name.'); $('#f-name')?.focus(); return; }
     if(S.knowsKana===null){ alert('ひらがなが よめるか、えらんで ください。\nPlease answer the hiragana question.'); return; }
     S.name=v;
+    /* コースを決める。
+       英語からはじめる人は、かなが読めても N5 には まだ遠い。
+       かな → あいさつ → きほんの かたち の順を通してから N5 に渡す。
+       かなが読めるなら、かなの章は下で「クリアずみ」にするので
+       あいさつから 始まる。 */
+    S.course = S.uiEn ? 'beginner' : 'n5';
     if(S.knowsKana){
       // かなが読めるなら、ステージだけでなく項目じたいを「おぼえた」ことにする。
       // ここを飛ばすと、139字が未学習のまま残って今日の目標や図鑑の数字が狂う。

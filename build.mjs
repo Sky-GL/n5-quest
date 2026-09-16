@@ -7,6 +7,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const src = path.join(root, 'src');
 const out = path.join(root, 'n5-quest.html');
 
+const errs0 = [];   // 章を組む前に出た検証エラー。あとで errs に合流させる
 const VOCAB_FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const vocab = [];
 // ファイルごとの区切りは、そのまま「章」の区切りになる。
@@ -23,10 +24,13 @@ const { toRomaji } = await import(new URL('./src/romaji.js', import.meta.url));
 const { buildConfuseMap, CONFUSE_GROUPS } = await import(new URL('./src/confuse.js', import.meta.url));
 const { KANJI_A } = await import(new URL('./src/kanji-a.js', import.meta.url));
 const { KANJI_B } = await import(new URL('./src/kanji-b.js', import.meta.url));
+const { PHRASE_A } = await import(new URL('./src/phrase-a.js', import.meta.url));
+const { PHRASE_B } = await import(new URL('./src/phrase-b.js', import.meta.url));
 const { GRAMMAR_A } = await import(new URL('./src/grammar-a.js', import.meta.url));
 const { GRAMMAR_B } = await import(new URL('./src/grammar-b.js', import.meta.url));
 const { MONSTERS: MON_A } = await import(new URL('./src/monsters.js', import.meta.url));
 const { MONSTERS_B } = await import(new URL('./src/monsters-b.js', import.meta.url));
+const { MONSTERS_C } = await import(new URL('./src/monsters-c.js', import.meta.url));
 const { HEROES } = await import(new URL('./src/heroes.js', import.meta.url));
 const { ICON } = await import(new URL('./src/icon.js', import.meta.url));
 const { CREST } = await import(new URL('./src/crest.js', import.meta.url));
@@ -35,18 +39,55 @@ const { pngOf, icoOf, svgOf } = await import(new URL('./icongen.mjs', import.met
 const kana = [...KANA_A, ...KANA_B];
 const kanji = [...KANJI_A, ...KANJI_B];
 const grammar = [...GRAMMAR_A, ...GRAMMAR_B];
-const MONSTERS = [...MON_A, ...MONSTERS_B];
-parts['kana-a'] = KANA_A; parts['kana-b'] = KANA_B;
+const phrase = [...PHRASE_A, ...PHRASE_B];
+const MONSTERS = [...MON_A, ...MONSTERS_B, ...MONSTERS_C];
+/* 文字は「46音がさき、濁音・半濁音・拗音はあと」。
+   国際交流基金や Tofugu の入門手順と同じ切り方にする。
+   71字をいちどに出すと、46音を覚えきる前に濁点と拗音が混ざって、
+   どれも中途半端なまま次へ行ってしまう。
+   ファイルを分けずにここで割るのは、この区別が文字そのものの性質だから。 */
+const DAKUTEN = /[がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ]/;
+const isExtraKana = c => [...c].length > 1 || DAKUTEN.test(c);
+const splitKana = a => [a.filter(r => !isExtraKana(r[0])), a.filter(r => isExtraKana(r[0]))];
+const [HIRA_BASIC, HIRA_EXTRA] = splitKana(KANA_A);
+const [KATA_BASIC, KATA_EXTRA] = splitKana(KANA_B);
+parts['kana-a'] = HIRA_BASIC; parts['kana-a2'] = HIRA_EXTRA;
+parts['kana-b'] = KATA_BASIC; parts['kana-b2'] = KATA_EXTRA;
 parts['kanji-a'] = KANJI_A; parts['kanji-b'] = KANJI_B;
-parts['grammar-a'] = GRAMMAR_A; parts['grammar-b'] = GRAMMAR_B;
+/* 入門の骨組み。
+   「AはBです」「AはBじゃありません」「〜に いきます」といった
+   主語・助詞・述語の超基礎だけを、はじめての人むけの章に取り分ける。
+   かな → かいわ → ここ、で N5 の文法につながる。
+   新しく書き起こさず N5 側から抜くのは、同じ文型を二重に持たせないため。 */
+const BASIC_G = [
+  '〜は〜です', '〜じゃありません', '〜か（しつもん）', '〜の', '〜も', '〜を',
+  '〜に（ばしょ）', '〜へ', '〜で（ばしょ）', '〜が あります', '〜が います',
+  '〜ます', '〜ません', '〜ました', '〜に いきます'
+];
+{
+  const have = new Set([...GRAMMAR_A, ...GRAMMAR_B].map(r => r[0]));
+  BASIC_G.forEach(n => { if (!have.has(n)) errs0.push(`BASIC_G の「${n}」が文法データに無い`); });
+}
+const isBasicG = r => BASIC_G.includes(r[0]);
+parts['grammar-0'] = [...GRAMMAR_A, ...GRAMMAR_B].filter(isBasicG);
+parts['grammar-a'] = GRAMMAR_A.filter(r => !isBasicG(r));
+parts['grammar-b'] = GRAMMAR_B.filter(r => !isBasicG(r));
+parts['phrase-a'] = PHRASE_A; parts['phrase-b'] = PHRASE_B;
 
 // --- 章（ステージ）---
 // 並びが そのまま学習順になる。やさしいものと、すぐ使うものを先に置く。
 // ことば → 動き → 助詞 → ようす … と、語彙と文法を交互に挟んで飽きにくくしている。
 const CHAP_ORDER = [
   // かなは JLPT N5 の出題範囲ではなく、その手前の準備。だから先頭に置く
-  ['kana-a',    'kana',    'ひらがな',                      'Hiragana'],
-  ['kana-b',    'kana',    'カタカナ',                      'Katakana'],
+  ['kana-a',    'kana',    'ひらがな 46おん',               'Hiragana: the 46 sounds'],
+  ['kana-a2',   'kana',    'ひらがな だくてんと ようおん',  'Hiragana: voiced & combined'],
+  ['kana-b',    'kana',    'カタカナ 46おん',               'Katakana: the 46 sounds'],
+  ['kana-b2',   'kana',    'カタカナ だくてんと ようおん',  'Katakana: voiced & combined'],
+  // ここまでが「はじめての人」の範囲。かなを読めるようにして、口に出せる文を持たせる
+  ['phrase-a',  'phrase',  'あいさつと じこしょうかい',     'Greetings & Introductions'],
+  ['phrase-b',  'phrase',  'おみせと たずねる',             'Shops & Asking'],
+  // ここが かな・かいわ から N5 への橋
+  ['grammar-0', 'grammar', 'きほんの かたち',               'Basic Sentence Patterns'],
   ['vocab-a',   'vocab',   'ひとと からだ',                 'People & Body'],
   ['vocab-b',   'vocab',   'まいにちの うごき',             'Everyday Actions'],
   ['grammar-a', 'grammar', 'ぶんぽう：てにをはと きほん',   'Grammar: Particles & Basics'],
@@ -81,7 +122,7 @@ const pickChapBoss = (sec, last) => {
   }
   return MONSTERS[0].id;
 };
-const ID_PREFIX = { kana: 'n:', vocab: 'v:', kanji: 'k:', grammar: 'g:' };
+const ID_PREFIX = { kana: 'n:', vocab: 'v:', kanji: 'k:', grammar: 'g:', phrase: 'p:' };
 const CHAPTERS = CHAP_ORDER.map(([file, sec, name, en], i) => ({
   id: file, sec, name, en,
   boss: pickChapBoss(sec, i === CHAP_ORDER.length - 1),
@@ -89,7 +130,7 @@ const CHAPTERS = CHAP_ORDER.map(([file, sec, name, en], i) => ({
 }));
 
 // --- 検証 ---
-const errs = [];
+const errs = [...errs0];
 
 // N5版の心臓部。学習者は漢字が読めない前提なので、
 // 画面に出る日本語は「ルビ付きの漢字」か「かな」のどちらかしか許さない。
@@ -287,7 +328,29 @@ const checkSprite = (kind, m) => {
     errs.push(`「${w}（${r}）」の読みが は・へ で終わる。build.mjs の PARTICLE_SOUND か WORD_TAIL に入れること`);
   });
 
-const AREAS = new Set(['vocab', 'kanji', 'grammar', 'any', 'boss']);
+/* かいわの文の検証。
+   はじめての人が読むので かんじは使わない（ふりがなを読むにも かなが要る）。
+   いみ・ばめん も かな で書く。 */
+{
+  const seen = new Set(), seenEn = new Map();
+  phrase.forEach((r, i) => {
+    const w = `phrase[${i}] ${r[0]}`;
+    if (r.length !== 4) errs.push(`${w} は [文, いみ, English, ばめん] の4つにする`);
+    r.forEach((f, n) => { if (!f) errs.push(`${w} の ${n + 1}番目が空`); });
+    if (KANJI_CH.test(r[0])) errs.push(`${w} かいわの文に漢字は使わない（かなだけで書く）`);
+    if (KANJI_CH.test(r[1])) errs.push(`${w} いみに漢字は使わない`);
+    if (KANJI_CH.test(r[3])) errs.push(`${w} ばめんに漢字は使わない`);
+    if (!/[A-Za-z]/.test(r[2])) errs.push(`${w} 英語がない`);
+    if (seen.has(r[0])) errs.push(`${w} が重複している`);
+    // 英語から日本語を選ばせる出題があるので、英語が重なると正解が2つになる
+    if (seenEn.has(r[2])) errs.push(`${w} の英語が phrase[${seenEn.get(r[2])}] と同じ: ${r[2]}`);
+    seenEn.set(r[2], i);
+    seen.add(r[0]);
+    checkParticle(w, r[0]);
+  });
+}
+
+const AREAS = new Set(['kana', 'phrase', 'vocab', 'kanji', 'grammar', 'any', 'boss']);
 MONSTERS.forEach(m => {
   checkSprite('monster', m);
   if (!AREAS.has(m.area)) errs.push(`monster[${m.id}] 不明な area: ${m.area}`);
@@ -336,7 +399,7 @@ if (!MONSTERS.some(m => m.area === 'boss')) errs.push('ボスがいない');
       all.add(id);
     });
   });
-  const total = kana.length + vocab.length + kanji.length + grammar.length;
+  const total = kana.length + vocab.length + kanji.length + grammar.length + phrase.length;
   if (all.size !== total) errs.push(`章に入っていない項目がある（章 ${all.size} / 全体 ${total}）`);
 }
 // 取りこぼし再戦と monPool のフォールバックは 'any' がいる前提なので、ここで担保する
@@ -372,6 +435,8 @@ const dataJs =
   '"kanji":[' + NL + rows(kanji) + NL +
   '],' + NL +
   '"grammar":[' + NL + rows(grammar) + NL +
+  '],' + NL +
+  '"phrase":[' + NL + rows(phrase) + NL +
   ']};' + NL +
   'const MONSTERS=[' + NL + rows(MONSTERS) + NL + '];' + NL +
   'const HEROES=[' + NL + rows(HEROES) + NL + '];' + NL +
@@ -466,8 +531,8 @@ fs.writeFileSync(path.join(distDir, 'site.webmanifest'), JSON.stringify({
 const kb = f => (fs.statSync(path.join(distDir, f)).size / 1024).toFixed(0) + ' KB';
 console.log('OK ' + out + '（Artifact用の断片）');
 console.log('OK dist/  index.html ' + kb('index.html') + ' / data.js ' + kb('data.js') + ' / app.js ' + kb('app.js'));
-console.log(`  かな ${kana.length} / 語彙 ${vocab.length} / 漢字 ${kanji.length}字→例語 ${kanjiWords} / 文法 ${grammar.length} / 敵 ${MONSTERS.length} / 勇者 ${HEROES.length}`);
+console.log(`  かな ${kana.length} / かいわ ${phrase.length} / 語彙 ${vocab.length} / 漢字 ${kanji.length}字→例語 ${kanjiWords} / 文法 ${grammar.length} / 敵 ${MONSTERS.length} / 勇者 ${HEROES.length}`);
 console.log(`  章 ${CHAPTERS.length}（${CHAPTERS.map(c => c.ids.length).join('/')}）`);
 // 出題の単位は 語彙=1語 / 漢字=1字 / 文法=1文型。例語は漢字の学習材料であって項目ではない
-console.log(`  出題項目 合計 ${kana.length + vocab.length + kanji.length + grammar.length}`);
+console.log(`  出題項目 合計 ${kana.length + vocab.length + kanji.length + grammar.length + phrase.length}`);
 console.log('OK アイコン ' + icons.map(([n]) => n).concat('favicon.ico', 'favicon.svg', 'site.webmanifest').join(' / '));
