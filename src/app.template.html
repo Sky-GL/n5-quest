@@ -786,16 +786,17 @@ function paintMons(root){
 // 踏み込みアニメ(0.36s)で勇者がいちばん前に出る時刻。
 // 敵の被弾・ダメージ表示をここに合わせると、斬った瞬間に当たったように見える
 const HIT_AT=160;
-// 攻撃の間だけ、剣を振り上げた差分ポーズ(px2)に描き替える
+// 踏み込みの間は構えのまま、剣が届く瞬間だけ突きのポーズ(px2)に差し替える。
+// 先に突きを出してから戻すと、当たる前に振り終わっているように見えてしまう
 function heroSwing(){
   const sp=$('#heroSp'); if(!sp) return;
   sp.classList.remove('atk'); void sp.offsetWidth; sp.classList.add('atk');
   const cv=sp.querySelector('canvas'); const h=withRobe(heroOf(S.hero));
   if(!cv||!h.px2) return;
-  const sc=+cv.dataset.scale||4;
-  drawPx(cv,h.px2,h.pal,sc);
-  // 振り上げたまま戻ると「斬っていない」ように見える。いちばん前に出た瞬間に下ろす
-  setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,h.px,h.pal,sc); },HIT_AT);
+  const sc=+cv.dataset.scale||3;
+  const draw=(px,at)=>setTimeout(()=>{ const c=$('#heroSp canvas'); if(c) drawPx(c,px,h.pal,sc); },at);
+  draw(h.px2,HIT_AT);   // 当たる瞬間に突く
+  draw(h.px,380);       // 踏み込みが終わるころに構えへ戻す
 }
 
 /* ===== 出題 ===== */
@@ -990,7 +991,7 @@ function titleShell(inner, sub){
 function vTitle(){
   const heroId=(slotSummary(SLOT)||{}).hero||S.hero;
   $('#view').innerHTML=titleShell(`
-    <div class="title-hero">${monHtml(heroOf(heroId),6)}</div>
+    <div class="title-hero">${monHtml(heroOf(heroId),5)}</div>
     <div class="win title-menu"><span class="win-t">ぼうけんのしょ</span><div class="cmds">
       ${SLOTS.map(n=>{
         const u=slotUsed(n), g=u?slotSummary(n):null;
@@ -1044,7 +1045,7 @@ function paintHud(){
 // 空のぼうけんのしょを選んだときの登録画面
 function vNewGame(){
   $('#view').innerHTML=titleShell(`
-    <div class="title-hero">${monHtml(heroOf(S.hero),6)}</div>
+    <div class="title-hero">${monHtml(heroOf(S.hero),5)}</div>
     <div class="win title-menu"><span class="win-t">ぼうけんのしょ ${SLOT}</span>
       <div class="fld" style="margin-bottom:8px">
         <label for="f-name">なまえ（8もじまで）</label>
@@ -1223,7 +1224,7 @@ function drawBattle(intro){
     <div class="stage-hp" id="stageHp">${stageHp()}</div>
     <div class="foes" id="foes">${foesHtml()}</div>
     <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}</div>
-    <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),4)}</span>
+    <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),3)}</span>
   </div>
   <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?'　れんげき '+B.combo:''}</span>
     <div class="msg ruby-on" id="bmsg"></div>
@@ -1460,7 +1461,7 @@ function vWipe(){
   $('#view').innerHTML=`
   <div class="stage">
     <div class="mon-name">…………</div>
-    <span class="hero-sprite fallen">${monHtml(heroOf(S.hero),4)}</span>
+    <span class="hero-sprite fallen">${monHtml(heroOf(S.hero),3)}</span>
   </div>
   <div class="win"><span class="win-t">ぜんめつ${gl('Wiped out')}</span><div class="msg" id="wmsg"></div></div>
   <div class="win tight"><div class="cmds">
