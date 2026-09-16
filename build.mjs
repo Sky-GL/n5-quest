@@ -363,7 +363,12 @@ const HEAD_ICONS =
   `<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=${V}">\n` +
   `<link rel="manifest" href="./site.webmanifest?v=${V}">\n` +
   '<meta name="apple-mobile-web-app-title" content="N5クエスト">\n' +
-  '<meta name="mobile-web-app-capable" content="yes">\n';
+  '<meta name="mobile-web-app-capable" content="yes">\n' +
+  // iOS 16.3以前は manifest の display を見ないので、こちらが無いと
+  // ホーム画面に追加してもブラウザのまま開く。
+  // ホーム画面のアプリとして開けないと、Safariの7日ルールで進捗が消えうる。
+  '<meta name="apple-mobile-web-app-capable" content="yes">\n' +
+  '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n';
 
 // ローカル確認用は1ファイル完結のまま（file:// でも動くように）
 fs.writeFileSync(path.join(root, 'preview.html'),
