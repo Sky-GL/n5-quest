@@ -2591,9 +2591,13 @@ function distractors(item,field,n){
 // 選択肢の見え方。日本語はふりがな付き、英語と読みはそのまま
 const OPT_RUBY={mean:true, w:false, read:false, en:false};
 // label は ['にほんご','English'] で渡す。設問文こそ読めないと答えようがない
-function q(label,main,item,field){
+/* 問いの日本語を、その場で 聞けるようにする。
+   かなが読めない人には、文字だけ出しても手がかりにならない。
+   ただし「読みかた」「おと」を当てさせる問題で鳴らすと 答えそのものなので、
+   鳴らしてよい問題にだけ hear を付ける。付けるのは呼び出し側の判断。 */
+function q(label,main,item,field,hear){
   const opts=shuffle([{v:item[field],ok:true}].concat(distractors(item,field,3).map(d=>({v:d[field],ok:false}))));
-  return {label:label[0],labelEn:label[1],main,item,field,opts,ruby:!!OPT_RUBY[field]};
+  return {label:label[0],labelEn:label[1],main,item,field,opts,ruby:!!OPT_RUBY[field],hear};
 }
 // 見出し語。読みを下に小さく添える（読みを問う設問のときだけ隠す）
 function W(word,read,sm,en){
@@ -2625,6 +2629,8 @@ function kanjiQ(item){
     return {label:'この ことばの よみかたは？',labelEn:'How do you read this word?',main:W(j[0],''),item,
       opts:optsOf(j[1],pool.flatMap(x=>x.words.map(w=>w[1]))),ruby:false};
   }
+  // 漢字には hear を付けない。1字の読みは1つに決まらず、例語を鳴らすと
+  // 意味の誘導になる（安→やすい で「cheap」が当たってしまう）
   if(kind==='k_en') return {label:'この かんじを えいごで いうと？',labelEn:'What does this kanji mean in English?',
     main:W(item.w,''),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
   if(kind==='k_on') return {label:'この かんじの おんよみは？',labelEn:'On-reading (from Chinese)?',main:W(item.w,''),item,
@@ -2734,7 +2740,7 @@ function phraseQ(item,force){
     main:earHtml(),item,say:item.w,opts:optsOf(item.w,pool.map(x=>x.w)),ruby:false,
     sub:phraseSub(true)};
   return {label:'この ぶんの いみは？',labelEn:'What does this phrase mean?',
-    main:phraseMain(item.w),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false};
+    main:phraseMain(item.w),item,opts:optsOf(item.en,pool.map(x=>x.en)),ruby:false,hear:item.w};
 }
 function makeQ(item,mode){
   // モードの判定を先に置く。かなを先に見てしまうと、聴解モードでも
@@ -2756,13 +2762,15 @@ function makeQ(item,mode){
   // はじめて出す項目は、いちばん素直な形（意味を選ぶ）から入る
   const kind=rec(item.id).lv<=1?t[0]:pick(t);
   const B={
-    v_mean:()=>q(['この ことばの いみは？','What does this word mean?'],W(item.w,item.read),item,'mean'),
-    v_en :()=>q(['この ことばを えいごで いうと？','How do you say this word in English?'],W(item.w,item.read),item,'en'),
+    // 読みを画面に出している問題なので、鳴らしても答えは漏れない
+    v_mean:()=>q(['この ことばの いみは？','What does this word mean?'],W(item.w,item.read),item,'mean',item.read),
+    v_en :()=>q(['この ことばを えいごで いうと？','How do you say this word in English?'],W(item.w,item.read),item,'en',item.read),
+    // よみかた・□の中・いみから語をあてる問題は、鳴らすと答えになるので hear なし
     v_read:()=>q(['この ことばの よみかたは？','How do you read this word?'],W(item.w,''),item,'read'),
     v_blank:()=>q(['□に はいる ことばは？','Which word fits in the blank?'],`<span class="qsent">${blankHtml(item.ex)}</span>`,item,'w'),
     v_jp :()=>q(['この いみの ことばは？','Which Japanese word means this?'],W(item.en,'',false,true),item,'w'),
-    g_mean:()=>q(['この かたちの いみは？','What does this pattern mean?'],W(item.w,'',true),item,'mean'),
-    g_en :()=>q(['この かたちを えいごで いうと？','How do you say this pattern in English?'],W(item.w,'',true),item,'en'),
+    g_mean:()=>q(['この かたちの いみは？','What does this pattern mean?'],W(item.w,'',true),item,'mean',item.ex?sayText(item.ex):''),
+    g_en :()=>q(['この かたちを えいごで いうと？','How do you say this pattern in English?'],W(item.w,'',true),item,'en',item.ex?sayText(item.ex):''),
     g_blank:()=>q(['□に はいる かたちは？','Which pattern fits in the blank?'],`<span class="qsent">${blankHtml(item.ex)}</span>`,item,'w')
   };
   return B[kind]();
@@ -3138,7 +3146,8 @@ function drawBattle(intro){
   <div id="after"></div>`;
   paintMons();
   window.scrollTo(0,0);  // 前の問題のスクロール位置を引きずらない
-  type($('#bmsg'), (intro?intro+'\n':'')+`<span class="q">${esc(Q.label)}${Q.labelEn?gl(Q.labelEn):''}</span>\n`+Q.main);
+  const hearBtn = (TTS.ready&&Q.hear&&!Q.say) ? sayBtn(Q.hear,1) : '';
+  type($('#bmsg'), (intro?intro+'\n':'')+`<span class="q">${esc(Q.label)}${Q.labelEn?gl(Q.labelEn):''}</span>\n`+Q.main+hearBtn);
   // 聴解は音がすべてなので、文字送りの終わりを待たずに鳴らす
   if(Q.say) replaySay();
 }
