@@ -20,12 +20,13 @@ Vercelは `vercel.json` の `buildCommand: node build.mjs` を実行して `dist
 ```
 src/app.template.html   アプリ本体（HTML+CSS+JS）。データ差し込み位置は <script id="__DATA__">
 src/kana-a,b.js         ひらがな71 / カタカナ68
+src/phrase-a,b.js       かいわの文62（はじめての人むけ。かなだけで書く）
 src/vocab-a..h.js       語彙805
 src/kanji-a,b.js        漢字103字（例語203）
 src/grammar-a,b.js      文法88
 src/romaji.js           かな→ローマ字の変換器
 src/heroes.js           勇者2体（32x32、px=構え / px2=突き）
-src/monsters.js,-b.js   敵18体（12x12）
+src/monsters.js,-b,-c   敵20体（24x24。12x12で描いてEPXで上げる）
 src/icon.js             ファビコンの元絵（16x16）
 src/crest.js            タイトルの紋章（56x56）
 build.mjs               結合・検証・dist生成・アイコン生成
@@ -35,6 +36,10 @@ icongen.mjs             ドット絵からPNG/ICO/SVGを作る（外部依存な
 ファイル1つが章（ステージ）1つに対応する。章データは別に持たず `build.mjs` の
 `CHAP_ORDER` がファイル構成から起こす。**章を増やすときはデータファイルを足して
 `CHAP_ORDER` に1行追加するだけ**でよい。
+
+例外が2つある。どちらも `build.mjs` が `parts[...]` を組み替えて章を割っている。
+- かな … 46音と「だくてん・ようおん」に割る（`isExtraKana`）
+- 文法 … 入門の骨組み15文型を `grammar-0` に取り分ける（`BASIC_G`）
 
 ## N5版で絶対に崩してはいけない前提
 
