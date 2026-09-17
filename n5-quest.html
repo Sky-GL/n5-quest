@@ -409,6 +409,63 @@ button.kc{padding:0; font-family:inherit; color:inherit; cursor:pointer}
 /* 覚えた分だけ英語を引く。段の決め方は uiStage() */
 .en-2 .gl-s{display:none !important}
 .en-1 .gl-s,.en-1 .gl-m{display:none !important}
+
+/* ===== 英語が主、かなが従（段3＝はじめた直後） =====
+   英語版なのに日本語を大きく出していたら、それは日本語版に英語の注釈が
+   付いただけのもの。ひらがなを1字も読めない人にとっては、大きいほうが
+   読めない字で、読めるほうが小さい灰色、という逆立ちした画面になる。
+   段3のあいだは 英語を先に・大きく、かなを後ろに・小さく出す。
+   かなを覚えた段2で、この反転は自然に解ける（短いラベルの英語が消えるので）。
+   呼び出し側は「日本語 + gl(English)」の1つの形で書いてあるので、
+   並びは order、大きさは親と .gl の指定だけで入れ替えられる。 */
+.en-main .gl{color:var(--fg); letter-spacing:.01em}
+.en-main .nav button{font-size:9.5px}
+.en-main .nav button .i{order:-2; font-size:17px}
+.en-main .nav button .gl{order:-1; font-size:11.5px; color:inherit}
+.en-main .win-t{display:flex; gap:6px; align-items:baseline; font-size:10px; color:#8A8FB4}
+.en-main .win-t .gl{order:-1; font-size:12px; color:var(--gold)}
+/* 画面の案内だけを入れ替える。[data-a] は こたえの選択肢＝学習の中身なので触らない。
+   ここを小さくすると、選ぶ対象そのものが読みにくくなる */
+.en-main .cmd:not([data-a])>span:not(.cur){display:flex; flex-direction:column; font-size:11.5px; color:var(--dim)}
+/* 直下の .gl だけ。中の .note に入っている英語まで大きくすると行が折れて崩れる */
+.en-main .cmd:not([data-a])>span:not(.cur)>.gl{order:-1; font-size:15.5px; line-height:1.55; margin:0}
+/* 敵の名前 */
+.en-main .mon-name{display:flex; flex-direction:column; font-size:11px}
+.en-main .mon-name>.gl{order:-1; font-size:13.5px}
+/* みせ。品名は .gn、英語はその兄弟 */
+.en-main .good>span:first-child{display:flex; flex-direction:column}
+.en-main .good .gn{font-size:11.5px; color:var(--dim)}
+.en-main .good>span:first-child>.gl{order:-1; font-size:15.5px}
+.en-main .good .gd{font-size:11px}
+.en-main .good .gd>.gl{font-size:12.5px}
+/* かう／たりない などのボタン */
+.en-main .good button{display:flex; flex-direction:column; font-size:10.5px}
+.en-main .good button>.gl{order:-1; font-size:12.5px}
+/* そえ書きは 大きさだけ入れ替える。
+   .note には <span class="st-n"> や <br> が混ざっているものがあり、
+   flex にすると それらが1行ずつに割れて「もっている ゴールド / 0」のように崩れる。
+   もともと .gl は block なので 2行にはなっている。ここは主従の見え方だけ直せばよい。 */
+.en-main .note{font-size:11px}
+.en-main .note>.gl{font-size:12.5px; color:var(--dim)}
+/* ステージの名前。日本語は .nm、英語はその兄弟の .gl */
+.en-main .stage-card>span:last-child{display:flex; flex-direction:column}
+.en-main .stage-card .nm{font-size:11.5px; color:var(--dim); line-height:1.5}
+.en-main .stage-card>span:last-child>.gl{order:-1; font-size:15.5px; line-height:1.5}
+/* 章の一覧。中身の並びは ステージ名と同じ形 */
+.en-main .chap>span:nth-child(2){display:flex; flex-direction:column; font-size:11px; color:var(--dim)}
+.en-main .chap>span:nth-child(2)>.gl{order:-1; font-size:14px}
+.en-main .st-l{display:flex; flex-direction:column; font-size:10px; line-height:1.4}
+.en-main .st-l .gl{order:-1; font-size:12.5px; color:var(--dim)}
+.en-main .tg>span:first-child{display:flex; flex-direction:column; font-size:11.5px; color:var(--dim)}
+.en-main .tg>span:first-child .gl{order:-1; font-size:14.5px}
+.en-main .learn dt{display:flex; flex-direction:column; font-size:10px; line-height:1.4}
+.en-main .learn dt .gl{order:-1; font-size:12.5px; color:var(--dim)}
+/* メッセージ窓は1つの流れなので、並びは bi() が決める。ここは大きさだけ */
+.en-main .msg{font-size:13px; color:#9AA1C0}
+.en-main .msg .gl{font-size:15.5px; color:var(--fg); line-height:1.85}
+/* 問いの見出しは bi() を通らないので、ここで並びも入れ替える */
+.en-main .msg .q{display:flex; flex-direction:column; color:#9A8A50; font-size:13px}
+.en-main .msg .q>.gl{order:-1; color:var(--gold); font-size:15.5px}
 /* ---- ホーム画面への案内 ---- */
 .hint{border-color:var(--gold)}
 .hint .hb{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:start}
@@ -1965,6 +2022,8 @@ const JLPT_SECS=['vocab','kanji','grammar'];
 const GL_S=22, GL_M=60;
 const glCls = t => { const n=String(t).length; return n<=GL_S?'gl gl-s':(n<=GL_M?'gl gl-m':'gl gl-l'); };
 const gl = t => `<span class="${glCls(t)}">${esc(t)}</span>`;
+// 英語が主、かなが従で出す段。はじめた直後だけ
+const enMain = () => uiStage()===3;
 // 3=ぜんぶ英語 / 2=短いラベルを外す / 1=長い解説だけ英語 / 0=日本語版
 function uiStage(){
   if(!S.uiEn) return 0;
@@ -1977,9 +2036,16 @@ const N5NL='\n\n';
 // メッセージ窓の文。1行ずつ 日本語→英語 の順に積む。
 // type() は英語オフのとき .gl の中身を送らないので、これ1本で両方まかなえる。
 // 引数は [日本語, 英語] の配列か、英語の要らない行なら文字列。
-const bi = rows => rows.filter(Boolean)
-  .map(r => typeof r==='string' ? esc(r) : esc(r[0])+(r[1]?gl(r[1]):''))
-  .join('\n');
+const bi = rows => {
+  const em=enMain();   // 段の判定は かな139字を数えるので、行ごとに呼ばない
+  return rows.filter(Boolean)
+    .map(r => {
+      if(typeof r==='string') return esc(r);
+      const ja=esc(r[0]), en=r[1]?gl(r[1]):'';
+      return em ? en+ja : ja+en;   // 英語が主のときは英語を先に出す
+    })
+    .join('\n');
+};
 // 敵の名前。英語版では英語名で出す
 const mEn = m => m.en||m.name;
 
@@ -2708,6 +2774,7 @@ function render(){
   document.body.classList.toggle('no-en',ust===0);
   document.body.classList.toggle('en-2',ust===2);
   document.body.classList.toggle('en-1',ust===1);
+  document.body.classList.toggle('en-main',ust===3);
   // タイトル画面ではステータスと下部メニューを隠す
   const t = route==='title'||route==='newgame';
   $('#hud').classList.toggle('hide',t);
