@@ -24,6 +24,13 @@ body{
 .wrap{max-width:560px; margin:0 auto; padding:10px 10px 84px; min-height:100vh}
 canvas{image-rendering:pixelated; image-rendering:crisp-edges}
 button{font-family:inherit; font-size:inherit; color:inherit; background:none; border:none; cursor:pointer; text-align:left}
+/* 携帯のダブルタップ拡大を切る。
+   50音表の139字やこたえの4択は、続けて押すのがふつうの使い方なので、
+   2回目が「ダブルタップ」と判定されて画面が拡大し、そのまま戻らなくなる。
+   ずかんは押す対象だらけなので、そこで特に起きる。
+   manipulation はつまむ拡大（本人の意思での拡大）は残すので、
+   文字を大きくしたい人の逃げ道はふさがない。 */
+button,select,input,[data-sayt]{touch-action:manipulation}
 button:focus-visible{outline:var(--px) solid var(--gold); outline-offset:2px}
 
 /* ---- ふりがな ----
@@ -2249,6 +2256,12 @@ function vBook(){
         <span class="zc">${c?'たおした '+c:'まだ'}${gl(c?`Defeated ${c}`:'Not met yet')}</span>
         ${c?`<span class="zd">${esc(m.msg)}</span>`:''}</div>`;}).join('')}</div>
   </div>`;
+  /* ここで描かないと、モンスターの canvas が未描画のまま残る。
+     描いていない canvas は既定の 300x150 で場所を取るので、
+     20枚がグリッドを押し広げて ずかんのページ全体が横に溢れる。
+     render() は呼んでくれるが、タブの切り替えは vBook() を直接呼ぶ。
+     絵を出す画面が自分で描くようにして、呼び出し側に任せない。 */
+  paintMons();
 }
 
 /* ===== 強さ ===== */
@@ -2481,7 +2494,7 @@ document.addEventListener('click',e=>{
     mon:pick(MONSTERS.filter(m=>m.area==='any')),
     intro:bi([['にげた ものたちが たちふさがった！','The ones you ran from block your way!']])});
   }
-  if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }
+  if(d.bs){ bookSec=d.bs; SFX.sel(); return vBook(); }   // vBook が自分で paintMons する
   if(d.ask) return askAI(d.ask);
   if(d.spell) return cast(d.spell,t);
   // 画面全体の見た目が変わる設定（uiEn）もあるので、vConf() ではなく render() を通す
