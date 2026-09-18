@@ -1525,7 +1525,7 @@ function titleShell(inner, sub){
 function vTitle(){
   const heroId=(slotSummary(SLOT)||{}).hero||S.hero;
   $('#view').innerHTML=titleShell(`
-    <div class="title-hero">${monHtml(heroOf(heroId),5)}</div>
+    <div class="title-hero">${monHtml(heroOf(heroId),3)}</div>
     <div class="win title-menu"><span class="win-t">ぼうけんのしょ${gl('Save file')}</span><div class="cmds">
       ${SLOTS.map(n=>{
         const u=slotUsed(n), g=u?slotSummary(n):null;
@@ -1581,7 +1581,7 @@ function paintHud(){
 // 空のぼうけんのしょを選んだときの登録画面
 function vNewGame(){
   $('#view').innerHTML=titleShell(`
-    <div class="title-hero">${monHtml(heroOf(S.hero),5)}</div>
+    <div class="title-hero">${monHtml(heroOf(S.hero),3)}</div>
     <div class="win title-menu"><span class="win-t">ぼうけんのしょ ${SLOT}${gl('Save file '+SLOT)}</span>
       <div class="fld" style="margin-bottom:8px">
         <label for="f-name">なまえ（8もじまで）${gl('Your name (up to 8 characters)')}</label>
@@ -1797,7 +1797,7 @@ function drawBattle(intro){
     <div class="foes" id="foes">${foesHtml()}</div>
     <div class="mon-name">${B.chap?'ぬしの ':''}${esc(foe().m.name)}${aliveFoes().length>1?` ほか ${aliveFoes().length-1}たい`:''}${
       gl((B.chap?'Boss: ':'')+mEn(foe().m)+(aliveFoes().length>1?` and ${aliveFoes().length-1} more`:''))}</div>
-    <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),3)}</span>
+    <span class="hero-sprite" id="heroSp">${monHtml(heroOf(S.hero),2)}</span>
   </div>
   <div class="win"><span class="win-t">${B.i+1} / ${B.items.length}${B.combo>=3?`　れんげき ${B.combo}${gl(`${B.combo} in a row`)}`:''}</span>
     <div class="msg ruby-on" id="bmsg"></div>
@@ -2054,7 +2054,7 @@ function vWipe(){
   $('#view').innerHTML=`
   <div class="stage">
     <div class="mon-name">…………</div>
-    <span class="hero-sprite fallen">${monHtml(heroOf(S.hero),3)}</span>
+    <span class="hero-sprite fallen">${monHtml(heroOf(S.hero),2)}</span>
   </div>
   <div class="win"><span class="win-t">ぜんめつ${gl('Wiped out')}</span><div class="msg" id="wmsg"></div></div>
   <div class="win tight"><div class="cmds">

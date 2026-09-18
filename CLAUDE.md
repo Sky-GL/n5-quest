@@ -25,13 +25,17 @@ src/vocab-a..h.js       語彙805
 src/kanji-a,b.js        漢字103字（例語203）
 src/grammar-a,b.js      文法88
 src/romaji.js           かな→ローマ字の変換器
-src/heroes.js           勇者2体（32x32、px=構え / px2=突き）
+src/heroes.js           勇者2体（48x48、px=構え / px2=突き）
 src/monsters.js,-b,-c   敵20体（24x24。12x12で描いてEPXで上げる）
 src/icon.js             ファビコンの元絵（16x16）
 src/crest.js            タイトルの紋章（56x56）
 build.mjs               結合・検証・dist生成・アイコン生成
 icongen.mjs             ドット絵からPNG/ICO/SVGを作る（外部依存なし）
 ```
+
+**ドット絵の大きさを変えたら `monHtml(sprite, 倍率)` の倍率も直す。**
+画面に出る大きさは 絵のドット数 × 倍率 で決まる。倍率をそのままにすると
+その絵だけ巨大になる（勇者は48ドットなので タイトル3倍・戦闘2倍）。
 
 ファイル1つが章（ステージ）1つに対応する。章データは別に持たず `build.mjs` の
 `CHAP_ORDER` がファイル構成から起こす。**章を増やすときはデータファイルを足して
